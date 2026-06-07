@@ -28,6 +28,7 @@ export default defineConfig({
     env: {
       NODE_ENV: "production",
       NEXT_PUBLIC_USE_MOCK_AUTH: "true",
+      NEXT_PUBLIC_USE_MOCK_BACKEND: "true",
       NEXT_PUBLIC_API_URL: "http://127.0.0.1:65535",
     },
   },

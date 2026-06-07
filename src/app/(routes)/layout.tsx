@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAdminSession } from "@/lib/auth/session";
+import MockBackendBoot from "@/app/_components/MockBackendBoot";
 import LogoutButton from "./LogoutButton";
 
 const navItems = [
@@ -15,6 +16,7 @@ export default async function RoutesLayout({
   const session = await getAdminSession();
   return (
     <div className="flex min-h-screen">
+      <MockBackendBoot />
       <aside className="w-56 border-r border-zinc-200 bg-white flex flex-col">
         <div className="px-6 py-5 border-b border-zinc-200">
           <Link href="/" className="font-semibold text-lg tracking-tight">
