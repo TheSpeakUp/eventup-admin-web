@@ -1,0 +1,44 @@
+name: Deploy
+
+# Manual-trigger only — every prod push is human-gated.
+on:
+  workflow_dispatch: {}
+
+# Repo-level secrets required before first run:
+#   PROD_SSH_HOST   prod box host or IP
+#   PROD_SSH_USER   ssh user (sudoer for systemctl restart)
+#   PROD_SSH_KEY    private key (OpenSSH PEM)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: install ssh key
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+
+      - name: run deploy.sh
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          SSH_KEY_PATH: /home/runner/.ssh/id_deploy
+        run: ./scripts/deploy.sh
