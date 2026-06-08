@@ -20,9 +20,20 @@ import {
 } from "./providers-store";
 import type { ServiceDetail } from "@/lib/services/types";
 import type { ProviderDetail } from "@/lib/providers/types";
+import {
+  CONFLICT_OFFER_ID,
+  makeDispatchRunLogItem,
+  makeDlqItem,
+  makeProviderHealthItem,
+  makeServiceHealthItem,
+  makeSlaSummaryItem,
+} from "./offers-fixtures";
+import { getAllOffers, getOffer, setOfferStatus } from "./offers-store";
+import { isOfferStatus, type OfferStatus, type QueueStatus } from "@/lib/offers/types";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
+const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
 
 function toServiceListItem(svc: ServiceDetail): ServiceListItem {
   return {
@@ -107,6 +118,27 @@ function applyCursor<T extends { id: number; updated_at: string }>(
   const has_more = filtered.length > limit;
   const next_last_id = has_more && page.length > 0 ? (page[page.length - 1]?.id ?? null) : null;
   return { items: page, next_last_id, has_more, count: page.length };
+}
+
+function moderateOffer(rawId: string | readonly string[] | undefined, newStatus: OfferStatus, key: string) {
+  const id = Number(rawId);
+  if (Number.isNaN(id) || !isOfferStatus(newStatus)) {
+    return HttpResponse.json({ message: "bad input" }, { status: 400 });
+  }
+  if (id === CONFLICT_OFFER_ID) {
+    return HttpResponse.json(
+      { error: { meta: { original_detail: "conflicting status" } } },
+      { status: 409 },
+    );
+  }
+  const updated = setOfferStatus(id, newStatus);
+  if (!updated) return HttpResponse.json({ message: "not found" }, { status: 404 });
+  return HttpResponse.json({
+    offer_id: id,
+    new_status: newStatus,
+    message_key: `offers.${key}`,
+    message: `Offer ${key}d`,
+  });
 }
 
 export const handlers = [
@@ -363,6 +395,105 @@ export const handlers = [
       new_status: "canceled",
       message_key: "admin.marketplace.provider.canceled",
       message: "Provider canceled",
+    });
+  }),
+
+  // ── Offers SLA queue ──────────────────────────────────────────────────
+  http.get(`${OFFERS_BASE}/review-sla/summary`, ({ request }) => {
+    const url = new URL(request.url);
+    const queueFilter = url.searchParams.getAll("queue_status") as QueueStatus[];
+    const offers = getAllOffers().filter((o) => o.status === "on_review");
+    const items = offers
+      .filter((o) => queueFilter.length === 0 || queueFilter.includes(o.queue_status))
+      .map(makeSlaSummaryItem);
+    const counters = {
+      total_on_review: offers.length,
+      in_sla: offers.filter((o) => o.queue_status === "in_sla").length,
+      warning: offers.filter((o) => o.queue_status === "warning").length,
+      overdue_response: offers.filter((o) => o.queue_status === "overdue_response").length,
+      closed_without_response_candidates: offers.filter((o) => o.queue_status === "closed_without_response").length,
+    };
+    return HttpResponse.json({ generated_at: new Date(0).toISOString(), counters, items });
+  }),
+  http.get(`${OFFERS_BASE}/:id/detail-card`, ({ params }) => {
+    const id = Number(params.id);
+    const offer = getOffer(id);
+    if (!offer) return HttpResponse.json({ message: "not found" }, { status: 404 });
+    return HttpResponse.json(offer);
+  }),
+  http.get(`${OFFERS_BASE}/review-sla/health`, () =>
+    HttpResponse.json({
+      generated_at: new Date(0).toISOString(),
+      items: [0, 1, 2, 3].map(makeServiceHealthItem),
+    }),
+  ),
+  http.get(`${OFFERS_BASE}/review-sla/providers/health`, () =>
+    HttpResponse.json({
+      generated_at: new Date(0).toISOString(),
+      items: [0, 1, 2, 3].map(makeProviderHealthItem),
+    }),
+  ),
+  http.get(`${OFFERS_BASE}/review-sla/dispatch-runs`, () =>
+    HttpResponse.json({
+      items: [0, 1, 2].map(makeDispatchRunLogItem),
+      total: 3,
+    }),
+  ),
+  http.get(`${OFFERS_BASE}/review-sla/providers/dlq`, () =>
+    HttpResponse.json({
+      items: [0, 1].map(makeDlqItem),
+      total: 2,
+    }),
+  ),
+  http.post(`${OFFERS_BASE}/:id/approve`, ({ params }) => moderateOffer(params.id, "active", "approve")),
+  http.post(`${OFFERS_BASE}/:id/reject`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as { reason?: string };
+    if (!body.reason || body.reason.trim().length < 10) {
+      return HttpResponse.json({ message: "reason must be at least 10 characters" }, { status: 422 });
+    }
+    return moderateOffer(params.id, "rejected", "reject");
+  }),
+  http.post(`${OFFERS_BASE}/:id/archive`, ({ params }) => moderateOffer(params.id, "archived", "archive")),
+  http.post(`${OFFERS_BASE}/:id/disable`, ({ params }) => moderateOffer(params.id, "disabled", "disable")),
+  http.post(`${OFFERS_BASE}/:id/enable`, ({ params }) => moderateOffer(params.id, "active", "enable")),
+  http.post(`${OFFERS_BASE}/review-sla/dispatch`, () =>
+    HttpResponse.json({
+      generated_at: new Date(0).toISOString(),
+      auto_close_enabled: true,
+      checked_offers: 10,
+      reminders_sent: 3,
+      auto_closed: 1,
+      reminder_offer_ids: [1, 2, 3],
+      auto_closed_offer_ids: [4],
+      escalations_sent: 0,
+      escalated_service_ids: [],
+    }),
+  ),
+  http.post(`${OFFERS_BASE}/review-sla/providers/dispatch`, () =>
+    HttpResponse.json({
+      generated_at: new Date(0).toISOString(),
+      checked_providers: 5,
+      escalations_sent: 1,
+      escalated_provider_ids: [201],
+      channels: ["email"],
+      delivery_outcomes: [],
+    }),
+  ),
+  http.post(`${OFFERS_BASE}/review-sla/providers/dlq/replay`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({ mode: "dry_run" }))) as { mode?: string };
+    const mode = body.mode === "apply" ? "apply" : "dry_run";
+    return HttpResponse.json({
+      mode,
+      total_candidates: 2,
+      processed_items: 2,
+      sent_replays: mode === "apply" ? 2 : 0,
+      failed_replays: 0,
+      skipped_replays: 0,
+      channels: ["email"],
+      replayed_keys: mode === "apply" ? ["dlq_0", "dlq_1"] : [],
+      candidates: [],
+      delivery_outcomes: [],
+      replay_run_id: mode === "apply" ? "replay_run_1" : null,
     });
   }),
 ];

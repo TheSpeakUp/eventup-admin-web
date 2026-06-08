@@ -6,6 +6,7 @@ import LogoutButton from "./LogoutButton";
 const navItems = [
   { href: "/services", label: "Services" },
   { href: "/providers", label: "Providers" },
+  { href: "/offers", label: "Offers" },
 ];
 
 export default async function RoutesLayout({
