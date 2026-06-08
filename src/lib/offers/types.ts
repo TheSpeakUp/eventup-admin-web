@@ -27,7 +27,7 @@ export function isQueueStatus(value: string): value is QueueStatus {
 
 export type OfferModerationResponse = {
   offer_id: number;
-  new_status: string;
+  new_status: OfferStatus;
   message_key: string | null;
   message: string;
 };
