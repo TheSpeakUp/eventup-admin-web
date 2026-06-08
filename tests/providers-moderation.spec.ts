@@ -1,60 +1,52 @@
 import { test, expect, type Page } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
 
-async function openDetail(page: Page, id: string): Promise<void> {
+async function openProviderDetail(page: Page, id: number): Promise<void> {
   await page.goto(`/providers/${id}`);
   await expect(page.getByTestId("provider-detail-title")).toBeVisible();
 }
 
-test.describe("providers moderation actions", () => {
-  test("approve flips status to approved", async ({ page }) => {
-    await loginAsMockAdmin(page, `/providers/prv_001`);
-    await openDetail(page, "prv_001");
-    await page.getByTestId("moderation-open-approve").click();
+test.describe("providers moderation actions (A6.2 contract)", () => {
+  test("verify transitions pending → verified", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/1`);
+    await openProviderDetail(page, 1);
+    await page.getByTestId("moderation-open-verify").click();
     await expect(page.getByTestId("moderation-dialog")).toBeVisible();
-    await page.getByTestId("moderation-submit-approve").click();
-    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "approved");
+    // Verification message is optional.
+    await page.getByTestId("moderation-submit-verify").click();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "verified");
   });
 
-  test("suspend requires reason 10+ chars; restore returns to approved", async ({ page }) => {
-    await loginAsMockAdmin(page, `/providers/prv_002`);
-    await openDetail(page, "prv_002");
-    await page.getByTestId("moderation-open-suspend").click();
+  test("block requires reason 10+ chars; unblock returns to verified", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/2`);
+    await openProviderDetail(page, 2);
+    await page.getByTestId("moderation-open-block").click();
     await page
-      .getByTestId("moderation-reason-suspend")
-      .fill("Insurance certificate missing; pause listings.");
-    await page.getByTestId("moderation-submit-suspend").click();
-    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "suspended");
+      .getByTestId("moderation-reason-block")
+      .fill("Insurance certificate expired — block listings.");
+    await page.getByTestId("moderation-submit-block").click();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "blocked");
 
-    await page.getByTestId("moderation-open-restore").click();
-    await page.getByTestId("moderation-submit-restore").click();
-    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "approved");
+    await page.getByTestId("moderation-open-unblock").click();
+    await page.getByTestId("moderation-submit-unblock").click();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "verified");
   });
 
-  test("reject requires reason 10+ chars and flips status", async ({ page }) => {
-    await loginAsMockAdmin(page, `/providers/prv_005`);
-    await openDetail(page, "prv_005");
-    await page.getByTestId("moderation-open-reject").click();
-    await page
-      .getByTestId("moderation-reason-reject")
-      .fill("Identity verification documents incomplete.");
-    await page.getByTestId("moderation-submit-reject").click();
-    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "rejected");
+  test("delete transitions any state → canceled", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/5`);
+    await openProviderDetail(page, 5);
+    await page.getByTestId("moderation-open-delete").click();
+    await page.getByTestId("moderation-submit-delete").click();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "canceled");
   });
 
   test("409 surfaces inline error and leaves status untouched", async ({ page }) => {
-    await loginAsMockAdmin(page, `/providers/prv_conflict`);
-    await openDetail(page, "prv_conflict");
-    await expect(page.getByTestId("status-badge")).toHaveAttribute(
-      "data-status",
-      "pending_review",
-    );
-    await page.getByTestId("moderation-open-approve").click();
-    await page.getByTestId("moderation-submit-approve").click();
-    await expect(page.getByTestId("moderation-error-approve")).toContainText(/cannot be approved/i);
-    await expect(page.getByTestId("status-badge")).toHaveAttribute(
-      "data-status",
-      "pending_review",
-    );
+    await loginAsMockAdmin(page, `/providers/9999`);
+    await openProviderDetail(page, 9999);
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
+    await page.getByTestId("moderation-open-verify").click();
+    await page.getByTestId("moderation-submit-verify").click();
+    await expect(page.getByTestId("moderation-error-verify")).toContainText(/cannot be verified/i);
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
   });
 });

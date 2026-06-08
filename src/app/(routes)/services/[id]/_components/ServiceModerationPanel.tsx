@@ -3,52 +3,56 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
   approveServiceAction,
-  hideServiceAction,
+  archiveServiceAction,
   rejectServiceAction,
-  requestChangesServiceAction,
-  restoreServiceAction,
+  republishServiceAction,
+  unpublishServiceAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
+import type { ServiceStatus } from "@/lib/services/types";
 
-type Kind = "approve" | "reject" | "request_changes" | "hide" | "restore";
+type Kind = "approve" | "reject" | "unpublish" | "republish" | "archive";
 
 type DialogConfig = {
   title: string;
   body: string;
   needsReason: boolean;
+  reasonOptional?: boolean;
   confirmLabel: string;
 };
 
 const DIALOGS: Record<Kind, DialogConfig> = {
   approve: {
     title: "Approve service?",
-    body: "This will publish the service to the marketplace.",
+    body: "Transition on_review → published. Service becomes visible in the marketplace.",
     needsReason: false,
     confirmLabel: "Approve",
   },
   reject: {
     title: "Reject service",
-    body: "Provide a reason (10+ chars). The provider will see it.",
+    body: "Provide a reason (10+ chars). Service returns to draft.",
     needsReason: true,
     confirmLabel: "Reject",
   },
-  request_changes: {
-    title: "Request changes",
-    body: "Describe what needs to change (10+ chars).",
+  unpublish: {
+    title: "Unpublish service?",
+    body: "Optional reason (10+ chars if provided). Service hidden from the marketplace.",
     needsReason: true,
-    confirmLabel: "Send request",
+    reasonOptional: true,
+    confirmLabel: "Unpublish",
   },
-  hide: {
-    title: "Hide service from marketplace?",
-    body: "The service will no longer be visible to buyers.",
+  republish: {
+    title: "Republish service?",
+    body: "Restore published state.",
     needsReason: false,
-    confirmLabel: "Hide",
+    confirmLabel: "Republish",
   },
-  restore: {
-    title: "Restore visibility?",
-    body: "Restore the service to a visible state.",
-    needsReason: false,
-    confirmLabel: "Restore",
+  archive: {
+    title: "Archive service?",
+    body: "Optional reason (10+ chars if provided). Archived services are not surfaced in any state.",
+    needsReason: true,
+    reasonOptional: true,
+    confirmLabel: "Archive",
   },
 };
 
@@ -58,9 +62,9 @@ const ACTIONS: Record<
 > = {
   approve: approveServiceAction,
   reject: rejectServiceAction,
-  request_changes: requestChangesServiceAction,
-  hide: hideServiceAction,
-  restore: restoreServiceAction,
+  unpublish: unpublishServiceAction,
+  republish: republishServiceAction,
+  archive: archiveServiceAction,
 };
 
 function ActionForm({
@@ -69,7 +73,7 @@ function ActionForm({
   onSettled,
 }: {
   kind: Kind;
-  serviceId: string;
+  serviceId: number;
   onSettled: (ok: boolean) => void;
 }) {
   const [state, formAction, pending] = useActionState(ACTIONS[kind], EMPTY_STATE);
@@ -89,11 +93,11 @@ function ActionForm({
       {cfg.needsReason ? (
         <textarea
           name="reason"
-          required
+          required={!cfg.reasonOptional}
           minLength={10}
           rows={4}
           data-testid={`moderation-reason-${kind}`}
-          placeholder="Reason (min 10 chars)…"
+          placeholder={cfg.reasonOptional ? "Reason (optional, min 10 chars)…" : "Reason (min 10 chars)…"}
           className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
       ) : null}
@@ -116,7 +120,21 @@ function ActionForm({
   );
 }
 
-export default function ServiceModerationPanel({ serviceId }: { serviceId: string }) {
+const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
+  { kind: "approve", label: "Approve", className: "bg-emerald-600 text-white hover:bg-emerald-700" },
+  { kind: "reject", label: "Reject", className: "bg-red-600 text-white hover:bg-red-700" },
+  { kind: "unpublish", label: "Unpublish", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+  { kind: "republish", label: "Republish", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+  { kind: "archive", label: "Archive", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+];
+
+export default function ServiceModerationPanel({
+  serviceId,
+  status: _status,
+}: {
+  serviceId: number;
+  status: ServiceStatus;
+}) {
   const [open, setOpen] = useState<Kind | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
@@ -135,46 +153,17 @@ export default function ServiceModerationPanel({ serviceId }: { serviceId: strin
 
   return (
     <div className="space-y-2" data-testid="moderation-panel">
-      <button
-        type="button"
-        onClick={() => setOpen("approve")}
-        data-testid="moderation-open-approve"
-        className="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-      >
-        Approve
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("request_changes")}
-        data-testid="moderation-open-request_changes"
-        className="w-full rounded-md bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-      >
-        Request changes
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("reject")}
-        data-testid="moderation-open-reject"
-        className="w-full rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-      >
-        Reject
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("hide")}
-        data-testid="moderation-open-hide"
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-      >
-        Hide
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("restore")}
-        data-testid="moderation-open-restore"
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-      >
-        Restore
-      </button>
+      {ALL_KINDS.map(({ kind, label, className }) => (
+        <button
+          key={kind}
+          type="button"
+          onClick={() => setOpen(kind)}
+          data-testid={`moderation-open-${kind}`}
+          className={`w-full rounded-md px-3 py-2 text-sm font-medium ${className}`}
+        >
+          {label}
+        </button>
+      ))}
 
       <dialog
         ref={dialogRef}

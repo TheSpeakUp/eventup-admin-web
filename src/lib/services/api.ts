@@ -1,54 +1,90 @@
 import { apiFetch, type ApiFetchResult } from "@/lib/api";
 import type {
+  ServiceCursorPage,
   ServiceDetail,
   ServiceListQuery,
-  ServiceListResponse,
-  ServiceSummary,
+  ServiceModerationResponse,
+  ServiceStats,
 } from "./types";
 
-const BASE = "/admin/v2/services";
+const BASE = "/admin/v2/marketplace/services";
 
 function buildListPath(query: ServiceListQuery): string {
   const params = new URLSearchParams();
-  if (query.q) params.set("q", query.q);
+  if (query.search) params.set("search", query.search);
   if (query.status) params.set("status", query.status);
-  if (query.page && query.page > 1) params.set("page", String(query.page));
-  if (query.page_size) params.set("page_size", String(query.page_size));
+  if (query.provider_id !== undefined)
+    params.set("provider_id", String(query.provider_id));
+  if (query.last_id !== undefined) params.set("last_id", String(query.last_id));
+  if (query.limit !== undefined) params.set("limit", String(query.limit));
   const qs = params.toString();
   return qs ? `${BASE}?${qs}` : BASE;
 }
 
 export function listServices(
   query: ServiceListQuery = {},
-): Promise<ApiFetchResult<ServiceListResponse>> {
-  return apiFetch<ServiceListResponse>(buildListPath(query));
+): Promise<ApiFetchResult<ServiceCursorPage>> {
+  return apiFetch<ServiceCursorPage>(buildListPath(query));
 }
 
-export function getService(id: string): Promise<ApiFetchResult<ServiceDetail>> {
-  return apiFetch<ServiceDetail>(`${BASE}/${encodeURIComponent(id)}`);
+export function getService(id: number): Promise<ApiFetchResult<ServiceDetail>> {
+  return apiFetch<ServiceDetail>(`${BASE}/${id}`);
 }
 
-type MutationOpts = { reason?: string };
-
-function moderationCall(
-  id: string,
-  action: "approve" | "reject" | "request-changes" | "hide" | "restore",
-  opts: MutationOpts = {},
-): Promise<ApiFetchResult<ServiceSummary>> {
-  return apiFetch<ServiceSummary>(
-    `${BASE}/${encodeURIComponent(id)}/${action}`,
-    {
-      method: "POST",
-      body: opts.reason ? JSON.stringify({ reason: opts.reason }) : undefined,
-      redirectOn401: false,
-    },
-  );
+export function getServiceStats(
+  id: number,
+): Promise<ApiFetchResult<ServiceStats>> {
+  return apiFetch<ServiceStats>(`${BASE}/${id}/stats`);
 }
 
-export const approveService = (id: string) => moderationCall(id, "approve");
-export const rejectService = (id: string, reason: string) =>
-  moderationCall(id, "reject", { reason });
-export const requestChangesService = (id: string, reason: string) =>
-  moderationCall(id, "request-changes", { reason });
-export const hideService = (id: string) => moderationCall(id, "hide");
-export const restoreService = (id: string) => moderationCall(id, "restore");
+export function approveService(
+  id: number,
+): Promise<ApiFetchResult<ServiceModerationResponse>> {
+  return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/approve`, {
+    method: "POST",
+    redirectOn401: false,
+  });
+}
+
+export function rejectService(
+  id: number,
+  reason: string,
+  comment?: string,
+): Promise<ApiFetchResult<ServiceModerationResponse>> {
+  return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ reason, ...(comment ? { comment } : {}) }),
+    redirectOn401: false,
+  });
+}
+
+export function unpublishService(
+  id: number,
+  reason?: string,
+): Promise<ApiFetchResult<ServiceModerationResponse>> {
+  const qs = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+  return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/unpublish${qs}`, {
+    method: "POST",
+    redirectOn401: false,
+  });
+}
+
+export function republishService(
+  id: number,
+): Promise<ApiFetchResult<ServiceModerationResponse>> {
+  return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/republish`, {
+    method: "POST",
+    redirectOn401: false,
+  });
+}
+
+export function archiveService(
+  id: number,
+  reason?: string,
+): Promise<ApiFetchResult<ServiceModerationResponse>> {
+  const qs = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+  return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/archive${qs}`, {
+    method: "POST",
+    redirectOn401: false,
+  });
+}

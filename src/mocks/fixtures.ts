@@ -1,11 +1,11 @@
 import type { ServiceDetail, ServiceStatus } from "@/lib/services/types";
 
 const STATUSES: ServiceStatus[] = [
-  "pending_review",
+  "draft",
+  "on_review",
   "published",
-  "needs_changes",
-  "hidden",
-  "rejected",
+  "unpublished",
+  "archived",
 ];
 
 const CATEGORIES = [
@@ -17,65 +17,66 @@ const CATEGORIES = [
   "Transportation",
 ];
 
-const PROVIDERS = [
-  { id: "prv_aurora", name: "Aurora Events Co." },
-  { id: "prv_blackbird", name: "Blackbird Studios" },
-  { id: "prv_cardinal", name: "Cardinal Catering" },
-  { id: "prv_drift", name: "Drift Sound" },
-  { id: "prv_emberbloom", name: "Emberbloom Decor" },
-];
-
-function pad(n: number, width = 3): string {
-  return n.toString().padStart(width, "0");
-}
+const PROVIDER_IDS = [1, 2, 3, 4, 5];
 
 function pick<T>(arr: readonly T[], i: number): T {
   return arr[i % arr.length] as T;
 }
 
+// id=9999 is the always-409 conflict fixture used by e2e to assert error surfacing.
+export const CONFLICT_SERVICE_ID = 9999;
+
 export function buildFixtureServices(): ServiceDetail[] {
   const out: ServiceDetail[] = [];
-  // Dedicated fixture the handlers treat as always-409 to exercise the
-  // moderation error surface in e2e tests.
   out.push({
-    id: "svc_conflict",
+    id: CONFLICT_SERVICE_ID,
     title: "Conflict fixture (always 409 on actions)",
-    provider_id: "prv_aurora",
-    provider_name: "Aurora Events Co.",
-    category: "Catering",
-    price_cents: 12_345,
+    provider_id: 1,
+    status: "on_review",
+    category_id: 1,
+    recipient_type: 0,
+    base_price_minor: 12_345,
     currency: "USD",
-    status: "pending_review",
+    remote_available: false,
     description: "Used by Playwright to assert that 4xx surfaces inline.",
+    pricing_type: "once",
+    pricing_interval_minutes: null,
+    max_units_per_order: null,
+    external_url: null,
+    address: null,
+    attributes: null,
     created_at: "2026-05-01T10:00:00.000Z",
     updated_at: "2026-05-01T10:00:00.000Z",
-    last_moderation_note: null,
-    last_moderator_email: null,
   });
   for (let i = 0; i < 25; i++) {
-    const provider = pick(PROVIDERS, i);
+    const providerId = pick(PROVIDER_IDS, i);
     const status = pick(STATUSES, i);
     const day = (i % 28) + 1;
     const updatedDay = ((i * 3) % 28) + 1;
+    const dd = String(day).padStart(2, "0");
+    const ud = String(updatedDay).padStart(2, "0");
     out.push({
-      id: `svc_${pad(i + 1)}`,
+      id: i + 1,
       title: `${pick(CATEGORIES, i)} package #${i + 1}`,
-      provider_id: provider.id,
-      provider_name: provider.name,
-      category: pick(CATEGORIES, i),
-      price_cents: 5_000 + i * 1_750,
-      currency: "USD",
+      provider_id: providerId,
       status,
+      category_id: ((i % 6) + 1),
+      recipient_type: i % 3,
+      base_price_minor: 5_000 + i * 1_750,
+      currency: "USD",
+      remote_available: i % 2 === 0,
       description:
         `Sample service description for fixture #${i + 1}. ` +
         `Provider offers a ${pick(CATEGORIES, i).toLowerCase()} package suitable ` +
         `for mid-size corporate events.`,
-      created_at: `2026-05-${pad(day, 2)}T10:00:00.000Z`,
-      updated_at: `2026-06-${pad(updatedDay, 2)}T10:00:00.000Z`,
-      last_moderation_note: status === "needs_changes" || status === "rejected"
-        ? "Please attach pricing breakdown and one reference photo."
-        : null,
-      last_moderator_email: status === "pending_review" ? null : "admin@example.com",
+      pricing_type: "once",
+      pricing_interval_minutes: null,
+      max_units_per_order: null,
+      external_url: null,
+      address: null,
+      attributes: null,
+      created_at: `2026-05-${dd}T10:00:00.000Z`,
+      updated_at: `2026-06-${ud}T10:00:00.000Z`,
     });
   }
   return out;

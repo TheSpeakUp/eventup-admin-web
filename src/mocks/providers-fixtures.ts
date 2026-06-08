@@ -1,19 +1,10 @@
 import type { ProviderDetail, ProviderStatus } from "@/lib/providers/types";
 
 const STATUSES: ProviderStatus[] = [
-  "pending_review",
-  "approved",
-  "suspended",
-  "rejected",
-];
-
-const CATEGORIES = [
-  "Catering",
-  "Photography",
-  "Music & DJ",
-  "Venue",
-  "Decor",
-  "Transportation",
+  "pending",
+  "verified",
+  "blocked",
+  "canceled",
 ];
 
 const NAMES = [
@@ -34,61 +25,57 @@ const NAMES = [
   "Onyx Productions",
 ];
 
-function pad(n: number, width = 3): string {
-  return n.toString().padStart(width, "0");
+function slug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
 function pick<T>(arr: readonly T[], i: number): T {
   return arr[i % arr.length] as T;
 }
 
-function slug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
+export const CONFLICT_PROVIDER_ID = 9999;
 
 export function buildFixtureProviders(): ProviderDetail[] {
   const out: ProviderDetail[] = [];
   out.push({
-    id: "prv_conflict",
+    id: CONFLICT_PROVIDER_ID,
     name: "Conflict fixture (always 409 on actions)",
-    contact_email: "conflict@example.com",
-    category: "Catering",
-    status: "pending_review",
+    verification_status: "pending",
+    location_id: null,
+    services_count: 0,
+    active_offers_count: 0,
     description: "Used by Playwright to assert that 4xx surfaces inline.",
-    website: null,
+    contact_email: "conflict@example.com",
     phone: null,
+    website: null,
+    verification_message: null,
+    block_reason: null,
     created_at: "2026-05-01T10:00:00.000Z",
     updated_at: "2026-05-01T10:00:00.000Z",
-    last_moderation_note: null,
-    last_moderator_email: null,
   });
   for (let i = 0; i < NAMES.length; i++) {
     const name = NAMES[i] as string;
     const status = pick(STATUSES, i);
     const day = (i % 28) + 1;
     const updatedDay = ((i * 3) % 28) + 1;
-    const id = `prv_${pad(i + 1)}`;
+    const dd = String(day).padStart(2, "0");
+    const ud = String(updatedDay).padStart(2, "0");
     out.push({
-      id,
+      id: i + 1,
       name,
-      contact_email: `${slug(name)}@example.com`,
-      category: pick(CATEGORIES, i),
-      status,
+      verification_status: status,
+      location_id: ((i % 5) + 1),
+      services_count: (i * 2) % 7,
+      active_offers_count: i % 4,
       description:
-        `Verified ${pick(CATEGORIES, i).toLowerCase()} provider operating ` +
-        `since 2024. Fixture entry #${i + 1} for the mock backend.`,
-      website: i % 2 === 0 ? `https://${slug(name)}.example.com` : null,
-      phone: i % 3 === 0 ? `+1-555-01${pad(i + 1, 2)}` : null,
-      created_at: `2026-05-${pad(day, 2)}T10:00:00.000Z`,
-      updated_at: `2026-06-${pad(updatedDay, 2)}T10:00:00.000Z`,
-      last_moderation_note:
-        status === "rejected" || status === "suspended"
-          ? "Documents incomplete — submit insurance certificate."
-          : null,
-      last_moderator_email: status === "pending_review" ? null : "admin@example.com",
+        `Fixture provider #${i + 1}: ${name}. Mid-size operator covering corporate events.`,
+      contact_email: `${slug(name)}@example.com`,
+      phone: i % 2 === 0 ? `+1-555-01${String(i).padStart(2, "0")}` : null,
+      website: i % 3 === 0 ? `https://${slug(name)}.example.com` : null,
+      verification_message: status === "verified" ? "All documents reviewed." : null,
+      block_reason: status === "blocked" ? "Insurance certificate expired." : null,
+      created_at: `2026-05-${dd}T10:00:00.000Z`,
+      updated_at: `2026-06-${ud}T10:00:00.000Z`,
     });
   }
   return out;

@@ -1,19 +1,19 @@
 import Link from "next/link";
-import type { ProviderSummary } from "@/lib/providers/types";
+import type { ProviderListItem } from "@/lib/providers/types";
 import StatusBadge from "./StatusBadge";
 
 function formatDate(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
-export default function ProvidersTable({ rows }: { rows: ProviderSummary[] }) {
+export default function ProvidersTable({ rows }: { rows: ProviderListItem[] }) {
   if (rows.length === 0) {
     return (
       <div
         data-testid="providers-empty"
         className="rounded-md border border-dashed border-zinc-300 p-10 text-center text-sm text-zinc-500"
       >
-        No providers match the current filters.
+        No providers match the current search.
       </div>
     );
   }
@@ -23,8 +23,8 @@ export default function ProvidersTable({ rows }: { rows: ProviderSummary[] }) {
         <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
           <tr>
             <th className="px-4 py-2.5 text-left font-medium">Name</th>
-            <th className="px-4 py-2.5 text-left font-medium">Contact</th>
-            <th className="px-4 py-2.5 text-left font-medium">Category</th>
+            <th className="px-4 py-2.5 text-left font-medium">Services</th>
+            <th className="px-4 py-2.5 text-left font-medium">Active offers</th>
             <th className="px-4 py-2.5 text-left font-medium">Status</th>
             <th className="px-4 py-2.5 text-left font-medium">Updated</th>
           </tr>
@@ -41,9 +41,11 @@ export default function ProvidersTable({ rows }: { rows: ProviderSummary[] }) {
                   {row.name}
                 </Link>
               </td>
-              <td className="px-4 py-2.5 text-zinc-700">{row.contact_email}</td>
-              <td className="px-4 py-2.5 text-zinc-700">{row.category}</td>
-              <td className="px-4 py-2.5"><StatusBadge status={row.status} /></td>
+              <td className="px-4 py-2.5 text-zinc-700">{row.services_count}</td>
+              <td className="px-4 py-2.5 text-zinc-700">{row.active_offers_count}</td>
+              <td className="px-4 py-2.5">
+                <StatusBadge status={row.verification_status} />
+              </td>
               <td className="px-4 py-2.5 text-zinc-500">{formatDate(row.updated_at)}</td>
             </tr>
           ))}

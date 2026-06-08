@@ -1,20 +1,22 @@
 import Link from "next/link";
-import type { ServiceSummary } from "@/lib/services/types";
+import type { ServiceListItem } from "@/lib/services/types";
 import StatusBadge from "./StatusBadge";
 
-function formatPrice(cents: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
+function formatPrice(minor: number | null, currency: string | null): string {
+  if (minor === null) return "—";
+  const fmt = new Intl.NumberFormat("en-US", {
+    style: currency ? "currency" : "decimal",
+    currency: currency ?? "USD",
     maximumFractionDigits: 0,
-  }).format(cents / 100);
+  });
+  return fmt.format(minor / 100);
 }
 
 function formatDate(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
-export default function ServicesTable({ rows }: { rows: ServiceSummary[] }) {
+export default function ServicesTable({ rows }: { rows: ServiceListItem[] }) {
   if (rows.length === 0) {
     return (
       <div
@@ -32,8 +34,7 @@ export default function ServicesTable({ rows }: { rows: ServiceSummary[] }) {
           <tr>
             <th className="px-4 py-2.5 text-left font-medium">Title</th>
             <th className="px-4 py-2.5 text-left font-medium">Provider</th>
-            <th className="px-4 py-2.5 text-left font-medium">Category</th>
-            <th className="px-4 py-2.5 text-left font-medium">Price</th>
+            <th className="px-4 py-2.5 text-left font-medium">Base price</th>
             <th className="px-4 py-2.5 text-left font-medium">Status</th>
             <th className="px-4 py-2.5 text-left font-medium">Updated</th>
           </tr>
@@ -50,9 +51,10 @@ export default function ServicesTable({ rows }: { rows: ServiceSummary[] }) {
                   {row.title}
                 </Link>
               </td>
-              <td className="px-4 py-2.5 text-zinc-700">{row.provider_name}</td>
-              <td className="px-4 py-2.5 text-zinc-700">{row.category}</td>
-              <td className="px-4 py-2.5 text-zinc-700">{formatPrice(row.price_cents, row.currency)}</td>
+              <td className="px-4 py-2.5 text-zinc-700">#{row.provider_id}</td>
+              <td className="px-4 py-2.5 text-zinc-700">
+                {formatPrice(row.base_price_minor, row.currency)}
+              </td>
               <td className="px-4 py-2.5"><StatusBadge status={row.status} /></td>
               <td className="px-4 py-2.5 text-zinc-500">{formatDate(row.updated_at)}</td>
             </tr>

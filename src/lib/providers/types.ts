@@ -1,8 +1,8 @@
 export const PROVIDER_STATUSES = [
-  "pending_review",
-  "approved",
-  "suspended",
-  "rejected",
+  "pending",
+  "verified",
+  "blocked",
+  "canceled",
 ] as const;
 
 export type ProviderStatus = (typeof PROVIDER_STATUSES)[number];
@@ -11,34 +11,49 @@ export function isProviderStatus(value: string): value is ProviderStatus {
   return (PROVIDER_STATUSES as readonly string[]).includes(value);
 }
 
-export type ProviderSummary = {
-  id: string;
+export type ProviderListItem = {
+  id: number;
   name: string;
-  contact_email: string;
-  category: string;
-  status: ProviderStatus;
+  verification_status: ProviderStatus;
+  location_id: number | null;
+  services_count: number;
+  active_offers_count: number;
+  created_at: string;
   updated_at: string;
 };
 
-export type ProviderDetail = ProviderSummary & {
-  description: string;
-  website: string | null;
+export type ProviderDetail = ProviderListItem & {
+  description: string | null;
+  contact_email: string | null;
   phone: string | null;
-  created_at: string;
-  last_moderation_note: string | null;
-  last_moderator_email: string | null;
+  website: string | null;
+  verification_message: string | null;
+  block_reason: string | null;
 };
 
-export type ProviderListResponse = {
-  items: ProviderSummary[];
-  total: number;
-  page: number;
-  page_size: number;
+export type ProviderCursorPage = {
+  items: ProviderListItem[];
+  next_last_id: number | null;
+  has_more: boolean;
+  count: number;
 };
 
 export type ProviderListQuery = {
-  q?: string;
-  status?: ProviderStatus;
-  page?: number;
-  page_size?: number;
+  search?: string;
+  last_id?: number;
+  limit?: number;
+};
+
+export type ProviderModerationResponse = {
+  provider_id: number;
+  new_status: ProviderStatus;
+  message_key: string | null;
+  message: string;
+};
+
+export type ProviderStats = {
+  provider_id: number;
+  total_services: number;
+  services_by_status: Record<string, number>;
+  active_offers_count: number;
 };

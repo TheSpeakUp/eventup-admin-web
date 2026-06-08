@@ -3,79 +3,73 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  approveProvider,
-  rejectProvider,
-  restoreProvider,
-  suspendProvider,
+  blockProvider,
+  deleteProvider,
+  unblockProvider,
+  verifyProvider,
 } from "@/lib/providers/api";
 import type { ActionState } from "./action-types";
 
-const idSchema = z.string().min(1, "provider id is required");
+const idSchema = z.coerce.number().int().positive("provider id is required");
 const reasonSchema = z.string().trim().min(10, "Reason must be at least 10 characters");
+const messageOptionalSchema = z.string().trim().min(1).max(2000).optional();
 
-function revalidate(id: string) {
+function revalidate(id: number) {
   revalidatePath(`/providers/${id}`);
   revalidatePath("/providers");
 }
 
-function failParse(err: z.ZodError): ActionState {
-  return { ok: false, error: err.issues[0]?.message ?? "Invalid input" };
+function fail(message: string): ActionState {
+  return { ok: false, error: message };
 }
 
-async function reasoned(
-  formData: FormData,
-  call: (id: string, reason: string) => Promise<{ ok: boolean; status: number; message?: string }>,
-): Promise<ActionState> {
-  const idParse = idSchema.safeParse(formData.get("providerId"));
-  if (!idParse.success) return failParse(idParse.error);
-  const reasonParse = reasonSchema.safeParse(formData.get("reason"));
-  if (!reasonParse.success) return failParse(reasonParse.error);
-  const result = await call(idParse.data, reasonParse.data);
-  if (!result.ok) {
-    return { ok: false, error: result.message ?? `Request failed (${result.status})` };
+function parseProviderId(formData: FormData): { ok: true; id: number } | { ok: false; state: ActionState } {
+  const parsed = idSchema.safeParse(formData.get("providerId"));
+  if (!parsed.success) return { ok: false, state: fail(parsed.error.issues[0]?.message ?? "Invalid id") };
+  return { ok: true, id: parsed.data };
+}
+
+export async function verifyProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const idR = parseProviderId(formData);
+  if (!idR.ok) return idR.state;
+  const messageRaw = formData.get("message");
+  let message: string | undefined;
+  if (typeof messageRaw === "string" && messageRaw.trim().length > 0) {
+    const parsed = messageOptionalSchema.safeParse(messageRaw);
+    if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid message");
+    message = parsed.data;
   }
-  revalidate(idParse.data);
+  const result = await verifyProvider(idR.id, message);
+  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  revalidate(idR.id);
   return { ok: true, error: null };
 }
 
-async function plain(
-  formData: FormData,
-  call: (id: string) => Promise<{ ok: boolean; status: number; message?: string }>,
-): Promise<ActionState> {
-  const idParse = idSchema.safeParse(formData.get("providerId"));
-  if (!idParse.success) return failParse(idParse.error);
-  const result = await call(idParse.data);
-  if (!result.ok) {
-    return { ok: false, error: result.message ?? `Request failed (${result.status})` };
-  }
-  revalidate(idParse.data);
+export async function blockProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const idR = parseProviderId(formData);
+  if (!idR.ok) return idR.state;
+  const reasonR = reasonSchema.safeParse(formData.get("reason"));
+  if (!reasonR.success) return fail(reasonR.error.issues[0]?.message ?? "Invalid reason");
+  const result = await blockProvider(idR.id, reasonR.data);
+  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  revalidate(idR.id);
   return { ok: true, error: null };
 }
 
-export async function approveProviderAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  return plain(formData, approveProvider);
+export async function unblockProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const idR = parseProviderId(formData);
+  if (!idR.ok) return idR.state;
+  const result = await unblockProvider(idR.id);
+  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  revalidate(idR.id);
+  return { ok: true, error: null };
 }
 
-export async function rejectProviderAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  return reasoned(formData, rejectProvider);
-}
-
-export async function suspendProviderAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  return reasoned(formData, suspendProvider);
-}
-
-export async function restoreProviderAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  return plain(formData, restoreProvider);
+export async function deleteProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const idR = parseProviderId(formData);
+  if (!idR.ok) return idR.state;
+  const result = await deleteProvider(idR.id);
+  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  revalidate(idR.id);
+  return { ok: true, error: null };
 }
