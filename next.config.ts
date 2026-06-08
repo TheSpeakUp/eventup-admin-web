@@ -13,6 +13,17 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   outputFileTracingRoot: process.cwd(),
+
+  // pnpm puts deps under node_modules/.pnpm/... + symlinks. Next's file
+  // tracer occasionally drops things at the edge of those symlink chains.
+  // Force-include the swc helpers (required by next/dist/shared/lib/constants.js
+  // — missing this is what produced MODULE_NOT_FOUND on the first prod boot).
+  outputFileTracingIncludes: {
+    "/": [
+      "./node_modules/@swc/helpers/**/*",
+      "./node_modules/.pnpm/@swc+helpers@*/node_modules/@swc/helpers/**/*",
+    ],
+  },
 };
 
 export default nextConfig;
