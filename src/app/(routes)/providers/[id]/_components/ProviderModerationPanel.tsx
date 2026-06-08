@@ -8,7 +8,6 @@ import {
   verifyProviderAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
-import type { ProviderStatus } from "@/lib/providers/types";
 
 type Kind = "verify" | "block" | "unblock" | "delete";
 
@@ -126,10 +125,8 @@ const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
 
 export default function ProviderModerationPanel({
   providerId,
-  status: _status,
 }: {
   providerId: number;
-  status: ProviderStatus;
 }) {
   const [open, setOpen] = useState<Kind | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
