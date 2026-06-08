@@ -8,7 +8,9 @@ type Params = Promise<{ id: string }>;
 
 export default async function ProviderDetailPage({ params }: { params: Params }) {
   const { id } = await params;
-  const result = await getProvider(id);
+  const idNum = Number(id);
+  if (!Number.isInteger(idNum) || idNum <= 0) notFound();
+  const result = await getProvider(idNum);
   if (!result.ok) {
     if (result.status === 404) notFound();
     return (
@@ -35,7 +37,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
         <ProviderDetailView provider={result.data} />
         <aside className="space-y-3">
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
-          <ProviderModerationPanel providerId={result.data.id} />
+          <ProviderModerationPanel providerId={result.data.id} status={result.data.verification_status} />
         </aside>
       </div>
     </div>

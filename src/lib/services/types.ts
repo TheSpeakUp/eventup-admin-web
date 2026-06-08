@@ -1,9 +1,9 @@
 export const SERVICE_STATUSES = [
-  "pending_review",
+  "draft",
+  "on_review",
   "published",
-  "needs_changes",
-  "hidden",
-  "rejected",
+  "unpublished",
+  "archived",
 ] as const;
 
 export type ServiceStatus = (typeof SERVICE_STATUSES)[number];
@@ -12,35 +12,55 @@ export function isServiceStatus(value: string): value is ServiceStatus {
   return (SERVICE_STATUSES as readonly string[]).includes(value);
 }
 
-export type ServiceSummary = {
-  id: string;
+export type ServiceListItem = {
+  id: number;
   title: string;
-  provider_name: string;
-  category: string;
-  price_cents: number;
-  currency: string;
+  provider_id: number;
   status: ServiceStatus;
+  category_id: number | null;
+  recipient_type: number;
+  base_price_minor: number | null;
+  currency: string | null;
+  remote_available: boolean;
+  created_at: string;
   updated_at: string;
 };
 
-export type ServiceDetail = ServiceSummary & {
-  description: string;
-  provider_id: string;
-  created_at: string;
-  last_moderation_note: string | null;
-  last_moderator_email: string | null;
+export type ServiceDetail = ServiceListItem & {
+  description: string | null;
+  pricing_type: string;
+  pricing_interval_minutes: number | null;
+  max_units_per_order: number | null;
+  external_url: string | null;
+  address: string | null;
+  attributes: Record<string, unknown> | null;
 };
 
-export type ServiceListResponse = {
-  items: ServiceSummary[];
-  total: number;
-  page: number;
-  page_size: number;
+export type ServiceCursorPage = {
+  items: ServiceListItem[];
+  next_last_id: number | null;
+  has_more: boolean;
+  count: number;
 };
 
 export type ServiceListQuery = {
-  q?: string;
+  search?: string;
   status?: ServiceStatus;
-  page?: number;
-  page_size?: number;
+  provider_id?: number;
+  last_id?: number;
+  limit?: number;
+};
+
+export type ServiceModerationResponse = {
+  service_id: number;
+  new_status: ServiceStatus;
+  message_key: string | null;
+  message: string;
+};
+
+export type ServiceStats = {
+  service_id: number;
+  total_offers: number;
+  offers_by_status: Record<string, number>;
+  active_offers_count: number;
 };

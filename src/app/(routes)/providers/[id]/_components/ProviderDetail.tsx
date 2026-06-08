@@ -14,15 +14,27 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
             {provider.name}
           </h1>
           <p className="text-sm text-zinc-500">
-            {provider.contact_email} · {provider.category}
+            {provider.contact_email ?? "no contact email"}
           </p>
         </div>
-        <StatusBadge status={provider.status} />
+        <StatusBadge status={provider.verification_status} />
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div>
           <dt className="text-zinc-500">Provider ID</dt>
           <dd className="text-zinc-900 font-mono text-xs">{provider.id}</dd>
+        </div>
+        <div>
+          <dt className="text-zinc-500">Services</dt>
+          <dd className="text-zinc-900">{provider.services_count}</dd>
+        </div>
+        <div>
+          <dt className="text-zinc-500">Active offers</dt>
+          <dd className="text-zinc-900">{provider.active_offers_count}</dd>
+        </div>
+        <div>
+          <dt className="text-zinc-500">Location ID</dt>
+          <dd className="text-zinc-900">{provider.location_id ?? "—"}</dd>
         </div>
         <div>
           <dt className="text-zinc-500">Phone</dt>
@@ -33,10 +45,6 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
           <dd className="text-zinc-900 break-all">{provider.website ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Category</dt>
-          <dd className="text-zinc-900">{provider.category}</dd>
-        </div>
-        <div>
           <dt className="text-zinc-500">Created</dt>
           <dd className="text-zinc-900">{formatDate(provider.created_at)}</dd>
         </div>
@@ -45,19 +53,26 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
           <dd className="text-zinc-900">{formatDate(provider.updated_at)}</dd>
         </div>
       </dl>
-      <div>
-        <h2 className="text-sm font-medium text-zinc-500">Description</h2>
-        <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">{provider.description}</p>
-      </div>
-      {provider.last_moderation_note ? (
-        <div className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-700">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-            Last moderation note
+      {provider.description ? (
+        <div>
+          <h2 className="text-sm font-medium text-zinc-500">Description</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">{provider.description}</p>
+        </div>
+      ) : null}
+      {provider.verification_message ? (
+        <div className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
+          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+            Verification note
           </p>
-          <p className="mt-1">{provider.last_moderation_note}</p>
-          {provider.last_moderator_email ? (
-            <p className="mt-1 text-xs text-zinc-500">— {provider.last_moderator_email}</p>
-          ) : null}
+          <p className="mt-1">{provider.verification_message}</p>
+        </div>
+      ) : null}
+      {provider.block_reason ? (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-900">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+            Block reason
+          </p>
+          <p className="mt-1">{provider.block_reason}</p>
         </div>
       ) : null}
     </div>

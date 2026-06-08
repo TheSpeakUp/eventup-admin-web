@@ -1,12 +1,13 @@
 import type { ServiceDetail } from "@/lib/services/types";
 import StatusBadge from "../../_components/StatusBadge";
 
-function formatPrice(cents: number, currency: string): string {
+function formatPrice(minor: number | null, currency: string | null): string {
+  if (minor === null) return "—";
   return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
+    style: currency ? "currency" : "decimal",
+    currency: currency ?? "USD",
     maximumFractionDigits: 0,
-  }).format(cents / 100);
+  }).format(minor / 100);
 }
 
 function formatDate(iso: string): string {
@@ -22,19 +23,28 @@ export default function ServiceDetailView({ service }: { service: ServiceDetail 
             {service.title}
           </h1>
           <p className="text-sm text-zinc-500">
-            {service.provider_name} · {service.category}
+            Provider #{service.provider_id}
+            {service.category_id !== null ? ` · Category #${service.category_id}` : ""}
           </p>
         </div>
         <StatusBadge status={service.status} />
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div>
-          <dt className="text-zinc-500">Price</dt>
-          <dd className="text-zinc-900">{formatPrice(service.price_cents, service.currency)}</dd>
+          <dt className="text-zinc-500">Base price</dt>
+          <dd className="text-zinc-900">{formatPrice(service.base_price_minor, service.currency)}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Provider ID</dt>
-          <dd className="text-zinc-900 font-mono text-xs">{service.provider_id}</dd>
+          <dt className="text-zinc-500">Pricing type</dt>
+          <dd className="text-zinc-900">{service.pricing_type}</dd>
+        </div>
+        <div>
+          <dt className="text-zinc-500">Recipient type</dt>
+          <dd className="text-zinc-900">{service.recipient_type}</dd>
+        </div>
+        <div>
+          <dt className="text-zinc-500">Remote available</dt>
+          <dd className="text-zinc-900">{service.remote_available ? "Yes" : "No"}</dd>
         </div>
         <div>
           <dt className="text-zinc-500">Created</dt>
@@ -45,19 +55,10 @@ export default function ServiceDetailView({ service }: { service: ServiceDetail 
           <dd className="text-zinc-900">{formatDate(service.updated_at)}</dd>
         </div>
       </dl>
-      <div>
-        <h2 className="text-sm font-medium text-zinc-500">Description</h2>
-        <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">{service.description}</p>
-      </div>
-      {service.last_moderation_note ? (
-        <div className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-700">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-            Last moderation note
-          </p>
-          <p className="mt-1">{service.last_moderation_note}</p>
-          {service.last_moderator_email ? (
-            <p className="mt-1 text-xs text-zinc-500">— {service.last_moderator_email}</p>
-          ) : null}
+      {service.description ? (
+        <div>
+          <h2 className="text-sm font-medium text-zinc-500">Description</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">{service.description}</p>
         </div>
       ) : null}
     </div>

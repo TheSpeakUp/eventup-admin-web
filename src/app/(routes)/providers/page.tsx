@@ -1,10 +1,9 @@
 import { listProviders } from "@/lib/providers/api";
-import { isProviderStatus, type ProviderStatus } from "@/lib/providers/types";
 import Pagination from "./_components/Pagination";
 import ProvidersFilters from "./_components/ProvidersFilters";
 import ProvidersTable from "./_components/ProvidersTable";
 
-const PAGE_SIZE = 10;
+const LIMIT = 10;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -13,16 +12,22 @@ function pickString(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
+function pickPositiveInt(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : undefined;
+}
+
 export default async function ProvidersPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const q = pickString(sp.q)?.trim() ?? undefined;
-  const statusRaw = pickString(sp.status);
-  const status: ProviderStatus | undefined =
-    statusRaw && isProviderStatus(statusRaw) ? statusRaw : undefined;
-  const pageRaw = Number(pickString(sp.page) ?? "1");
-  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+  const search = pickString(sp.search)?.trim() || undefined;
+  const lastId = pickPositiveInt(pickString(sp.last_id));
 
-  const result = await listProviders({ q, status, page, page_size: PAGE_SIZE });
+  const result = await listProviders({
+    search,
+    last_id: lastId,
+    limit: LIMIT,
+  });
 
   if (!result.ok) {
     return (
@@ -38,24 +43,25 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
     );
   }
 
-  const { items, total, page: pageOut, page_size } = result.data;
+  const { items, has_more, next_last_id, count } = result.data;
 
   return (
     <div className="p-8 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Providers moderation</h1>
-        <span className="text-xs text-zinc-500" data-testid="providers-total">
-          {total} provider{total === 1 ? "" : "s"}
+        <span className="text-xs text-zinc-500" data-testid="providers-count">
+          {count} provider{count === 1 ? "" : "s"} on this page
         </span>
       </div>
       <ProvidersFilters />
       <ProvidersTable rows={items} />
       <Pagination
-        page={pageOut}
-        pageSize={page_size}
-        total={total}
+        nextLastId={next_last_id}
+        hasMore={has_more}
+        count={count}
         basePath="/providers"
-        searchParams={{ q, status }}
+        searchParams={{ search }}
+        lastId={lastId}
       />
     </div>
   );

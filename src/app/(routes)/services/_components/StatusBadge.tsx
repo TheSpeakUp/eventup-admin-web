@@ -1,24 +1,24 @@
 import type { ServiceStatus } from "@/lib/services/types";
 
 const STYLES: Record<ServiceStatus, { label: string; cls: string }> = {
-  pending_review: {
-    label: "Pending review",
+  draft: {
+    label: "Draft",
+    cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
+  },
+  on_review: {
+    label: "On review",
     cls: "bg-amber-100 text-amber-800 ring-amber-200",
   },
   published: {
     label: "Published",
     cls: "bg-emerald-100 text-emerald-800 ring-emerald-200",
   },
-  needs_changes: {
-    label: "Needs changes",
+  unpublished: {
+    label: "Unpublished",
     cls: "bg-orange-100 text-orange-800 ring-orange-200",
   },
-  hidden: {
-    label: "Hidden",
-    cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
-  },
-  rejected: {
-    label: "Rejected",
+  archived: {
+    label: "Archived",
     cls: "bg-red-100 text-red-800 ring-red-200",
   },
 };

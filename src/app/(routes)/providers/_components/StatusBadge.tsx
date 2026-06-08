@@ -1,21 +1,21 @@
 import type { ProviderStatus } from "@/lib/providers/types";
 
 const STYLES: Record<ProviderStatus, { label: string; cls: string }> = {
-  pending_review: {
-    label: "Pending review",
+  pending: {
+    label: "Pending",
     cls: "bg-amber-100 text-amber-800 ring-amber-200",
   },
-  approved: {
-    label: "Approved",
+  verified: {
+    label: "Verified",
     cls: "bg-emerald-100 text-emerald-800 ring-emerald-200",
   },
-  suspended: {
-    label: "Suspended",
-    cls: "bg-orange-100 text-orange-800 ring-orange-200",
-  },
-  rejected: {
-    label: "Rejected",
+  blocked: {
+    label: "Blocked",
     cls: "bg-red-100 text-red-800 ring-red-200",
+  },
+  canceled: {
+    label: "Canceled",
+    cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
   },
 };
 

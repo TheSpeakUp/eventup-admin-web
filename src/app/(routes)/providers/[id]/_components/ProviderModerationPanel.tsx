@@ -2,46 +2,52 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
-  approveProviderAction,
-  rejectProviderAction,
-  restoreProviderAction,
-  suspendProviderAction,
+  blockProviderAction,
+  deleteProviderAction,
+  unblockProviderAction,
+  verifyProviderAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
+import type { ProviderStatus } from "@/lib/providers/types";
 
-type Kind = "approve" | "reject" | "suspend" | "restore";
+type Kind = "verify" | "block" | "unblock" | "delete";
 
 type DialogConfig = {
   title: string;
   body: string;
   needsReason: boolean;
+  reasonField: "reason" | "message" | null;
   confirmLabel: string;
 };
 
 const DIALOGS: Record<Kind, DialogConfig> = {
-  approve: {
-    title: "Approve provider?",
-    body: "This will mark the provider as approved and visible in the marketplace.",
-    needsReason: false,
-    confirmLabel: "Approve",
-  },
-  reject: {
-    title: "Reject provider",
-    body: "Provide a reason (10+ chars). The provider will see it.",
+  verify: {
+    title: "Verify provider?",
+    body: "Mark provider as verified. Optional verification note.",
     needsReason: true,
-    confirmLabel: "Reject",
+    reasonField: "message",
+    confirmLabel: "Verify",
   },
-  suspend: {
-    title: "Suspend provider",
-    body: "Provide a reason (10+ chars). The provider will be temporarily hidden.",
+  block: {
+    title: "Block provider",
+    body: "Provide a reason (10+ chars). Provider will be hidden from the marketplace.",
     needsReason: true,
-    confirmLabel: "Suspend",
+    reasonField: "reason",
+    confirmLabel: "Block",
   },
-  restore: {
-    title: "Restore provider visibility?",
-    body: "Restore the provider to an approved, visible state.",
+  unblock: {
+    title: "Unblock provider?",
+    body: "Return provider to verified state.",
     needsReason: false,
-    confirmLabel: "Restore",
+    reasonField: null,
+    confirmLabel: "Unblock",
+  },
+  delete: {
+    title: "Delete provider?",
+    body: "Soft-delete (transition to canceled). This cannot be undone via this UI.",
+    needsReason: false,
+    reasonField: null,
+    confirmLabel: "Delete",
   },
 };
 
@@ -49,10 +55,10 @@ const ACTIONS: Record<
   Kind,
   (prev: ActionState, fd: FormData) => Promise<ActionState>
 > = {
-  approve: approveProviderAction,
-  reject: rejectProviderAction,
-  suspend: suspendProviderAction,
-  restore: restoreProviderAction,
+  verify: verifyProviderAction,
+  block: blockProviderAction,
+  unblock: unblockProviderAction,
+  delete: deleteProviderAction,
 };
 
 function ActionForm({
@@ -61,7 +67,7 @@ function ActionForm({
   onSettled,
 }: {
   kind: Kind;
-  providerId: string;
+  providerId: number;
   onSettled: (ok: boolean) => void;
 }) {
   const [state, formAction, pending] = useActionState(ACTIONS[kind], EMPTY_STATE);
@@ -75,17 +81,20 @@ function ActionForm({
     }
   }, [state, pending, onSettled]);
   const cfg = DIALOGS[kind];
+  const isMessage = cfg.reasonField === "message";
   return (
     <form action={formAction} className="space-y-3" data-testid={`moderation-form-${kind}`}>
       <input type="hidden" name="providerId" value={providerId} />
-      {cfg.needsReason ? (
+      {cfg.needsReason && cfg.reasonField ? (
         <textarea
-          name="reason"
-          required
-          minLength={10}
+          name={cfg.reasonField}
+          required={!isMessage}
+          minLength={isMessage ? 0 : 10}
           rows={4}
           data-testid={`moderation-reason-${kind}`}
-          placeholder="Reason (min 10 chars)…"
+          placeholder={
+            isMessage ? "Verification note (optional)…" : "Reason (min 10 chars)…"
+          }
           className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
       ) : null}
@@ -108,7 +117,20 @@ function ActionForm({
   );
 }
 
-export default function ProviderModerationPanel({ providerId }: { providerId: string }) {
+const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
+  { kind: "verify", label: "Verify", className: "bg-emerald-600 text-white hover:bg-emerald-700" },
+  { kind: "block", label: "Block", className: "bg-red-600 text-white hover:bg-red-700" },
+  { kind: "unblock", label: "Unblock", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+  { kind: "delete", label: "Delete", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+];
+
+export default function ProviderModerationPanel({
+  providerId,
+  status: _status,
+}: {
+  providerId: number;
+  status: ProviderStatus;
+}) {
   const [open, setOpen] = useState<Kind | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
@@ -127,38 +149,17 @@ export default function ProviderModerationPanel({ providerId }: { providerId: st
 
   return (
     <div className="space-y-2" data-testid="moderation-panel">
-      <button
-        type="button"
-        onClick={() => setOpen("approve")}
-        data-testid="moderation-open-approve"
-        className="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-      >
-        Approve
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("reject")}
-        data-testid="moderation-open-reject"
-        className="w-full rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-      >
-        Reject
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("suspend")}
-        data-testid="moderation-open-suspend"
-        className="w-full rounded-md bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-      >
-        Suspend
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen("restore")}
-        data-testid="moderation-open-restore"
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-      >
-        Restore
-      </button>
+      {ALL_KINDS.map(({ kind, label, className }) => (
+        <button
+          key={kind}
+          type="button"
+          onClick={() => setOpen(kind)}
+          data-testid={`moderation-open-${kind}`}
+          className={`w-full rounded-md px-3 py-2 text-sm font-medium ${className}`}
+        >
+          {label}
+        </button>
+      ))}
 
       <dialog
         ref={dialogRef}

@@ -1,65 +1,68 @@
 import Link from "next/link";
 
 type Props = {
-  page: number;
-  pageSize: number;
-  total: number;
+  nextLastId: number | null;
+  hasMore: boolean;
+  count: number;
   basePath: string;
   searchParams: Record<string, string | undefined>;
+  lastId: number | undefined;
 };
 
-function pageHref(
+function withParams(
   basePath: string,
   searchParams: Record<string, string | undefined>,
-  page: number,
+  overrides: Record<string, string | null>,
 ): string {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(searchParams)) {
     if (v) sp.set(k, v);
   }
-  if (page > 1) sp.set("page", String(page));
-  else sp.delete("page");
+  for (const [k, v] of Object.entries(overrides)) {
+    if (v === null) sp.delete(k);
+    else sp.set(k, v);
+  }
   const qs = sp.toString();
   return qs ? `${basePath}?${qs}` : basePath;
 }
 
-export default function Pagination({ page, pageSize, total, basePath, searchParams }: Props) {
-  const lastPage = Math.max(1, Math.ceil(total / pageSize));
-  if (lastPage <= 1) return null;
-  const from = Math.min(total, (page - 1) * pageSize + 1);
-  const to = Math.min(total, page * pageSize);
-  const prevDisabled = page <= 1;
-  const nextDisabled = page >= lastPage;
+export default function Pagination({
+  nextLastId,
+  hasMore,
+  count,
+  basePath,
+  searchParams,
+  lastId,
+}: Props) {
+  const onFirstPage = lastId === undefined;
+  if (onFirstPage && !hasMore) return null;
   return (
     <div className="flex items-center justify-between" data-testid="providers-pagination">
-      <span className="text-xs text-zinc-500">
-        Showing {from}–{to} of {total}
+      <span className="text-xs text-zinc-500" data-testid="page-count">
+        {count} on this page
       </span>
       <div className="flex items-center gap-2">
-        {prevDisabled ? (
-          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">Prev</span>
+        {onFirstPage ? (
+          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">First</span>
         ) : (
           <Link
-            href={pageHref(basePath, searchParams, page - 1)}
-            data-testid="providers-prev"
+            href={withParams(basePath, searchParams, { last_id: null })}
+            data-testid="providers-first"
             className="rounded-md border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:bg-zinc-50"
           >
-            Prev
+            First
           </Link>
         )}
-        <span className="text-xs text-zinc-500" data-testid="providers-page-indicator">
-          Page {page} of {lastPage}
-        </span>
-        {nextDisabled ? (
-          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">Next</span>
-        ) : (
+        {hasMore && nextLastId !== null ? (
           <Link
-            href={pageHref(basePath, searchParams, page + 1)}
+            href={withParams(basePath, searchParams, { last_id: String(nextLastId) })}
             data-testid="providers-next"
             className="rounded-md border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:bg-zinc-50"
           >
             Next
           </Link>
+        ) : (
+          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">Next</span>
         )}
       </div>
     </div>

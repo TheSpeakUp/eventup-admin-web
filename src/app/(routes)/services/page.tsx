@@ -4,7 +4,7 @@ import Pagination from "./_components/Pagination";
 import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
 
-const PAGE_SIZE = 10;
+const LIMIT = 10;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -13,16 +13,28 @@ function pickString(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
+function pickPositiveInt(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : undefined;
+}
+
 export default async function ServicesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const q = pickString(sp.q)?.trim() ?? undefined;
+  const search = pickString(sp.search)?.trim() || undefined;
   const statusRaw = pickString(sp.status);
   const status: ServiceStatus | undefined =
     statusRaw && isServiceStatus(statusRaw) ? statusRaw : undefined;
-  const pageRaw = Number(pickString(sp.page) ?? "1");
-  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+  const lastId = pickPositiveInt(pickString(sp.last_id));
+  const providerId = pickPositiveInt(pickString(sp.provider_id));
 
-  const result = await listServices({ q, status, page, page_size: PAGE_SIZE });
+  const result = await listServices({
+    search,
+    status,
+    last_id: lastId,
+    provider_id: providerId,
+    limit: LIMIT,
+  });
 
   if (!result.ok) {
     return (
@@ -38,24 +50,29 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
     );
   }
 
-  const { items, total, page: pageOut, page_size } = result.data;
+  const { items, has_more, next_last_id, count } = result.data;
 
   return (
     <div className="p-8 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Services moderation</h1>
-        <span className="text-xs text-zinc-500" data-testid="services-total">
-          {total} service{total === 1 ? "" : "s"}
+        <span className="text-xs text-zinc-500" data-testid="services-count">
+          {count} service{count === 1 ? "" : "s"} on this page
         </span>
       </div>
       <ServicesFilters />
       <ServicesTable rows={items} />
       <Pagination
-        page={pageOut}
-        pageSize={page_size}
-        total={total}
+        nextLastId={next_last_id}
+        hasMore={has_more}
+        count={count}
         basePath="/services"
-        searchParams={{ q, status }}
+        searchParams={{
+          search,
+          status,
+          provider_id: providerId !== undefined ? String(providerId) : undefined,
+        }}
+        lastId={lastId}
       />
     </div>
   );
