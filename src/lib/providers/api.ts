@@ -7,7 +7,7 @@ import type {
   ProviderStats,
 } from "./types";
 
-const BASE = "/admin/v2/marketplace/providers";
+const BASE = "/eventup-admin/v1/marketplace/providers";
 
 function buildListPath(query: ProviderListQuery): string {
   const params = new URLSearchParams();

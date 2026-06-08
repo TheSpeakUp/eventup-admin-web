@@ -2,7 +2,7 @@
 
 Next.js 16 admin SPA for the EventUp marketplace moderation surface.
 Served from `https://admin-marketplace.speakup.ltd`; talks to the
-EventUp backend at `https://api.speak-up.pro/admin/v2/marketplace/*`.
+EventUp backend at `https://api.speak-up.pro/eventup-admin/v1/marketplace/*`.
 
 ## Local dev
 
@@ -13,7 +13,7 @@ pnpm dev   # → http://localhost:3000
 
 With `NEXT_PUBLIC_USE_MOCK_AUTH=true NEXT_PUBLIC_USE_MOCK_BACKEND=true`
 the SPA runs standalone — login as `admin@example.com / password`, msw
-serves a fake `/admin/v2/marketplace/*`. See `.env.example`.
+serves a fake `/eventup-admin/v1/marketplace/*`. See `.env.example`.
 
 ## CI + e2e
 

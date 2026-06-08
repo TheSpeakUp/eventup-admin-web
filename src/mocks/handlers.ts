@@ -21,8 +21,8 @@ import {
 import type { ServiceDetail } from "@/lib/services/types";
 import type { ProviderDetail } from "@/lib/providers/types";
 
-const BASE = buildApiUrl("/admin/v2/marketplace/services");
-const PROVIDERS_BASE = buildApiUrl("/admin/v2/marketplace/providers");
+const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
+const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
 
 function toServiceListItem(svc: ServiceDetail): ServiceListItem {
   return {
