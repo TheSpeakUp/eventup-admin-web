@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import ErrorToast from "@/app/_components/ErrorToast";
 import {
   forceOfferDispatchAction,
@@ -10,6 +10,16 @@ import {
 import { EMPTY_OPS_STATE, type OpsActionState } from "../action-types";
 
 type OpsAction = (prev: OpsActionState, fd: FormData) => Promise<OpsActionState>;
+
+function applyOpsSettled(
+  state: OpsActionState,
+  confirmed: boolean,
+  setToast: (s: string | null) => void,
+  setConfirmed: (b: boolean) => void,
+): void {
+  if (state.error) setToast(state.error);
+  if (state.ok && confirmed) setConfirmed(false);
+}
 
 function ConfirmButton({
   testid,
@@ -29,14 +39,14 @@ function ConfirmButton({
   const [state, formAction, pending] = useActionState(action, EMPTY_OPS_STATE);
   const [confirmed, setConfirmed] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const lastSettled = useRef<OpsActionState | null>(null);
 
   useEffect(() => {
-    if (state.error && toast !== state.error) setToast(state.error);
-  }, [state.error, toast]);
-
-  useEffect(() => {
-    if (state.ok && confirmed) setConfirmed(false);
-  }, [state.ok, confirmed]);
+    if (state === EMPTY_OPS_STATE) return;
+    if (lastSettled.current === state) return;
+    lastSettled.current = state;
+    applyOpsSettled(state, confirmed, setToast, setConfirmed);
+  }, [state, confirmed]);
 
   const className =
     variant === "danger"
