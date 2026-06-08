@@ -1,6 +1,13 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import ErrorToast from "@/app/_components/ErrorToast";
+import {
+  providerActionUnavailableReason,
+  providerActionsForStatus,
+  type ProviderActionKind,
+} from "@/lib/moderation/transitions";
+import type { ProviderStatus } from "@/lib/providers/types";
 import {
   blockProviderAction,
   deleteProviderAction,
@@ -9,7 +16,7 @@ import {
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
 
-type Kind = "verify" | "block" | "unblock" | "delete";
+type Kind = ProviderActionKind;
 
 type DialogConfig = {
   title: string;
@@ -67,17 +74,17 @@ function ActionForm({
 }: {
   kind: Kind;
   providerId: number;
-  onSettled: (ok: boolean) => void;
+  onSettled: (ok: boolean, error: string | null) => void;
 }) {
   const [state, formAction, pending] = useActionState(ACTIONS[kind], EMPTY_STATE);
-  const lastReportedOk = useRef<boolean | null>(null);
+  const lastReported = useRef<{ ok: boolean; error: string | null } | null>(null);
   useEffect(() => {
     if (pending) return;
     if (state === EMPTY_STATE) return;
-    if (state.ok && lastReportedOk.current !== true) {
-      lastReportedOk.current = true;
-      onSettled(true);
-    }
+    const prev = lastReported.current;
+    if (prev && prev.ok === state.ok && prev.error === state.error) return;
+    lastReported.current = { ok: state.ok, error: state.error };
+    onSettled(state.ok, state.error);
   }, [state, pending, onSettled]);
   const cfg = DIALOGS[kind];
   const isMessage = cfg.reasonField === "message";
@@ -123,40 +130,71 @@ const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
   { kind: "delete", label: "Delete", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
 ];
 
+const DISABLED_CLASS =
+  "w-full rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-400 cursor-not-allowed";
+
 export default function ProviderModerationPanel({
   providerId,
+  status,
 }: {
   providerId: number;
+  status: ProviderStatus;
 }) {
   const [open, setOpen] = useState<Kind | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const allowed = providerActionsForStatus(status);
 
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
+    if (open && !el.open) el.show();
     if (!open && el.open) el.close();
   }, [open]);
 
-  function handleSettled(ok: boolean) {
-    if (ok) setOpen(null);
+  function handleSettled(ok: boolean, error: string | null) {
+    dialogRef.current?.close();
+    setOpen(null);
+    if (ok) {
+      setToast(null);
+    } else if (error) {
+      setToast(error);
+    }
   }
 
   const cfg = open ? DIALOGS[open] : null;
 
   return (
-    <div className="space-y-2" data-testid="moderation-panel">
-      {ALL_KINDS.map(({ kind, label, className }) => (
-        <button
-          key={kind}
-          type="button"
-          onClick={() => setOpen(kind)}
-          data-testid={`moderation-open-${kind}`}
-          className={`w-full rounded-md px-3 py-2 text-sm font-medium ${className}`}
-        >
-          {label}
-        </button>
-      ))}
+    <div className="space-y-2" data-testid="moderation-panel" data-status={status}>
+      {ALL_KINDS.map(({ kind, label, className }) => {
+        const isAllowed = allowed.has(kind);
+        if (!isAllowed) {
+          return (
+            <button
+              key={kind}
+              type="button"
+              disabled
+              title={providerActionUnavailableReason(kind, status)}
+              data-testid={`moderation-open-${kind}`}
+              data-disabled-reason={providerActionUnavailableReason(kind, status)}
+              className={DISABLED_CLASS}
+            >
+              {label}
+            </button>
+          );
+        }
+        return (
+          <button
+            key={kind}
+            type="button"
+            onClick={() => setOpen(kind)}
+            data-testid={`moderation-open-${kind}`}
+            className={`w-full rounded-md px-3 py-2 text-sm font-medium ${className}`}
+          >
+            {label}
+          </button>
+        );
+      })}
 
       <dialog
         ref={dialogRef}
@@ -189,6 +227,8 @@ export default function ProviderModerationPanel({
           </div>
         ) : null}
       </dialog>
+
+      <ErrorToast message={toast} onDismiss={() => setToast(null)} />
     </div>
   );
 }
