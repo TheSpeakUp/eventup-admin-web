@@ -3,8 +3,9 @@ import { loginAsMockAdmin } from "./helpers/login";
 
 test.describe("moderation dialog guards", () => {
   test("services: cancel button closes dialog without changing status", async ({ page }) => {
-    await loginAsMockAdmin(page, "/services/11");
-    await page.waitForURL("**/services/11");
+    // /services/17 is on_review (i=16 in the fixture cycle), so Reject is enabled.
+    await loginAsMockAdmin(page, "/services/17");
+    await page.waitForURL("**/services/17");
     const statusBefore = await page.getByTestId("status-badge").getAttribute("data-status");
 
     await page.getByTestId("moderation-open-reject").click();
@@ -19,8 +20,9 @@ test.describe("moderation dialog guards", () => {
   });
 
   test("providers: cancel button closes dialog without changing status", async ({ page }) => {
-    await loginAsMockAdmin(page, "/providers/11");
-    await page.waitForURL("**/providers/11");
+    // /providers/9 is pending (i=8 in the 4-status fixture cycle), so Block is enabled.
+    await loginAsMockAdmin(page, "/providers/9");
+    await page.waitForURL("**/providers/9");
     const statusBefore = await page.getByTestId("status-badge").getAttribute("data-status");
 
     await page.getByTestId("moderation-open-block").click();
@@ -51,8 +53,9 @@ test.describe("moderation dialog guards", () => {
   });
 
   test("providers block: reason shorter than 10 chars blocks the submit", async ({ page }) => {
-    await loginAsMockAdmin(page, "/providers/12");
-    await page.waitForURL("**/providers/12");
+    // /providers/10 is verified (i=9 in the 4-status fixture cycle), so Block is enabled.
+    await loginAsMockAdmin(page, "/providers/10");
+    await page.waitForURL("**/providers/10");
     const statusBefore = await page.getByTestId("status-badge").getAttribute("data-status");
 
     await page.getByTestId("moderation-open-block").click();

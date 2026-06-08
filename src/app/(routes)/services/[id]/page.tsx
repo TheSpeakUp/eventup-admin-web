@@ -37,7 +37,10 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
         <ServiceDetailView service={result.data} />
         <aside className="space-y-3">
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
-          <ServiceModerationPanel serviceId={result.data.id} />
+          <ServiceModerationPanel
+            serviceId={result.data.id}
+            status={result.data.status}
+          />
         </aside>
       </div>
     </div>

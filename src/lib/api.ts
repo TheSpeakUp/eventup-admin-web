@@ -104,8 +104,21 @@ async function readJson<T>(res: Response): Promise<T | null> {
 }
 
 async function readError(res: Response): Promise<string> {
-  const body = await readJson<{ detail?: string; message?: string }>(res);
-  return body?.detail ?? body?.message ?? `Request failed (${res.status})`;
+  const body = await readJson<{
+    detail?: string;
+    message?: string;
+    error?: {
+      message?: string;
+      meta?: { original_detail?: string };
+    };
+  }>(res);
+  return (
+    body?.error?.meta?.original_detail ??
+    body?.error?.message ??
+    body?.detail ??
+    body?.message ??
+    `Request failed (${res.status})`
+  );
 }
 
 /**

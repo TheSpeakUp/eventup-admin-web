@@ -46,14 +46,14 @@ test.describe("services moderation actions (A5.7 contract)", () => {
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "archived");
   });
 
-  test("409 surfaces inline error and leaves status untouched", async ({ page }) => {
+  test("409 surfaces a toast and leaves status untouched", async ({ page }) => {
     // Mock backend treats id=9999 (CONFLICT_SERVICE_ID) as always-409 on every mutation.
     await loginAsMockAdmin(page, `/services/9999`);
     await openServiceDetail(page, 9999);
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "on_review");
     await page.getByTestId("moderation-open-approve").click();
     await page.getByTestId("moderation-submit-approve").click();
-    await expect(page.getByTestId("moderation-error-approve")).toContainText(/cannot be approved/i);
+    await expect(page.getByTestId("error-toast")).toContainText(/cannot be approved/i);
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "on_review");
   });
 });

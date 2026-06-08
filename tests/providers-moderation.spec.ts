@@ -40,13 +40,13 @@ test.describe("providers moderation actions (A6.2 contract)", () => {
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "canceled");
   });
 
-  test("409 surfaces inline error and leaves status untouched", async ({ page }) => {
+  test("409 surfaces a toast and leaves status untouched", async ({ page }) => {
     await loginAsMockAdmin(page, `/providers/9999`);
     await openProviderDetail(page, 9999);
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
     await page.getByTestId("moderation-open-verify").click();
     await page.getByTestId("moderation-submit-verify").click();
-    await expect(page.getByTestId("moderation-error-verify")).toContainText(/cannot be verified/i);
+    await expect(page.getByTestId("error-toast")).toContainText(/cannot be verified/i);
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
   });
 });
