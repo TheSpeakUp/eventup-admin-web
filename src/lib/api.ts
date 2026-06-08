@@ -33,7 +33,7 @@ export async function postLogin(
 ): Promise<{ ok: true; data: LoginResponse } | { ok: false; error: ApiError }> {
   let res: Response;
   try {
-    res = await fetch(buildApiUrl("/admin/v2/auth/login"), {
+    res = await fetch(buildApiUrl("/eventup-admin/v1/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -62,7 +62,7 @@ export async function postLogin(
 export async function postLogout(accessToken: string | null): Promise<void> {
   if (!accessToken) return;
   try {
-    await fetch(buildApiUrl("/admin/v2/auth/logout"), {
+    await fetch(buildApiUrl("/eventup-admin/v1/auth/logout"), {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: "no-store",
@@ -74,7 +74,7 @@ export async function postLogout(accessToken: string | null): Promise<void> {
 
 async function tryRefresh(refreshToken: string): Promise<LoginResponse | null> {
   try {
-    const res = await fetch(buildApiUrl("/admin/v2/auth/refresh"), {
+    const res = await fetch(buildApiUrl("/eventup-admin/v1/auth/refresh"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),

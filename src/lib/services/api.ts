@@ -7,7 +7,7 @@ import type {
   ServiceStats,
 } from "./types";
 
-const BASE = "/admin/v2/marketplace/services";
+const BASE = "/eventup-admin/v1/marketplace/services";
 
 function buildListPath(query: ServiceListQuery): string {
   const params = new URLSearchParams();
