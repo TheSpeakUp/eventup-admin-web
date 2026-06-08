@@ -9,7 +9,6 @@ import {
   unpublishServiceAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
-import type { ServiceStatus } from "@/lib/services/types";
 
 type Kind = "approve" | "reject" | "unpublish" | "republish" | "archive";
 
@@ -130,10 +129,8 @@ const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
 
 export default function ServiceModerationPanel({
   serviceId,
-  status: _status,
 }: {
   serviceId: number;
-  status: ServiceStatus;
 }) {
   const [open, setOpen] = useState<Kind | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);

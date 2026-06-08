@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# eventup-admin-web
 
-## Getting Started
+Next.js 16 admin SPA for the EventUp marketplace moderation surface.
+Served from `https://admin-marketplace.speakup.ltd`; talks to the
+EventUp backend at `https://api.speak-up.pro/admin/v2/marketplace/*`.
 
-First, run the development server:
+## Local dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev   # → http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With `NEXT_PUBLIC_USE_MOCK_AUTH=true NEXT_PUBLIC_USE_MOCK_BACKEND=true`
+the SPA runs standalone — login as `admin@example.com / password`, msw
+serves a fake `/admin/v2/marketplace/*`. See `.env.example`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## CI + e2e
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.github/workflows/ci.yml` runs lint + build + Playwright on PRs.
+`pnpm test:e2e` boots a production build on `:3100` with both mock flags
+on, then drives 30 specs in headless Chromium.
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
+**Auto.** Every push to `main` triggers `.github/workflows/deploy.yml`,
+which:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **build** job (`ubuntu-latest`): `pnpm install --frozen-lockfile` →
+   `pnpm build` (Next 16, `output: "standalone"`) → stage `public/` +
+   `.next/static/` into `.next/standalone/` → upload as artifact
+   `eventup-admin-web-standalone` (30-day retention).
+2. **deploy** job (`ubuntu-latest`, gated by `production` environment):
+   download artifact → install ssh key → `rsync -az --delete`
+   `.next/standalone/` → `/opt/eventup-admin-web/` on origin → `sudo
+   systemctl restart eventup-admin-web` → smoke `https://admin-marketplace.speakup.ltd/login`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Concurrency group `deploy-prod` serializes pushes — never two deploys
+in flight against the same box. `workflow_dispatch` is also wired for
+manual replay.
 
-## Deploy on Vercel
+### Required repo secrets
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Secret           | Value                                                     |
+| ---------------- | --------------------------------------------------------- |
+| `PROD_SSH_HOST`  | `13.203.173.33` (marketplace origin box)                  |
+| `PROD_SSH_USER`  | `ubuntu`                                                  |
+| `PROD_SSH_KEY`   | OpenSSH private key (matching pubkey in `~ubuntu/.ssh/authorized_keys`) |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Origin box one-time provisioning
+
+The box `13.203.173.33` also hosts `marketplace.speak-up.pro` on `:3000`.
+The admin app is deployed strictly inside its own dir / port / unit so
+the two never contend.
+
+```
+# Node 22 (matches .nvmrc; deploy.yml builds against it on CI)
+sudo apt-get install -y nodejs   # via NodeSource setup_22.x
+
+# App dir owned by deploy user
+sudo mkdir -p /opt/eventup-admin-web && sudo chown ubuntu:ubuntu /opt/eventup-admin-web
+
+# Env file (NODE_ENV, PORT=3001, NEXT_PUBLIC_API_URL=https://api.speak-up.pro)
+sudo mkdir -p /etc/eventup-admin-web
+sudo install -m 0640 -o root -g ubuntu /dev/stdin /etc/eventup-admin-web/env <<EOF
+NODE_ENV=production
+PORT=3001
+HOSTNAME=127.0.0.1
+NEXT_PUBLIC_API_URL=https://api.speak-up.pro
+EOF
+
+# systemd unit — see /etc/systemd/system/eventup-admin-web.service in repo notes.
+# Resource isolation: CPUQuota=50%, MemoryMax=512M, ReadWritePaths=/opt/eventup-admin-web,
+# ProtectSystem=strict, PrivateTmp, NoNewPrivileges, etc.
+sudo systemctl daemon-reload
+sudo systemctl enable eventup-admin-web
+
+# Cloudflare Origin CA cert (15-year, request_type=origin-rsa) installed at:
+#   /etc/ssl/cloudflare/admin-marketplace.speakup.ltd.{crt,key}
+# Private key was generated on origin (never left the box); CF signed the CSR.
+
+# nginx vhost: TLS terminate w/ Origin CA cert, real-IP via cf-connecting-ip,
+# proxy_pass http://127.0.0.1:3001. Cloudflare zone SSL mode = Full (strict).
+sudo ln -sf /etc/nginx/sites-available/admin-marketplace.speakup.ltd \
+            /etc/nginx/sites-enabled/admin-marketplace.speakup.ltd
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### Sibling-app isolation guarantees
+
+- Dir: `/opt/eventup-admin-web/` (sibling marketplace app lives elsewhere)
+- Port: `3001` (sibling is `3000`)
+- systemd unit: `eventup-admin-web.service` (sibling uses pm2)
+- `ReadWritePaths=/opt/eventup-admin-web` — kernel-enforced; the app
+  cannot mutate anything outside its dir
+- `CPUQuota=50%` + `MemoryMax=512M` — capped resource share
+- `rsync --delete` is scoped to `$REMOTE_DIR`; never touches sibling
+  directories
+
+### Smoke after deploy
+
+The deploy job already runs an in-process smoke (`curl https://admin-marketplace.speakup.ltd/login` → 200). Manual extras:
+
+- `journalctl -u eventup-admin-web -n 50` — clean
+- DevTools cookies on real login: `eventup_admin_access` + `_refresh` are HttpOnly, Secure, SameSite=Lax, domain `admin-marketplace.speakup.ltd`
+- `/services` + `/providers` render real backend rows (CORS allow-list must contain `https://admin-marketplace.speakup.ltd` — handled in monolith repo)

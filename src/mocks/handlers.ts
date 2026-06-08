@@ -14,7 +14,6 @@ import { CONFLICT_SERVICE_ID } from "./fixtures";
 import { CONFLICT_PROVIDER_ID } from "./providers-fixtures";
 import { getAll, getById, setStatus } from "./store";
 import {
-  deleteProviderById,
   getAllProviders,
   getProviderById,
   setProviderStatus,
