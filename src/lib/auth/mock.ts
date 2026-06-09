@@ -21,7 +21,9 @@ export type MockTokens = {
 export async function issueMockTokens(email: string): Promise<MockTokens> {
   const accessTtlSeconds = 15 * 60;
   const refreshTtlSeconds = 7 * 24 * 60 * 60;
-  const access = await new SignJWT({ email })
+  // Mock dev account is a full-access SUPERADMIN so the admin-team nav (which is
+  // SUPERADMIN-gated) is reachable under NEXT_PUBLIC_USE_MOCK_AUTH.
+  const access = await new SignJWT({ email, role: "SUPERADMIN" })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(MOCK_SUB)
     .setIssuedAt()

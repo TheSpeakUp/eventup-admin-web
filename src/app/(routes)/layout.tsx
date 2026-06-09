@@ -7,7 +7,9 @@ const navItems = [
   { href: "/services", label: "Services" },
   { href: "/providers", label: "Providers" },
   { href: "/offers", label: "Offers" },
-  { href: "/admins", label: "Admin team" },
+  // Admin-team management is SUPERADMIN-only (the page itself 403s for others);
+  // hide the link so non-superadmins don't see a dead end.
+  { href: "/admins", label: "Admin team", superadminOnly: true },
 ];
 
 export default async function RoutesLayout({
@@ -16,6 +18,10 @@ export default async function RoutesLayout({
   children: React.ReactNode;
 }) {
   const session = await getAdminSession();
+  const isSuperadmin = session?.role === "SUPERADMIN";
+  const visibleNavItems = navItems.filter(
+    (item) => !item.superadminOnly || isSuperadmin,
+  );
   return (
     <div className="flex min-h-screen">
       <MockBackendBoot />
@@ -26,7 +32,7 @@ export default async function RoutesLayout({
           </Link>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}

@@ -1,11 +1,15 @@
 import { cookies } from "next/headers";
 import { decodeJwt } from "jose";
 import { ACCESS_COOKIE } from "./cookies";
+import { isAdminRole, type AdminRole } from "@/lib/admins/types";
 
 export type AdminSessionClaims = {
   sub: string;
   email: string;
   exp: number;
+  // Present on real admin access tokens (``jwt.py`` signs ``role``). Optional so
+  // a token without the claim degrades to "no elevated access" rather than null.
+  role: AdminRole | null;
 };
 
 function parseClaims(token: string): AdminSessionClaims | null {
@@ -22,6 +26,10 @@ function parseClaims(token: string): AdminSessionClaims | null {
       sub: payload.sub,
       email: payload.email,
       exp: payload.exp,
+      role:
+        typeof payload.role === "string" && isAdminRole(payload.role)
+          ? payload.role
+          : null,
     };
   } catch {
     return null;
