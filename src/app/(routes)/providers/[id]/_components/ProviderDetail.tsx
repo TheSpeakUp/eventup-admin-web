@@ -30,8 +30,11 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
           <dd className="text-zinc-900">{provider.active_offers_count}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Location ID</dt>
-          <dd className="text-zinc-900">{provider.location_id ?? "—"}</dd>
+          <dt className="text-zinc-500">Location</dt>
+          <dd className="text-zinc-900">
+            {provider.location_name ??
+              (provider.location_id !== null ? `#${provider.location_id}` : "—")}
+          </dd>
         </div>
         <div>
           <dt className="text-zinc-500">Phone</dt>

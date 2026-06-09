@@ -41,6 +41,9 @@ export type ServiceListItem = {
 };
 
 export type ServiceDetail = ServiceListItem & {
+  // Joined labels (backend PR #93) — detail-only; null when unresolved/unset.
+  provider_name: string | null;
+  category_name: string | null;
   description: string | null;
   pricing_type: string;
   pricing_interval_minutes: number | null;

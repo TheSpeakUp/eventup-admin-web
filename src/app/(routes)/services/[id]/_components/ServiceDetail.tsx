@@ -20,8 +20,10 @@ export default function ServiceDetailView({ service }: { service: ServiceDetail 
             {service.title}
           </h1>
           <p className="text-sm text-zinc-500">
-            Provider #{service.provider_id}
-            {service.category_id !== null ? ` · Category #${service.category_id}` : ""}
+            {service.provider_name ?? `Provider #${service.provider_id}`}
+            {service.category_id !== null
+              ? ` · ${service.category_name ?? `Category #${service.category_id}`}`
+              : ""}
           </p>
         </div>
         <StatusBadge status={service.status} />

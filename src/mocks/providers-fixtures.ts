@@ -42,6 +42,7 @@ export function buildFixtureProviders(): ProviderDetail[] {
     name: "Conflict fixture (always 409 on actions)",
     verification_status: "pending",
     location_id: null,
+    location_name: null,
     services_count: 0,
     active_offers_count: 0,
     description: "Used by Playwright to assert that 4xx surfaces inline.",
@@ -65,6 +66,7 @@ export function buildFixtureProviders(): ProviderDetail[] {
       name,
       verification_status: status,
       location_id: ((i % 5) + 1),
+      location_name: ["Dubai, UAE", "London, UK", "Berlin, DE", "Paris, FR", "Madrid, ES"][i % 5] as string,
       services_count: (i * 2) % 7,
       active_offers_count: i % 4,
       description:
