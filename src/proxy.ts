@@ -5,6 +5,12 @@ import { ACCESS_COOKIE } from "@/lib/auth/cookies";
 
 const LOGIN_PATH = "/login";
 
+// Public routes reachable without a session. The invitation-accept page is
+// authenticated by its single-use token (in the path), not by a cookie.
+function isPublicPath(pathname: string): boolean {
+  return pathname === LOGIN_PATH || pathname.startsWith("/invitations/");
+}
+
 function isExpired(token: string): boolean {
   try {
     const { exp } = decodeJwt(token);
@@ -17,7 +23,7 @@ function isExpired(token: string): boolean {
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  if (pathname === LOGIN_PATH) {
+  if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
   const token = req.cookies.get(ACCESS_COOKIE)?.value;
