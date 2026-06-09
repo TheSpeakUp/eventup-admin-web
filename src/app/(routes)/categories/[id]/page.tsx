@@ -1,0 +1,64 @@
+// src/app/(routes)/categories/[id]/page.tsx
+import { notFound } from "next/navigation";
+import { getCategory, listCategories } from "@/lib/categories/api";
+import { getAdminSession } from "@/lib/auth/session";
+import { CategoryForm } from "../_components/CategoryForm";
+import { DeleteCategoryButton } from "../_components/DeleteCategoryButton";
+
+export default async function CategoryDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const numId = Number(id);
+  const [catRes, listRes, session] = await Promise.all([
+    getCategory(numId),
+    listCategories({ limit: 100 }),
+    getAdminSession(),
+  ]);
+
+  if (catRes.status === 404) notFound();
+  if (!catRes.ok) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-semibold">Category</h1>
+        <div
+          data-testid="category-error"
+          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+        >
+          {`Failed to load category: ${catRes.message}`}
+        </div>
+      </div>
+    );
+  }
+
+  const category = catRes.data;
+  const parentOptions = listRes.ok
+    ? listRes.data.items.map((c) => ({ id: c.id, name: c.name }))
+    : [];
+  // Delete requires ADMIN_MARKETPLACE_PROVIDERS_RISK → ADMIN or SUPERADMIN.
+  const canDelete =
+    session?.role === "ADMIN" || session?.role === "SUPERADMIN";
+
+  // Key-remount so revalidated server values reset the uncontrolled form
+  // (React 19 <form action> reset gotcha — see PR #18).
+  const formKey = `${category.id}:${category.name}:${category.slug}:${category.sort_order}`;
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-semibold" data-testid="category-detail-name">
+        {category.name}
+      </h1>
+      <div className="mt-4 max-w-2xl space-y-6">
+        <CategoryForm
+          key={formKey}
+          mode="edit"
+          category={category}
+          parentOptions={parentOptions}
+        />
+        {canDelete ? <DeleteCategoryButton id={category.id} /> : null}
+      </div>
+    </div>
+  );
+}
