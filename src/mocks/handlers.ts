@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import { decodeJwt } from "jose";
 import { buildApiUrl } from "@/lib/api-config";
 import {
   isServiceStatus,
@@ -56,6 +57,41 @@ function toAdminListItem(a: AdminDetail): AdminListItem {
     display_name: a.display_name,
     last_login_at: a.last_login_at,
   };
+}
+
+// The operator's id rides in the bearer token's `sub` (mock JWTs mirror the
+// seeded admin ids — see src/lib/auth/mock.ts), so the PATCH handler can
+// reproduce the backend's self-referential guards.
+function operatorSub(request: Request): string | null {
+  const auth = request.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+  try {
+    const sub = decodeJwt(auth.slice(7)).sub;
+    return typeof sub === "string" ? sub : null;
+  } catch {
+    return null;
+  }
+}
+
+function activeSuperadminCount(): number {
+  return getAllAdmins().filter((a) => a.role === "SUPERADMIN" && a.is_active)
+    .length;
+}
+
+// Mirrors the real backend's map_marketplace_exception (eventup-backend #100):
+// error.message stays the localised generic string while the specific reason
+// rides in error.meta.original_detail, which the FE (readError in lib/api)
+// reads first.
+function adminValidationError(originalDetail: string) {
+  return HttpResponse.json(
+    {
+      error: {
+        message: "Request cannot be processed",
+        meta: { original_detail: originalDetail },
+      },
+    },
+    { status: 400 },
+  );
 }
 
 function toServiceListItem(svc: ServiceDetail): ServiceListItem {
@@ -596,7 +632,41 @@ export const handlers = [
     if (patch.role === undefined && patch.is_active === undefined) {
       return HttpResponse.json({ detail: "no fields to update" }, { status: 400 });
     }
-    const updated = updateAdminRecord(String(params.id), patch);
+    const targetId = String(params.id);
+    const target = getAdminById(targetId);
+    if (!target) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+
+    // Backend admin-domain guards (eventup-backend #100). Self-guard is checked
+    // before last-active-superadmin so an operator acting on their own row gets
+    // the self message; a different operator hits the superadmin guard.
+    const deactivating = patch.is_active === false;
+    const demoting = patch.role !== undefined && patch.role !== target.role;
+    if (operatorSub(request) === targetId) {
+      if (deactivating) {
+        return adminValidationError("You cannot deactivate your own account.");
+      }
+      if (demoting) {
+        return adminValidationError("You cannot change your own role.");
+      }
+    }
+    if (
+      target.role === "SUPERADMIN" &&
+      target.is_active &&
+      activeSuperadminCount() === 1
+    ) {
+      if (deactivating) {
+        return adminValidationError(
+          "Cannot deactivate the last active superadmin.",
+        );
+      }
+      if (patch.role !== undefined && patch.role !== "SUPERADMIN") {
+        return adminValidationError(
+          "Cannot change the role of the last active superadmin.",
+        );
+      }
+    }
+
+    const updated = updateAdminRecord(targetId, patch);
     if (!updated) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(toAdminListItem(updated));
   }),

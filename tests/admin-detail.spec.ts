@@ -73,4 +73,25 @@ test.describe("Admin detail management", () => {
       "You cannot change your own role.",
     );
   });
+
+  // Backend-only guard the FE never pre-empted: a different operator (mod)
+  // deactivating the sole active superadmin. Proves the generic error path now
+  // surfaces error.meta.original_detail for reasons the client cannot compute.
+  test("surfaces the last-active-superadmin reason from the backend", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, `/admins/${SUPER_ID}`, {
+      email: "mod@example.com",
+    });
+    await expect(page.getByTestId("admin-detail-email")).toHaveText(
+      "admin@example.com",
+    );
+
+    await page.getByTestId("admin-active-select").selectOption("false");
+    await page.getByTestId("admin-update-submit").click();
+
+    await expect(page.getByTestId("admin-update-error")).toHaveText(
+      "Cannot deactivate the last active superadmin.",
+    );
+  });
 });
