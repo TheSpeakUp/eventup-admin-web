@@ -42,11 +42,22 @@ import {
   revokeScopeRecord,
   updateAdminRecord,
 } from "./admins-store";
+import {
+  createCategoryRecord,
+  deleteCategoryRecord,
+  getCategoryById,
+  hasChildren,
+  listCategoriesPage,
+  updateCategoryRecord,
+} from "./categories-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
 const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
 const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
+const CATEGORIES_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/categories",
+);
 
 function toAdminListItem(a: AdminDetail): AdminListItem {
   return {
@@ -68,6 +79,20 @@ function operatorSub(request: Request): string | null {
   try {
     const sub = decodeJwt(auth.slice(7)).sub;
     return typeof sub === "string" ? sub : null;
+  } catch {
+    return null;
+  }
+}
+
+// The mock access token embeds the operator role directly as a `role` claim
+// (see src/lib/auth/mock.ts issueMockTokens). Read it straight from the bearer
+// to reproduce the backend's role-gated delete.
+function operatorRole(request: Request): string | null {
+  const auth = request.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+  try {
+    const role = decodeJwt(auth.slice(7)).role;
+    return typeof role === "string" ? role : null;
   } catch {
     return null;
   }
@@ -554,6 +579,70 @@ export const handlers = [
       delivery_outcomes: [],
       replay_run_id: mode === "apply" ? "replay_run_1" : null,
     });
+  }),
+
+  // ---- Marketplace categories (declare literal /list before /:id) ----
+  http.post(`${CATEGORIES_BASE}/list`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      search?: string;
+      sort?: string;
+      last_id?: number;
+      limit?: number;
+    };
+    return HttpResponse.json(listCategoriesPage(body));
+  }),
+  http.post(CATEGORIES_BASE, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createCategoryRecord(body as never);
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.get(`${CATEGORIES_BASE}/:id`, ({ params }) => {
+    const found = getCategoryById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+  http.put(`${CATEGORIES_BASE}/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const updated = updateCategoryRecord(Number(params.id), body as never);
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+  http.delete(`${CATEGORIES_BASE}/:id`, ({ params, request }) => {
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    const id = Number(params.id);
+    if (hasChildren(id)) {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "conflict",
+            meta: { original_detail: "Category has child categories" },
+          },
+        },
+        { status: 409 },
+      );
+    }
+    const ok = deleteCategoryRecord(id);
+    if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // ---- Admin team management (declare literal /invitations before /:id) ----
