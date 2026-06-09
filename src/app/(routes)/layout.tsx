@@ -7,6 +7,7 @@ const navItems = [
   { href: "/services", label: "Services" },
   { href: "/providers", label: "Providers" },
   { href: "/offers", label: "Offers" },
+  { href: "/admins", label: "Admin team" },
 ];
 
 export default async function RoutesLayout({

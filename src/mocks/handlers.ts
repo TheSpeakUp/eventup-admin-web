@@ -30,10 +30,33 @@ import {
 } from "./offers-fixtures";
 import { getAllOffers, getOffer, setOfferStatus } from "./offers-store";
 import { isOfferStatus, type OfferStatus, type QueueStatus } from "@/lib/offers/types";
+import { isAdminRole, type AdminDetail, type AdminListItem } from "@/lib/admins/types";
+import {
+  createInvitationRecord,
+  deleteInvitationRecord,
+  getAdminById,
+  getAllAdmins,
+  getAllInvitations,
+  grantScopeRecord,
+  revokeScopeRecord,
+  updateAdminRecord,
+} from "./admins-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
 const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
+const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
+
+function toAdminListItem(a: AdminDetail): AdminListItem {
+  return {
+    id: a.id,
+    email: a.email,
+    role: a.role,
+    is_active: a.is_active,
+    display_name: a.display_name,
+    last_login_at: a.last_login_at,
+  };
+}
 
 function toServiceListItem(svc: ServiceDetail): ServiceListItem {
   return {
@@ -495,5 +518,107 @@ export const handlers = [
       delivery_outcomes: [],
       replay_run_id: mode === "apply" ? "replay_run_1" : null,
     });
+  }),
+
+  // ---- Admin team management (declare literal /invitations before /:id) ----
+  http.get(ADMINS_BASE, () => {
+    const items = getAllAdmins().map(toAdminListItem);
+    return HttpResponse.json({ items, total: items.length });
+  }),
+  http.get(`${ADMINS_BASE}/invitations`, () => {
+    const items = getAllInvitations();
+    return HttpResponse.json({ items, total: items.length });
+  }),
+  http.post(`${ADMINS_BASE}/invitations`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      email?: unknown;
+      role?: unknown;
+    };
+    const email = typeof body.email === "string" ? body.email : "";
+    const role = typeof body.role === "string" && isAdminRole(body.role) ? body.role : null;
+    if (!email || !role) {
+      return HttpResponse.json({ detail: "Invalid invitation" }, { status: 422 });
+    }
+    if (getAllAdmins().some((a) => a.email.toLowerCase() === email.toLowerCase())) {
+      return HttpResponse.json(
+        { detail: "an admin with this email already exists" },
+        { status: 400 },
+      );
+    }
+    return HttpResponse.json(createInvitationRecord(email, role), { status: 201 });
+  }),
+  http.post(`${ADMINS_BASE}/invitations/:token/accept`, async ({ params, request }) => {
+    const token = String(params.token);
+    const body = (await request.json().catch(() => ({}))) as { password?: unknown };
+    const password = typeof body.password === "string" ? body.password : "";
+    if (password.length < 12) {
+      return HttpResponse.json({ detail: "password too short" }, { status: 422 });
+    }
+    if (token === "expired-token") {
+      return HttpResponse.json({ detail: "invitation has expired" }, { status: 400 });
+    }
+    if (token === "used-token") {
+      return HttpResponse.json(
+        { detail: "invitation has already been used" },
+        { status: 400 },
+      );
+    }
+    return HttpResponse.json(
+      {
+        id: "55555555-5555-4555-8555-555555555555",
+        email: "invited@example.com",
+        role: "MODERATOR",
+        is_active: true,
+        display_name: null,
+        last_login_at: null,
+      },
+      { status: 201 },
+    );
+  }),
+  http.delete(`${ADMINS_BASE}/invitations/:id`, ({ params }) => {
+    const ok = deleteInvitationRecord(String(params.id));
+    if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
+  }),
+  http.get(`${ADMINS_BASE}/:id`, ({ params }) => {
+    const admin = getAdminById(String(params.id));
+    if (!admin) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(admin);
+  }),
+  http.patch(`${ADMINS_BASE}/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      role?: unknown;
+      is_active?: unknown;
+    };
+    const patch: { role?: AdminDetail["role"]; is_active?: boolean } = {};
+    if (typeof body.role === "string" && isAdminRole(body.role)) patch.role = body.role;
+    if (typeof body.is_active === "boolean") patch.is_active = body.is_active;
+    if (patch.role === undefined && patch.is_active === undefined) {
+      return HttpResponse.json({ detail: "no fields to update" }, { status: 400 });
+    }
+    const updated = updateAdminRecord(String(params.id), patch);
+    if (!updated) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(toAdminListItem(updated));
+  }),
+  http.post(`${ADMINS_BASE}/:id/reviewer-scopes`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as { permission_key?: unknown };
+    const key = typeof body.permission_key === "string" ? body.permission_key : "";
+    if (!key) return HttpResponse.json({ detail: "permission key required" }, { status: 422 });
+    if (!getAdminById(String(params.id))) {
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    }
+    const scope = grantScopeRecord(String(params.id), key);
+    if (!scope) {
+      return HttpResponse.json(
+        { detail: "reviewer scope already granted" },
+        { status: 400 },
+      );
+    }
+    return HttpResponse.json(scope, { status: 201 });
+  }),
+  http.delete(`${ADMINS_BASE}/:id/reviewer-scopes/:key`, ({ params }) => {
+    const ok = revokeScopeRecord(String(params.id), String(params.key));
+    if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
