@@ -511,22 +511,24 @@ git commit -m "test(categories): MSW in-memory store + fixtures"
 
 - [ ] **Step 1: Determine the role of the bearer (for delete gating)**
 
-Find the existing helper that maps the mock bearer `sub` to a role (added in #20 / used by admin handlers). If a `operatorRole(request)` exists, reuse it. If only `operatorSub(request)` exists, add a local map at the top of the categories handler block:
+The mock access token embeds the operator role directly as a `role` claim (see `src/lib/auth/mock.ts` `issueMockTokens` — `new SignJWT({ email, role })`). Read it straight from the bearer; do NOT build a sub→role map. Add a local helper at the top of the categories handler block (mirror the existing `operatorSub` JWT-decode idiom in `handlers.ts`):
 
 ```ts
-// Mock seed: sub → role (mirror admins-store seed).
-const MOCK_SUB_ROLES: Record<string, "MODERATOR" | "ADMIN" | "SUPERADMIN"> = {
-  "11111111-1111-4111-8111-111111111111": "SUPERADMIN", // admin@example.com
-  "22222222-2222-4222-8222-222222222222": "ADMIN", // ops@example.com (confirm sub vs admins-store seed)
-  "33333333-3333-4333-8333-333333333333": "MODERATOR", // mod@example.com
-};
+import { decodeJwt } from "jose";
+
 function operatorRole(request: Request): string | null {
-  const sub = operatorSub(request);
-  return sub ? (MOCK_SUB_ROLES[sub] ?? null) : null;
+  const auth = request.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+  try {
+    const role = decodeJwt(auth.slice(7)).role;
+    return typeof role === "string" ? role : null;
+  } catch {
+    return null;
+  }
 }
 ```
 
-> Verify the exact `sub` values + `ops@` mapping against `src/mocks/admins-store.ts` seed before finalizing — copy them, don't guess.
+> If `handlers.ts` already imports `decodeJwt` (it does, for `operatorSub`), reuse the import rather than re-importing.
 
 - [ ] **Step 2: Add the 5 handlers** (place literal `/list` before `/:id`)
 
@@ -1645,7 +1647,17 @@ test.describe("Categories role gating", () => {
 });
 ```
 
-> Verify `ops@example.com` is seeded as ADMIN in `src/mocks/admins-store.ts`. If that fixture is absent, add it (mirror the existing seed rows) as part of this task, and ensure its `sub` matches `MOCK_SUB_ROLES` in the handlers.
+- [ ] **Step 0 (prerequisite for the ADMIN test): add `ops@example.com` as a mock login identity.** `src/lib/auth/mock.ts` `MOCK_USERS` currently has only `admin@example.com` (SUPERADMIN) and `mod@example.com` (MODERATOR); `isValidMockCredentials` gates login on membership in that map, so `ops@example.com` cannot log in until added. Add this entry (sub mirrors the `ADMIN_ID` seed in `admins-store.ts`):
+
+```ts
+  "ops@example.com": {
+    sub: "22222222-2222-4222-8222-222222222222",
+    email: "ops@example.com",
+    role: "ADMIN",
+  },
+```
+
+Its `role: "ADMIN"` claim flows into the JWT, so `operatorRole` (handler) and `getAdminSession().role` (page) both resolve ADMIN — delete is allowed for this user, hidden for `mod@example.com`.
 
 - [ ] **Step 2: Run + fix**
 
