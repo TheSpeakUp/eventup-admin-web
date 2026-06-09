@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/format";
 import { getServiceHealth } from "@/lib/offers/api";
 
 export default async function ServiceHealthSection() {
@@ -9,7 +10,7 @@ export default async function ServiceHealthSection() {
       <header className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-semibold">Service health</h2>
         <span className="text-xs text-zinc-500" data-testid="service-health-generated-at">
-          Updated {result.data.generated_at}
+          Updated {formatDateTime(result.data.generated_at)}
         </span>
       </header>
       <table className="w-full table-auto text-sm">
@@ -25,6 +26,13 @@ export default async function ServiceHealthSection() {
           </tr>
         </thead>
         <tbody>
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-2 py-3 text-center text-zinc-500" data-testid="service-health-empty">
+                No service health data.
+              </td>
+            </tr>
+          ) : null}
           {items.map((it) => (
             <tr key={it.service_id} data-testid={`service-health-row-${it.service_id}`} className="border-t border-zinc-100">
               <td className="px-2 py-1">{it.service_title ?? `#${it.service_id}`}</td>

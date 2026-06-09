@@ -1,8 +1,10 @@
+import { formatDateTime } from "@/lib/format";
 import { getDlq } from "@/lib/offers/api";
 
 export default async function DlqSection({ excludeReplayed = true }: { excludeReplayed?: boolean }) {
   const result = await getDlq({ exclude_replayed_successes: excludeReplayed, limit: 50 });
   if (!result.ok) return <p data-testid="dlq-error" className="text-sm text-red-700">{result.message}</p>;
+  const items = result.data.items;
   return (
     <section data-testid="dlq">
       <header className="mb-2 flex items-center justify-between">
@@ -19,12 +21,19 @@ export default async function DlqSection({ excludeReplayed = true }: { excludeRe
           </tr>
         </thead>
         <tbody>
-          {result.data.items.map((it) => (
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-2 py-3 text-center text-zinc-500" data-testid="dlq-empty">
+                No DLQ entries.
+              </td>
+            </tr>
+          ) : null}
+          {items.map((it) => (
             <tr key={it.dlq_key} data-testid={`dlq-row-${it.dlq_key}`} className="border-t border-zinc-100">
               <td className="px-2 py-1 font-mono text-xs">{it.dlq_key}</td>
               <td className="px-2 py-1">{it.channel}</td>
               <td className="px-2 py-1">#{it.provider_id}</td>
-              <td className="px-2 py-1">{it.created_at}</td>
+              <td className="px-2 py-1">{formatDateTime(it.created_at)}</td>
               <td className="px-2 py-1">{String((it.delivery_outcome as { status?: string })?.status ?? "—")}</td>
             </tr>
           ))}
