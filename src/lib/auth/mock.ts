@@ -20,6 +20,11 @@ const MOCK_USERS: Record<string, MockUser> = {
     email: "admin@example.com",
     role: "SUPERADMIN",
   },
+  "ops@example.com": {
+    sub: "22222222-2222-4222-8222-222222222222",
+    email: "ops@example.com",
+    role: "ADMIN",
+  },
   "mod@example.com": {
     sub: "33333333-3333-4333-8333-333333333333",
     email: "mod@example.com",
