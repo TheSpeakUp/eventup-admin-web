@@ -51,6 +51,15 @@ export default async function CategoryDetailPage({
         {category.name}
       </h1>
       <div className="mt-4 max-w-2xl space-y-6">
+        {/*
+          Translations are intentionally NOT passed on edit: the backend
+          MarketplaceCategoryRead DTO does not return name_translations /
+          description_translations, so there is no source to round-trip them.
+          The editor opens empty; saving sends only locales the operator
+          (re)enters (empty dict is skipped server-side → no data loss). A
+          future PR that adds a translations read endpoint should wire
+          nameTranslations / descriptionTranslations here.
+        */}
         <CategoryForm
           key={formKey}
           mode="edit"
