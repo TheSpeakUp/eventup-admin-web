@@ -35,6 +35,10 @@ function RoleActiveForm({
     >
       <h2 className="text-sm font-semibold text-zinc-700">Role &amp; access</h2>
       <input type="hidden" name="adminId" value={adminId} />
+      {/* Lets the server action detect a self role-change without an extra
+          fetch — it compares this server-rendered value against the submitted
+          role to surface a specific self-guard message. */}
+      <input type="hidden" name="currentRole" value={role} />
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col">
           <label htmlFor="role" className="text-xs text-zinc-500">
@@ -185,7 +189,17 @@ export default function AdminManagePanel({
   const heldKeys = new Set(scopes.map((s) => s.permission_key));
   return (
     <div className="space-y-6">
-      <RoleActiveForm adminId={adminId} role={role} isActive={isActive} />
+      {/* Key on the server-authoritative role/status so a successful save (which
+          revalidates these props) remounts the form, re-seeding the uncontrolled
+          selects' defaultValue. Without this the React-19 post-submit form reset
+          can strand a select on its stale value while the header badges already
+          show the new one. */}
+      <RoleActiveForm
+        key={`${role}:${String(isActive)}`}
+        adminId={adminId}
+        role={role}
+        isActive={isActive}
+      />
 
       <div className="space-y-3 rounded-md border border-zinc-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-zinc-700">Reviewer scopes</h2>

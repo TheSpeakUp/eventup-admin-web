@@ -26,4 +26,23 @@ test.describe("admin shell navigation", () => {
     // Root is still inside the authed shell, so admin-email stays present.
     await expect(page.getByTestId("admin-email")).toHaveText("admin@example.com");
   });
+
+  test("SUPERADMIN sees the Admin team nav link", async ({ page }) => {
+    await loginAsMockAdmin(page, "/services");
+    await expect(
+      page.getByRole("link", { name: "Admin team" }),
+    ).toBeVisible();
+  });
+
+  test("non-SUPERADMIN does not see the Admin team nav link", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, "/services", { email: "mod@example.com" });
+    await expect(page.getByTestId("admin-email")).toHaveText("mod@example.com");
+    // Sibling links still render — only the SUPERADMIN-gated one is hidden.
+    await expect(page.getByRole("link", { name: "Services" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Admin team" }),
+    ).toHaveCount(0);
+  });
 });
