@@ -83,7 +83,7 @@ export function listCategoriesPage(opts: {
   };
 }
 
-type CategoryWrite = Partial<Omit<CategoryRead, "id" | "is_leaf">> & {
+export type CategoryWrite = Partial<Omit<CategoryRead, "id" | "is_leaf">> & {
   name_translations?: Record<string, string>;
   description_translations?: Record<string, string>;
 };
@@ -167,7 +167,19 @@ export function updateCategoryRecord(
 
 export function deleteCategoryRecord(id: number): boolean {
   ensureSeed();
-  return categories.delete(id);
+  const removed = categories.get(id);
+  const deleted = categories.delete(id);
+  if (deleted) translations.delete(id);
+  // If the removed category had a parent and that parent now has no remaining
+  // children, restore the parent's leaf flag (mirror of the create-time
+  // is_leaf=false flip and consistency with the hasChildren delete guard).
+  if (deleted && removed?.parent_id != null) {
+    const parent = categories.get(removed.parent_id);
+    if (parent && !hasChildren(parent.id)) {
+      categories.set(parent.id, { ...parent, is_leaf: true });
+    }
+  }
+  return deleted;
 }
 
 export function hasChildren(id: number): boolean {

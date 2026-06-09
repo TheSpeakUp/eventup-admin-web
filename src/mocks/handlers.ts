@@ -49,7 +49,9 @@ import {
   hasChildren,
   listCategoriesPage,
   updateCategoryRecord,
+  type CategoryWrite,
 } from "./categories-store";
+import type { AttributeSchema } from "@/lib/categories/types";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -96,6 +98,49 @@ function operatorRole(request: Request): string | null {
   } catch {
     return null;
   }
+}
+
+// Normalize an untyped JSON body into the store's CategoryWrite shape. The
+// server action already validates/coerces every field before it reaches the
+// mock, so here we only pick the known keys (omitting any unexpected ones) to
+// keep the store typed instead of escaping through `as never`.
+function toCategoryWrite(body: Record<string, unknown>): CategoryWrite {
+  const out: CategoryWrite = {};
+  if (typeof body.name === "string") out.name = body.name;
+  if (typeof body.slug === "string") out.slug = body.slug;
+  if (typeof body.icon === "string" || body.icon === null)
+    out.icon = body.icon as string | null;
+  if (typeof body.description === "string" || body.description === null)
+    out.description = body.description as string | null;
+  if (typeof body.sort_order === "number") out.sort_order = body.sort_order;
+  if (typeof body.parent_id === "number" || body.parent_id === null)
+    out.parent_id = body.parent_id as number | null;
+  if (typeof body.publication_currency === "string" || body.publication_currency === null)
+    out.publication_currency = body.publication_currency as string | null;
+  if (typeof body.publication_price_monthly === "string" || body.publication_price_monthly === null)
+    out.publication_price_monthly = body.publication_price_monthly as string | null;
+  if (
+    typeof body.publication_price_monthly_discounted === "string" ||
+    body.publication_price_monthly_discounted === null
+  )
+    out.publication_price_monthly_discounted =
+      body.publication_price_monthly_discounted as string | null;
+  if (
+    body.attribute_schema === null ||
+    (typeof body.attribute_schema === "object" && body.attribute_schema !== null)
+  )
+    out.attribute_schema = body.attribute_schema as AttributeSchema | null;
+  if (typeof body.name_translations === "object" && body.name_translations !== null)
+    out.name_translations = body.name_translations as Record<string, string>;
+  if (
+    typeof body.description_translations === "object" &&
+    body.description_translations !== null
+  )
+    out.description_translations = body.description_translations as Record<
+      string,
+      string
+    >;
+  return out;
 }
 
 function activeSuperadminCount(): number {
@@ -596,7 +641,7 @@ export const handlers = [
       string,
       unknown
     >;
-    const created = createCategoryRecord(body as never);
+    const created = createCategoryRecord(toCategoryWrite(body));
     return HttpResponse.json(created, { status: 201 });
   }),
   http.get(`${CATEGORIES_BASE}/:id`, ({ params }) => {
@@ -610,7 +655,10 @@ export const handlers = [
       string,
       unknown
     >;
-    const updated = updateCategoryRecord(Number(params.id), body as never);
+    const updated = updateCategoryRecord(
+      Number(params.id),
+      toCategoryWrite(body),
+    );
     if (!updated)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(updated);
