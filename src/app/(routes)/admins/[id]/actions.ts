@@ -7,8 +7,7 @@ import {
   revokeReviewerScope,
   updateAdmin,
 } from "@/lib/admins/api";
-import { ADMIN_ROLES, isAdminRole } from "@/lib/admins/types";
-import { getAdminSession } from "@/lib/auth/session";
+import { ADMIN_ROLES } from "@/lib/admins/types";
 import type { ActionState } from "../action-types";
 
 const idSchema = z.string().uuid("admin id is required");
@@ -55,30 +54,10 @@ export async function updateAdminAction(
     return fail("Nothing to update");
   }
 
-  // Self-guard, surfaced client-side. The backend rejects self-demotion /
-  // self-deactivation too, but its envelope localises the reason down to a
-  // generic "Request cannot be processed", so we pre-empt with the specific
-  // message (and skip a doomed round-trip). The last-active-superadmin guard
-  // stays backend-only — the FE cannot know the active-superadmin count.
-  const session = await getAdminSession();
-  if (session && session.sub === idR.id) {
-    if (payload.is_active === false) {
-      return fail("You cannot deactivate your own account.");
-    }
-    const currentRoleRaw = formData.get("currentRole");
-    const currentRole =
-      typeof currentRoleRaw === "string" && isAdminRole(currentRoleRaw)
-        ? currentRoleRaw
-        : undefined;
-    if (
-      payload.role !== undefined &&
-      currentRole !== undefined &&
-      payload.role !== currentRole
-    ) {
-      return fail("You cannot change your own role.");
-    }
-  }
-
+  // Self-guard, last-active-superadmin, and every other admin-domain rejection
+  // are enforced backend-side. Its error envelope now carries the specific
+  // reason in error.meta.original_detail (read first by readError in lib/api),
+  // so the generic path below surfaces it verbatim — no client-side pre-emption.
   const result = await updateAdmin(idR.id, payload);
   if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
   revalidate(idR.id);

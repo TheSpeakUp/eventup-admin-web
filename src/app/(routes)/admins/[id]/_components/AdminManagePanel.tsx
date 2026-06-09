@@ -35,10 +35,6 @@ function RoleActiveForm({
     >
       <h2 className="text-sm font-semibold text-zinc-700">Role &amp; access</h2>
       <input type="hidden" name="adminId" value={adminId} />
-      {/* Lets the server action detect a self role-change without an extra
-          fetch — it compares this server-rendered value against the submitted
-          role to surface a specific self-guard message. */}
-      <input type="hidden" name="currentRole" value={role} />
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col">
           <label htmlFor="role" className="text-xs text-zinc-500">
