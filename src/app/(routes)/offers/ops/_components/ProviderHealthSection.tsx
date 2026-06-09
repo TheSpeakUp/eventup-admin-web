@@ -1,13 +1,15 @@
+import { formatDateTime } from "@/lib/format";
 import { getProviderHealth } from "@/lib/offers/api";
 
 export default async function ProviderHealthSection() {
   const result = await getProviderHealth({ limit: 50 });
   if (!result.ok) return <p data-testid="provider-health-error" className="text-sm text-red-700">{result.message}</p>;
+  const items = result.data.items;
   return (
     <section data-testid="provider-health">
       <header className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-semibold">Provider health</h2>
-        <span className="text-xs text-zinc-500">Updated {result.data.generated_at}</span>
+        <span className="text-xs text-zinc-500">Updated {formatDateTime(result.data.generated_at)}</span>
       </header>
       <table className="w-full table-auto text-sm">
         <thead className="text-left text-xs uppercase text-zinc-500">
@@ -23,7 +25,14 @@ export default async function ProviderHealthSection() {
           </tr>
         </thead>
         <tbody>
-          {result.data.items.map((it) => (
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="px-2 py-3 text-center text-zinc-500" data-testid="provider-health-empty">
+                No provider health data.
+              </td>
+            </tr>
+          ) : null}
+          {items.map((it) => (
             <tr key={it.provider_id} data-testid={`provider-health-row-${it.provider_id}`} className="border-t border-zinc-100">
               <td className="px-2 py-1">{it.provider_name ?? `#${it.provider_id}`}</td>
               <td className="px-2 py-1">{it.services_total}</td>

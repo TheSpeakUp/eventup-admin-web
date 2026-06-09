@@ -1,9 +1,6 @@
+import { formatDateTime } from "@/lib/format";
 import type { ProviderDetail } from "@/lib/providers/types";
 import StatusBadge from "../../_components/StatusBadge";
-
-function formatDate(iso: string): string {
-  return new Date(iso).toISOString().slice(0, 16).replace("T", " ");
-}
 
 export default function ProviderDetailView({ provider }: { provider: ProviderDetail }) {
   return (
@@ -46,11 +43,11 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
         </div>
         <div>
           <dt className="text-zinc-500">Created</dt>
-          <dd className="text-zinc-900">{formatDate(provider.created_at)}</dd>
+          <dd className="text-zinc-900">{formatDateTime(provider.created_at)}</dd>
         </div>
         <div>
           <dt className="text-zinc-500">Updated</dt>
-          <dd className="text-zinc-900">{formatDate(provider.updated_at)}</dd>
+          <dd className="text-zinc-900">{formatDateTime(provider.updated_at)}</dd>
         </div>
       </dl>
       {provider.description ? (

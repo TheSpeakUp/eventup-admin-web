@@ -12,6 +12,20 @@ export function isServiceStatus(value: string): value is ServiceStatus {
   return (SERVICE_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * Mirrors backend `MarketplaceRecipientType` (IntEnum): ALL=0, SPEAKER=1, ORGANIZER=2.
+ * The API serialises the enum as its integer value; map it to an operator-readable label.
+ */
+export const RECIPIENT_TYPE_LABELS: Record<number, string> = {
+  0: "All",
+  1: "Speaker",
+  2: "Organizer",
+};
+
+export function formatRecipientType(value: number): string {
+  return RECIPIENT_TYPE_LABELS[value] ?? `Unknown (${value})`;
+}
+
 export type ServiceListItem = {
   id: number;
   title: string;

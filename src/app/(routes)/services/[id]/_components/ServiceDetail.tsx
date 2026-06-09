@@ -1,4 +1,5 @@
-import type { ServiceDetail } from "@/lib/services/types";
+import { formatDateTime } from "@/lib/format";
+import { formatRecipientType, type ServiceDetail } from "@/lib/services/types";
 import StatusBadge from "../../_components/StatusBadge";
 
 function formatPrice(minor: number | null, currency: string | null): string {
@@ -8,10 +9,6 @@ function formatPrice(minor: number | null, currency: string | null): string {
     currency: currency ?? "USD",
     maximumFractionDigits: 0,
   }).format(minor / 100);
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toISOString().slice(0, 16).replace("T", " ");
 }
 
 export default function ServiceDetailView({ service }: { service: ServiceDetail }) {
@@ -40,7 +37,7 @@ export default function ServiceDetailView({ service }: { service: ServiceDetail 
         </div>
         <div>
           <dt className="text-zinc-500">Recipient type</dt>
-          <dd className="text-zinc-900">{service.recipient_type}</dd>
+          <dd className="text-zinc-900">{formatRecipientType(service.recipient_type)}</dd>
         </div>
         <div>
           <dt className="text-zinc-500">Remote available</dt>
@@ -48,11 +45,11 @@ export default function ServiceDetailView({ service }: { service: ServiceDetail 
         </div>
         <div>
           <dt className="text-zinc-500">Created</dt>
-          <dd className="text-zinc-900">{formatDate(service.created_at)}</dd>
+          <dd className="text-zinc-900">{formatDateTime(service.created_at)}</dd>
         </div>
         <div>
           <dt className="text-zinc-500">Updated</dt>
-          <dd className="text-zinc-900">{formatDate(service.updated_at)}</dd>
+          <dd className="text-zinc-900">{formatDateTime(service.updated_at)}</dd>
         </div>
       </dl>
       {service.description ? (
