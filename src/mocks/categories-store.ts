@@ -6,8 +6,10 @@ import type {
 import { buildFixtureCategories } from "./categories-fixtures";
 
 const categories = new Map<number, CategoryRead>();
-// Translations are write-only on the mock (Read DTO omits them); persist so
-// edit round-trips can assert they were stored.
+// Translations are write-only scaffolding: the category Read DTO omits them, so
+// nothing reads this map yet. Persisted on create/update so a future PR adding a
+// translations-read endpoint (+ its mock handler + getCategoryTranslations) has a
+// backing store to serve. Intentionally retained, not dead by accident.
 const translations = new Map<
   number,
   {
