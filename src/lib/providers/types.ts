@@ -23,6 +23,8 @@ export type ProviderListItem = {
 };
 
 export type ProviderDetail = ProviderListItem & {
+  // Resolved location label (backend PR #93) — detail-only; null when unset/unsynced.
+  location_name: string | null;
   description: string | null;
   contact_email: string | null;
   phone: string | null;
