@@ -7,7 +7,8 @@ import {
   revokeReviewerScope,
   updateAdmin,
 } from "@/lib/admins/api";
-import { ADMIN_ROLES } from "@/lib/admins/types";
+import { ADMIN_ROLES, isAdminRole } from "@/lib/admins/types";
+import { getAdminSession } from "@/lib/auth/session";
 import type { ActionState } from "../action-types";
 
 const idSchema = z.string().uuid("admin id is required");
@@ -52,6 +53,30 @@ export async function updateAdminAction(
 
   if (payload.role === undefined && payload.is_active === undefined) {
     return fail("Nothing to update");
+  }
+
+  // Self-guard, surfaced client-side. The backend rejects self-demotion /
+  // self-deactivation too, but its envelope localises the reason down to a
+  // generic "Request cannot be processed", so we pre-empt with the specific
+  // message (and skip a doomed round-trip). The last-active-superadmin guard
+  // stays backend-only — the FE cannot know the active-superadmin count.
+  const session = await getAdminSession();
+  if (session && session.sub === idR.id) {
+    if (payload.is_active === false) {
+      return fail("You cannot deactivate your own account.");
+    }
+    const currentRoleRaw = formData.get("currentRole");
+    const currentRole =
+      typeof currentRoleRaw === "string" && isAdminRole(currentRoleRaw)
+        ? currentRoleRaw
+        : undefined;
+    if (
+      payload.role !== undefined &&
+      currentRole !== undefined &&
+      payload.role !== currentRole
+    ) {
+      return fail("You cannot change your own role.");
+    }
   }
 
   const result = await updateAdmin(idR.id, payload);

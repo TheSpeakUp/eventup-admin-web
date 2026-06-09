@@ -1,8 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
 
-// Seeded MODERATOR from src/mocks/admins-store.ts.
+// Seeded admins from src/mocks/admins-store.ts. The mock SUPERADMIN login
+// (admin@example.com) carries sub === SUPER_ID, so SUPER_ID is the operator's
+// own row — used to exercise the self-guard.
 const MOD_ID = "33333333-3333-4333-8333-333333333333";
+const SUPER_ID = "11111111-1111-4111-8111-111111111111";
 
 test.describe("Admin detail management", () => {
   test("updates role and active state", async ({ page }) => {
@@ -16,6 +19,8 @@ test.describe("Admin detail management", () => {
     await page.getByTestId("admin-update-submit").click();
 
     await expect(page.getByTestId("admin-update-error")).toHaveCount(0);
+    // After a successful save the revalidated server value must drive the
+    // selects — they reflect the new persisted role/status without a reload.
     await expect(page.getByTestId("admin-role-select")).toHaveValue("ADMIN");
     await expect(page.getByTestId("admin-active-select")).toHaveValue("false");
   });
@@ -37,6 +42,35 @@ test.describe("Admin detail management", () => {
       .click();
     await expect(page.getByTestId("scopes-list")).not.toContainText(
       "admin.marketplace.offers.dispatch",
+    );
+  });
+
+  test("shows a specific message when deactivating your own account", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, `/admins/${SUPER_ID}`);
+    await expect(page.getByTestId("admin-detail-email")).toHaveText(
+      "admin@example.com",
+    );
+
+    await page.getByTestId("admin-active-select").selectOption("false");
+    await page.getByTestId("admin-update-submit").click();
+
+    await expect(page.getByTestId("admin-update-error")).toHaveText(
+      "You cannot deactivate your own account.",
+    );
+  });
+
+  test("shows a specific message when changing your own role", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, `/admins/${SUPER_ID}`);
+
+    await page.getByTestId("admin-role-select").selectOption("ADMIN");
+    await page.getByTestId("admin-update-submit").click();
+
+    await expect(page.getByTestId("admin-update-error")).toHaveText(
+      "You cannot change your own role.",
     );
   });
 });
