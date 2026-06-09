@@ -38,7 +38,7 @@ export function CategoriesTable({
             <td>{r.slug}</td>
             <td>
               {r.parent_id != null
-                ? (parentNames.get(r.parent_id) ?? r.parent_id)
+                ? (parentNames.get(r.parent_id) ?? "—")
                 : "—"}
             </td>
             <td>{r.sort_order}</td>
