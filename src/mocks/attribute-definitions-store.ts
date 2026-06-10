@@ -1,6 +1,8 @@
 import type {
   AttributeDefinitionCursorPage,
   AttributeDefinitionRead,
+  AttributeDefinitionTranslations,
+  AttributeDefinitionTranslationsPayload,
 } from "@/lib/attribute-definitions/types";
 import { buildFixtureAttributeDefinitions } from "./attribute-definitions-fixtures";
 
@@ -8,15 +10,37 @@ import { buildFixtureAttributeDefinitions } from "./attribute-definitions-fixtur
 const defs = new Map<string, AttributeDefinitionRead>();
 let nextId = 100;
 
+type TranslationSet = {
+  field_translations: AttributeDefinitionTranslations["field_translations"];
+  enum_value_translations: AttributeDefinitionTranslations["enum_value_translations"];
+};
+const translations = new Map<string, TranslationSet>();
+
+function ensureTranslationSeed(): void {
+  if (translations.size > 0) return;
+  // Seed one set on the `cuisine` fixture so the GET-render e2e has data.
+  translations.set("cuisine", {
+    field_translations: [
+      { locale: "en", label: "Cuisine", description: "Type of cuisine" },
+      { locale: "ru", label: "Кухня", description: null },
+    ],
+    enum_value_translations: [
+      { locale: "ru", enum_value: "italian", label: "Итальянская" },
+    ],
+  });
+}
+
 function ensureSeed(): void {
   if (defs.size > 0) return;
   for (const d of buildFixtureAttributeDefinitions()) defs.set(d.key, d);
 }
 
 export function resetAttributeDefinitionsStore(): void {
+  translations.clear();
   defs.clear();
   nextId = 100;
   ensureSeed();
+  ensureTranslationSeed();
 }
 
 export function getAttributeDefinitionByKey(
@@ -126,4 +150,32 @@ export function updateAttributeDefinitionRecord(
 export function deleteAttributeDefinitionRecord(key: string): boolean {
   ensureSeed();
   return defs.delete(key);
+}
+
+export function getAttributeDefinitionTranslations(
+  key: string,
+): TranslationSet {
+  ensureSeed();
+  ensureTranslationSeed();
+  return (
+    translations.get(key) ?? {
+      field_translations: [],
+      enum_value_translations: [],
+    }
+  );
+}
+
+// Returns the stored set, or null if the definition key does not exist.
+export function setAttributeDefinitionTranslations(
+  key: string,
+  payload: AttributeDefinitionTranslationsPayload,
+): TranslationSet | null {
+  ensureSeed();
+  if (!defs.has(key)) return null;
+  const set: TranslationSet = {
+    field_translations: payload.field_translations ?? [],
+    enum_value_translations: payload.enum_value_translations ?? [],
+  };
+  translations.set(key, set);
+  return set;
 }

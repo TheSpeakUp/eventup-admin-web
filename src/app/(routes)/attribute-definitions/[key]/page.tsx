@@ -1,4 +1,5 @@
 // src/app/(routes)/attribute-definitions/[key]/page.tsx
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAttributeDefinition } from "@/lib/attribute-definitions/api";
 import { getAdminSession } from "@/lib/auth/session";
@@ -59,6 +60,13 @@ export default async function AttributeDefinitionDetailPage({
           mode="edit"
           definition={definition}
         />
+        <Link
+          href={`/attribute-definitions/${encodeURIComponent(definition.key)}/translations`}
+          data-testid="manage-translations-link"
+          className="inline-block text-sm text-blue-700"
+        >
+          Manage translations →
+        </Link>
         {canDelete ? (
           <DeleteAttributeDefinitionButton attrKey={definition.key} />
         ) : null}

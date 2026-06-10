@@ -52,3 +52,28 @@ export function isAttributeDefinitionSort(
 ): value is AttributeDefinitionSort {
   return (ATTRIBUTE_DEFINITION_SORTS as readonly string[]).includes(value);
 }
+
+// ---- Translations sub-resource (F10) ----
+export type AttributeFieldTranslation = {
+  locale: string;
+  label: string;
+  description?: string | null;
+};
+
+export type AttributeEnumTranslation = {
+  locale: string;
+  enum_value: string;
+  label: string;
+};
+
+export type AttributeDefinitionTranslations = {
+  attribute_key: string;
+  field_translations: AttributeFieldTranslation[];
+  enum_value_translations: AttributeEnumTranslation[];
+};
+
+// PUT body = full replace; same row shapes, no attribute_key (it's in the URL).
+export type AttributeDefinitionTranslationsPayload = {
+  field_translations: AttributeFieldTranslation[];
+  enum_value_translations: AttributeEnumTranslation[];
+};

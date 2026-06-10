@@ -68,7 +68,9 @@ import {
   createAttributeDefinitionRecord,
   deleteAttributeDefinitionRecord,
   getAttributeDefinitionByKey,
+  getAttributeDefinitionTranslations,
   listAttributeDefinitionsPage,
+  setAttributeDefinitionTranslations,
   updateAttributeDefinitionRecord,
   type AttributeDefinitionWrite,
 } from "./attribute-definitions-store";
@@ -1182,6 +1184,78 @@ export const handlers = [
     );
     return HttpResponse.json(created, { status: 201 });
   }),
+  http.get(
+    `${ATTRIBUTE_DEFINITIONS_BASE}/:key/translations`,
+    ({ params }) => {
+      const key = String(params.key);
+      const found = getAttributeDefinitionByKey(key);
+      if (!found)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      const set = getAttributeDefinitionTranslations(key);
+      return HttpResponse.json({ attribute_key: key, ...set });
+    },
+  ),
+  http.put(
+    `${ATTRIBUTE_DEFINITIONS_BASE}/:key/translations`,
+    async ({ params, request }) => {
+      const key = String(params.key);
+      const body = (await request.json().catch(() => ({}))) as {
+        field_translations?: Array<{ locale?: unknown; enum_value?: unknown }>;
+        enum_value_translations?: Array<{
+          locale?: unknown;
+          enum_value?: unknown;
+        }>;
+      };
+      const fields = Array.isArray(body.field_translations)
+        ? body.field_translations
+        : [];
+      const enums = Array.isArray(body.enum_value_translations)
+        ? body.enum_value_translations
+        : [];
+      // Backend parity: unique locale (field) and unique (locale, enum_value).
+      const fieldLocales = new Set<string>();
+      for (const f of fields) {
+        const loc = String(f.locale ?? "");
+        if (fieldLocales.has(loc)) {
+          return HttpResponse.json(
+            {
+              error: {
+                message: "Request cannot be processed",
+                meta: { original_detail: `Duplicate field locale: ${loc}` },
+              },
+            },
+            { status: 400 },
+          );
+        }
+        fieldLocales.add(loc);
+      }
+      const enumPairs = new Set<string>();
+      for (const e of enums) {
+        const pair = `${String(e.locale ?? "")}|${String(e.enum_value ?? "")}`;
+        if (enumPairs.has(pair)) {
+          return HttpResponse.json(
+            {
+              error: {
+                message: "Request cannot be processed",
+                meta: {
+                  original_detail: `Duplicate enum translation: ${pair}`,
+                },
+              },
+            },
+            { status: 400 },
+          );
+        }
+        enumPairs.add(pair);
+      }
+      const set = setAttributeDefinitionTranslations(
+        key,
+        body as never,
+      );
+      if (!set)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json({ attribute_key: key, ...set });
+    },
+  ),
   http.get(`${ATTRIBUTE_DEFINITIONS_BASE}/:key`, ({ params }) => {
     const found = getAttributeDefinitionByKey(String(params.key));
     if (!found)
