@@ -55,6 +55,12 @@ import {
   type CategoryWrite,
 } from "./categories-store";
 import {
+  deleteCategoryBindingRecord,
+  listCategoryBindingRecords,
+  upsertCategoryBindingRecord,
+  type CategoryBindingWrite,
+} from "./category-bindings-store";
+import {
   createPromoCodeRecord,
   deactivatePromoCodeRecord,
   getPromoCodeById,
@@ -500,6 +506,24 @@ function toAttributeDefinitionWrite(
   if (typeof body.sort_order === "number") out.sort_order = body.sort_order;
   if (typeof body.is_active === "boolean") out.is_active = body.is_active;
   if (typeof body.is_system === "boolean") out.is_system = body.is_system;
+  return out;
+}
+
+// Pick known binding keys from an untyped JSON body. The server action already
+// validated/coerced each field; here we only keep typed keys.
+function toCategoryBindingWrite(
+  body: Record<string, unknown>,
+): CategoryBindingWrite {
+  const out: CategoryBindingWrite = {};
+  if (typeof body.descriptor === "object" && body.descriptor !== null)
+    out.descriptor = body.descriptor as Record<string, unknown>;
+  if (typeof body.group_name === "string" || body.group_name === null)
+    out.group_name = body.group_name as string | null;
+  if (typeof body.sort_order === "number") out.sort_order = body.sort_order;
+  if (typeof body.is_visible_in_filters === "boolean")
+    out.is_visible_in_filters = body.is_visible_in_filters;
+  if (typeof body.is_visible_in_card === "boolean")
+    out.is_visible_in_card = body.is_visible_in_card;
   return out;
 }
 
@@ -1171,6 +1195,65 @@ export const handlers = [
       );
     }
     const ok = deleteCategoryRecord(id);
+    if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // ---- Marketplace category↔attribute bindings (F14) ----
+  http.get(`${CATEGORIES_BASE}/:id/bindings`, ({ params }) => {
+    const rows = listCategoryBindingRecords(Number(params.id));
+    if (rows === null)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json({ items: rows, count: rows.length });
+  }),
+  http.put(
+    `${CATEGORIES_BASE}/:id/bindings/:key`,
+    async ({ params, request }) => {
+      const body = (await request.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      const write = toCategoryBindingWrite(body);
+      // Backend requires descriptor on the upsert request (422 there; 400 here
+      // is close enough for the UI's generic envelope handling).
+      if (write.descriptor === undefined) {
+        return HttpResponse.json(
+          {
+            error: {
+              message: "Request cannot be processed",
+              meta: { original_detail: "descriptor is required" },
+            },
+          },
+          { status: 400 },
+        );
+      }
+      const updated = upsertCategoryBindingRecord(
+        Number(params.id),
+        String(params.key),
+        write,
+      );
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+  http.delete(`${CATEGORIES_BASE}/:id/bindings/:key`, ({ params, request }) => {
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    const ok = deleteCategoryBindingRecord(
+      Number(params.id),
+      String(params.key),
+    );
     if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
   }),
