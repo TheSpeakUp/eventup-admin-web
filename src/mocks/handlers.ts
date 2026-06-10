@@ -132,6 +132,12 @@ import {
 } from "./quality-store";
 import { getPaymentById, listPaymentsPage } from "./payments-store";
 import { getAuditEventById, listAuditEventsPage } from "./audit-store";
+import {
+  listRegistrySnapshotsPage,
+  rollbackRegistrySnapshotRecord,
+  runRevalidationRecord,
+} from "./registry-store";
+import type { RevalidationRunPayload } from "@/lib/registry/types";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -159,6 +165,7 @@ const PAYMENTS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/payments",
 );
 const AUDIT_BASE = buildApiUrl("/eventup-admin/v1/audit");
+const REGISTRY_BASE = buildApiUrl("/eventup-admin/v1/marketplace");
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
 
@@ -1913,6 +1920,74 @@ export const handlers = [
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
   }),
+
+  // ---- Attribute registry snapshots + revalidation (F13) ----------------
+  // List is GET with querystring filters (attribute_key / category_id /
+  // entity_type) + cursor (last_id / limit). Rollback is ADMIN-gated (RISK);
+  // revalidation is MODERATOR+ (any authenticated admin in the mock).
+  http.get(`${REGISTRY_BASE}/attribute-registry/snapshots`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listRegistrySnapshotsPage({
+        attribute_key: queryStr(url.searchParams.get("attribute_key")),
+        category_id: queryNum(url.searchParams.get("category_id")),
+        entity_type: queryStr(url.searchParams.get("entity_type")),
+        last_id: queryNum(url.searchParams.get("last_id")),
+        limit: queryNum(url.searchParams.get("limit")),
+      }),
+    );
+  }),
+  http.post(
+    `${REGISTRY_BASE}/attribute-registry/snapshots/:id/rollback`,
+    ({ params, request }) => {
+      const role = operatorRole(request);
+      if (role !== "ADMIN" && role !== "SUPERADMIN") {
+        return HttpResponse.json(
+          {
+            error: {
+              message: "forbidden",
+              meta: { original_detail: "Requires ADMIN role" },
+            },
+          },
+          { status: 403 },
+        );
+      }
+      const id = Number(params.id);
+      if (!Number.isInteger(id))
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      const result = rollbackRegistrySnapshotRecord(id, {
+        admin_id: operatorSub(request),
+        display_name: operatorSub(request),
+      });
+      if (!result)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(result);
+    },
+  ),
+  http.post(
+    `${REGISTRY_BASE}/attribute-revalidation/run`,
+    async ({ request }) => {
+      const body = (await request.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      const payload: RevalidationRunPayload = {
+        category_ids: Array.isArray(body.category_ids)
+          ? (body.category_ids as number[])
+          : undefined,
+        service_ids: Array.isArray(body.service_ids)
+          ? (body.service_ids as number[])
+          : undefined,
+        only_pending: body.only_pending !== false,
+        limit:
+          typeof body.limit === "number" && Number.isFinite(body.limit)
+            ? body.limit
+            : 500,
+        source: typeof body.source === "string" ? body.source : "admin_manual",
+      };
+      return HttpResponse.json(runRevalidationRecord(payload));
+    },
+  ),
 
   // ---- Unified audit log (M6, READ-ONLY) --------------------------------
   // The list lives at the router ROOT (AUDIT_BASE, no sub-segment) and the
