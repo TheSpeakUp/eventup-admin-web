@@ -223,7 +223,7 @@ export function TranslationsEditor({
             {state.error}
           </p>
         ) : null}
-        {state && state.ok && !pending ? (
+        {state !== EMPTY_STATE && state.ok && !pending ? (
           <p data-testid="translations-saved" className="text-sm text-green-700">
             Saved.
           </p>
