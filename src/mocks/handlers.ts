@@ -59,6 +59,33 @@ import {
   buildSummary,
   buildTopListings,
 } from "./traffic-fixtures";
+import {
+  createDiscountRuleRecord,
+  createMonthlyDiscountRecord,
+  createProductRecord,
+  createTariffRecord,
+  createZoneRecord,
+  deactivateDiscountRuleRecord,
+  deactivateMonthlyDiscountRecord,
+  deactivateProductRecord,
+  getProductById,
+  getZoneById,
+  listDiscountRulesPage,
+  listMonthlyDiscountsPage,
+  listProductsPage,
+  listTariffsPage,
+  listZonesPage,
+  updateDiscountRuleRecord,
+  updateMonthlyDiscountRecord,
+  updateProductRecord,
+  updateTariffRecord,
+  updateZoneRecord,
+  type DiscountRuleWrite,
+  type MonthlyDiscountWrite,
+  type ProductWrite,
+  type TariffWrite,
+  type ZoneWrite,
+} from "./promotions-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -69,6 +96,9 @@ const CATEGORIES_BASE = buildApiUrl(
 );
 const ANALYTICS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/analytics",
+);
+const PROMOTIONS_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/promotions",
 );
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
@@ -153,6 +183,145 @@ function toCategoryWrite(body: Record<string, unknown>): CategoryWrite {
       string
     >;
   return out;
+}
+
+// --- Promotions catalog body coercion ------------------------------------- //
+// The server actions already validate/coerce every field; here we only pick the
+// known keys per entity so the store stays typed (no `as never`).
+function str(body: Record<string, unknown>, key: string): string | undefined {
+  return typeof body[key] === "string" ? (body[key] as string) : undefined;
+}
+function num(body: Record<string, unknown>, key: string): number | undefined {
+  return typeof body[key] === "number" ? (body[key] as number) : undefined;
+}
+function numOrNull(
+  body: Record<string, unknown>,
+  key: string,
+): number | null | undefined {
+  if (body[key] === null) return null;
+  return typeof body[key] === "number" ? (body[key] as number) : undefined;
+}
+function bool(body: Record<string, unknown>, key: string): boolean | undefined {
+  return typeof body[key] === "boolean" ? (body[key] as boolean) : undefined;
+}
+function dateOrNull(
+  body: Record<string, unknown>,
+  key: string,
+): string | null | undefined {
+  if (body[key] === null) return null;
+  return typeof body[key] === "string" ? (body[key] as string) : undefined;
+}
+function translations(
+  body: Record<string, unknown>,
+  key: string,
+): Record<string, string> | undefined {
+  const v = body[key];
+  return typeof v === "object" && v !== null
+    ? (v as Record<string, string>)
+    : undefined;
+}
+
+function toProductWrite(body: Record<string, unknown>): ProductWrite {
+  const out: ProductWrite = {};
+  const code = str(body, "code");
+  if (code !== undefined) out.code = code;
+  const nt = translations(body, "name_translations");
+  if (nt !== undefined) out.name_translations = nt;
+  if (body.description_translations === null)
+    out.description_translations = null;
+  else {
+    const dt = translations(body, "description_translations");
+    if (dt !== undefined) out.description_translations = dt;
+  }
+  const dbu = str(body, "default_billing_unit");
+  if (dbu !== undefined) out.default_billing_unit = dbu;
+  const ss = str(body, "service_scope");
+  if (ss !== undefined) out.service_scope = ss;
+  const pt = str(body, "period_type");
+  if (pt !== undefined) out.period_type = pt;
+  const ia = bool(body, "is_active");
+  if (ia !== undefined) out.is_active = ia;
+  return out;
+}
+
+function toTariffWrite(body: Record<string, unknown>): TariffWrite {
+  const out: TariffWrite = {};
+  const pid = num(body, "product_id");
+  if (pid !== undefined) out.product_id = pid;
+  const bu = str(body, "billing_unit");
+  if (bu !== undefined) out.billing_unit = bu;
+  const bp = str(body, "base_price");
+  if (bp !== undefined) out.base_price = bp;
+  const cur = str(body, "currency");
+  if (cur !== undefined) out.currency = cur;
+  const vpu = numOrNull(body, "volume_per_unit");
+  if (vpu !== undefined) out.volume_per_unit = vpu;
+  const mu = num(body, "min_units");
+  if (mu !== undefined) out.min_units = mu;
+  return out;
+}
+
+function toDiscountRuleWrite(
+  body: Record<string, unknown>,
+): DiscountRuleWrite {
+  const out: DiscountRuleWrite = {};
+  const pid = numOrNull(body, "product_id");
+  if (pid !== undefined) out.product_id = pid;
+  const tid = numOrNull(body, "tariff_id");
+  if (tid !== undefined) out.tariff_id = tid;
+  const mu = num(body, "min_units");
+  if (mu !== undefined) out.min_units = mu;
+  const dp = num(body, "discount_percent");
+  if (dp !== undefined) out.discount_percent = dp;
+  const vf = dateOrNull(body, "valid_from");
+  if (vf !== undefined) out.valid_from = vf;
+  const vt = dateOrNull(body, "valid_to");
+  if (vt !== undefined) out.valid_to = vt;
+  const ia = bool(body, "is_active");
+  if (ia !== undefined) out.is_active = ia;
+  return out;
+}
+
+function toMonthlyDiscountWrite(
+  body: Record<string, unknown>,
+): MonthlyDiscountWrite {
+  const out: MonthlyDiscountWrite = {};
+  const pid = numOrNull(body, "product_id");
+  if (pid !== undefined) out.product_id = pid;
+  const tid = numOrNull(body, "tariff_id");
+  if (tid !== undefined) out.tariff_id = tid;
+  const ms = str(body, "month_start");
+  if (ms !== undefined) out.month_start = ms;
+  const dp = num(body, "discount_percent");
+  if (dp !== undefined) out.discount_percent = dp;
+  const mct = numOrNull(body, "max_campaigns_total");
+  if (mct !== undefined) out.max_campaigns_total = mct;
+  const mcps = numOrNull(body, "max_campaigns_per_service");
+  if (mcps !== undefined) out.max_campaigns_per_service = mcps;
+  const ia = bool(body, "is_active");
+  if (ia !== undefined) out.is_active = ia;
+  return out;
+}
+
+function toZoneWrite(body: Record<string, unknown>): ZoneWrite {
+  const out: ZoneWrite = {};
+  const code = str(body, "code");
+  if (code !== undefined) out.code = code;
+  const tg = str(body, "time_granularity");
+  if (tg !== undefined) out.time_granularity = tg;
+  const ms = num(body, "max_slots");
+  if (ms !== undefined) out.max_slots = ms;
+  return out;
+}
+
+function queryBool(value: string | null): boolean | undefined {
+  if (value === null) return undefined;
+  return value === "true";
+}
+function queryNum(value: string | null): number | undefined {
+  if (value === null) return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function activeSuperadminCount(): number {
@@ -885,4 +1054,210 @@ export const handlers = [
       return HttpResponse.json(detail);
     },
   ),
+
+  // ---- Promotions catalog (M3a) -----------------------------------------
+  // products: full CRUD. Register collection list/create, then the literal
+  // /deactivate before /:id so MSW's first-match doesn't swallow it.
+  http.get(`${PROMOTIONS_BASE}/products`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listProductsPage({
+        is_active: queryBool(url.searchParams.get("is_active")),
+        q: url.searchParams.get("q") ?? undefined,
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/products`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createProductRecord(toProductWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.post(
+    `${PROMOTIONS_BASE}/products/:id/deactivate`,
+    ({ params }) => {
+      const updated = deactivateProductRecord(Number(params.id));
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+  http.get(`${PROMOTIONS_BASE}/products/:id`, ({ params }) => {
+    const found = getProductById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+  http.patch(`${PROMOTIONS_BASE}/products/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const updated = updateProductRecord(Number(params.id), toProductWrite(body));
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+
+  // tariffs: list + create + update (no detail, no deactivate)
+  http.get(`${PROMOTIONS_BASE}/tariffs`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listTariffsPage({
+        product_id: queryNum(url.searchParams.get("product_id")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/tariffs`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createTariffRecord(toTariffWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.patch(`${PROMOTIONS_BASE}/tariffs/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const updated = updateTariffRecord(Number(params.id), toTariffWrite(body));
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+
+  // discount-rules: list + create + update + deactivate (no detail)
+  http.get(`${PROMOTIONS_BASE}/discount-rules`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listDiscountRulesPage({
+        product_id: queryNum(url.searchParams.get("product_id")),
+        tariff_id: queryNum(url.searchParams.get("tariff_id")),
+        is_active: queryBool(url.searchParams.get("is_active")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/discount-rules`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createDiscountRuleRecord(toDiscountRuleWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.post(
+    `${PROMOTIONS_BASE}/discount-rules/:id/deactivate`,
+    ({ params }) => {
+      const updated = deactivateDiscountRuleRecord(Number(params.id));
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+  http.patch(
+    `${PROMOTIONS_BASE}/discount-rules/:id`,
+    async ({ params, request }) => {
+      const body = (await request.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      const updated = updateDiscountRuleRecord(
+        Number(params.id),
+        toDiscountRuleWrite(body),
+      );
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  // monthly-discounts: list + create + update + deactivate (no detail)
+  http.get(`${PROMOTIONS_BASE}/monthly-discounts`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listMonthlyDiscountsPage({
+        product_id: queryNum(url.searchParams.get("product_id")),
+        is_active: queryBool(url.searchParams.get("is_active")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/monthly-discounts`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createMonthlyDiscountRecord(toMonthlyDiscountWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.post(
+    `${PROMOTIONS_BASE}/monthly-discounts/:id/deactivate`,
+    ({ params }) => {
+      const updated = deactivateMonthlyDiscountRecord(Number(params.id));
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+  http.patch(
+    `${PROMOTIONS_BASE}/monthly-discounts/:id`,
+    async ({ params, request }) => {
+      const body = (await request.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      const updated = updateMonthlyDiscountRecord(
+        Number(params.id),
+        toMonthlyDiscountWrite(body),
+      );
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  // zones: list + detail + create + update (no deactivate)
+  http.get(`${PROMOTIONS_BASE}/zones`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listZonesPage({
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/zones`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createZoneRecord(toZoneWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.get(`${PROMOTIONS_BASE}/zones/:id`, ({ params }) => {
+    const found = getZoneById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+  http.patch(`${PROMOTIONS_BASE}/zones/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const updated = updateZoneRecord(Number(params.id), toZoneWrite(body));
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
 ];
