@@ -51,6 +51,14 @@ import {
   updateCategoryRecord,
   type CategoryWrite,
 } from "./categories-store";
+import {
+  createAttributeDefinitionRecord,
+  deleteAttributeDefinitionRecord,
+  getAttributeDefinitionByKey,
+  listAttributeDefinitionsPage,
+  updateAttributeDefinitionRecord,
+  type AttributeDefinitionWrite,
+} from "./attribute-definitions-store";
 import type { AttributeSchema } from "@/lib/categories/types";
 import {
   DEFAULT_FROM,
@@ -99,6 +107,9 @@ const ANALYTICS_BASE = buildApiUrl(
 );
 const PROMOTIONS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/promotions",
+);
+const ATTRIBUTE_DEFINITIONS_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/attribute-definitions",
 );
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
@@ -322,6 +333,23 @@ function queryNum(value: string | null): number | undefined {
   if (value === null) return undefined;
   const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
+}
+
+// Pick known attribute-definition keys from an untyped JSON body. The server
+// action already validated/coerced each field; here we only keep typed keys.
+function toAttributeDefinitionWrite(
+  body: Record<string, unknown>,
+): AttributeDefinitionWrite {
+  const out: AttributeDefinitionWrite = {};
+  if (typeof body.key === "string") out.key = body.key;
+  if (typeof body.descriptor === "object" && body.descriptor !== null)
+    out.descriptor = body.descriptor as Record<string, unknown>;
+  if (typeof body.group_name === "string" || body.group_name === null)
+    out.group_name = body.group_name as string | null;
+  if (typeof body.sort_order === "number") out.sort_order = body.sort_order;
+  if (typeof body.is_active === "boolean") out.is_active = body.is_active;
+  if (typeof body.is_system === "boolean") out.is_system = body.is_system;
+  return out;
 }
 
 function activeSuperadminCount(): number {
@@ -870,6 +898,75 @@ export const handlers = [
       );
     }
     const ok = deleteCategoryRecord(id);
+    if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // ---- Marketplace attribute-definitions (literal /list before /:key) ----
+  http.post(`${ATTRIBUTE_DEFINITIONS_BASE}/list`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      search?: string;
+      group_name?: string;
+      is_active?: boolean;
+      sort?: string;
+      last_id?: number;
+      limit?: number;
+    };
+    return HttpResponse.json(listAttributeDefinitionsPage(body));
+  }),
+  http.post(ATTRIBUTE_DEFINITIONS_BASE, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createAttributeDefinitionRecord(
+      toAttributeDefinitionWrite(body),
+    );
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.get(`${ATTRIBUTE_DEFINITIONS_BASE}/:key`, ({ params }) => {
+    const found = getAttributeDefinitionByKey(String(params.key));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+  http.put(`${ATTRIBUTE_DEFINITIONS_BASE}/:key`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const patch = toAttributeDefinitionWrite(body);
+    // Backend rejects an empty update body with 400 (parity).
+    if (Object.keys(patch).length === 0) {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "Request cannot be processed",
+            meta: { original_detail: "No fields to update" },
+          },
+        },
+        { status: 400 },
+      );
+    }
+    const updated = updateAttributeDefinitionRecord(String(params.key), patch);
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+  http.delete(`${ATTRIBUTE_DEFINITIONS_BASE}/:key`, ({ params, request }) => {
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    const ok = deleteAttributeDefinitionRecord(String(params.key));
     if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
   }),
