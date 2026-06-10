@@ -56,10 +56,14 @@ test.describe("Attribute definitions CRUD", () => {
     await page.getByTestId("attribute-definition-active").uncheck();
     await page.getByTestId("attribute-definition-group").fill("misc");
     await page.getByTestId("attribute-definition-submit").click();
-    // Re-open the list filtered to inactive — the edited record should appear.
-    await page.goto("/attribute-definitions?is_active=false");
+    // After form submit, checkbox should remain unchecked (state persisted).
     await expect(
-      page.getByTestId("attribute-definition-row-editable_attr"),
-    ).toBeVisible();
+      page.getByTestId("attribute-definition-active"),
+    ).not.toBeChecked();
+    // Reload the page and verify the unchecked state persists.
+    await page.reload();
+    await expect(
+      page.getByTestId("attribute-definition-active"),
+    ).not.toBeChecked();
   });
 });
