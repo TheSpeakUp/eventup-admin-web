@@ -99,6 +99,22 @@ import {
   type TariffWrite,
   type ZoneWrite,
 } from "./promotions-store";
+import {
+  activateFormulaConfigRecord,
+  clearServiceOverrideRecord,
+  getAnomalyById,
+  getFormulaConfigById,
+  getProviderMetricById,
+  getServiceMetricById,
+  listAnomaliesPage,
+  listFormulaConfigsPage,
+  listProviderMetricsPage,
+  listServiceMetricsPage,
+  reviewAnomalyRecord,
+  rollbackFormulaConfigRecord,
+  setServiceOverrideRecord,
+  type OverrideWrite,
+} from "./quality-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -112,6 +128,9 @@ const ANALYTICS_BASE = buildApiUrl(
 );
 const PROMOTIONS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/promotions",
+);
+const QUALITY_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/quality",
 );
 const ATTRIBUTE_DEFINITIONS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/attribute-definitions",
@@ -317,6 +336,40 @@ function toMonthlyDiscountWrite(
   const ia = bool(body, "is_active");
   if (ia !== undefined) out.is_active = ia;
   return out;
+}
+
+// Quality manual-override body coercion. The server action validates/coerces
+// every field before the mock sees it; here we only pick the known keys.
+function toOverrideWrite(body: Record<string, unknown>): OverrideWrite | null {
+  const coefficient = num(body, "coefficient");
+  const reason = str(body, "reason");
+  if (coefficient === undefined || reason === undefined) return null;
+  const out: OverrideWrite = { coefficient, reason };
+  if (body.until === null) out.until = null;
+  else {
+    const until = str(body, "until");
+    if (until !== undefined) out.until = until;
+  }
+  return out;
+}
+
+// Quality writes gate ADMIN_MARKETPLACE_RANKING_MANAGE = SUPERADMIN-only.
+// Returns a 403 (generic message + specific reason in meta.original_detail,
+// matching map_marketplace_exception) for any non-SUPERADMIN operator; null when
+// the operator is allowed through.
+function forbidNonSuperadminQuality(request: Request): Response | null {
+  if (operatorRole(request) === "SUPERADMIN") return null;
+  return HttpResponse.json(
+    {
+      error: {
+        message: "forbidden",
+        meta: {
+          original_detail: "Requires the marketplace ranking-manage permission",
+        },
+      },
+    },
+    { status: 403 },
+  );
 }
 
 function toZoneWrite(body: Record<string, unknown>): ZoneWrite {
@@ -1415,6 +1468,148 @@ export const handlers = [
   }),
   http.get(`${PROMOTIONS_BASE}/campaigns/:id`, ({ params }) => {
     const found = getCampaignById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // ---- Quality / ranking (M4) -------------------------------------------
+  // Service metrics: list + detail + override set (POST) / clear (DELETE).
+  // Register the literal /override before /:id so MSW's first-match doesn't
+  // route the override to the detail handler. Writes gate SUPERADMIN.
+  http.get(`${QUALITY_BASE}/services`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listServiceMetricsPage({
+        quality_tier: queryStr(url.searchParams.get("quality_tier")),
+        provider_id: queryNum(url.searchParams.get("provider_id")),
+        has_override: queryBool(url.searchParams.get("has_override")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(
+    `${QUALITY_BASE}/services/:id/override`,
+    async ({ params, request }) => {
+      const forbidden = forbidNonSuperadminQuality(request);
+      if (forbidden) return forbidden;
+      const body = (await request.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
+      const write = toOverrideWrite(body);
+      if (!write)
+        return adminValidationError("coefficient and reason are required");
+      const updated = setServiceOverrideRecord(Number(params.id), write);
+      if (!updated)
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      return HttpResponse.json(updated);
+    },
+  ),
+  http.delete(`${QUALITY_BASE}/services/:id/override`, ({ params, request }) => {
+    const forbidden = forbidNonSuperadminQuality(request);
+    if (forbidden) return forbidden;
+    const updated = clearServiceOverrideRecord(Number(params.id));
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+  http.get(`${QUALITY_BASE}/services/:id`, ({ params }) => {
+    const found = getServiceMetricById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // Provider metrics: list + detail (read-only).
+  http.get(`${QUALITY_BASE}/providers`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listProviderMetricsPage({
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.get(`${QUALITY_BASE}/providers/:id`, ({ params }) => {
+    const found = getProviderMetricById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // Formula configs: list + activate (POST /{id}/activate) + rollback
+  // (POST /rollback) + detail. Register the literal /rollback and /:id/activate
+  // before /:id. Writes gate SUPERADMIN.
+  http.get(`${QUALITY_BASE}/formula-configs`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listFormulaConfigsPage({
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${QUALITY_BASE}/formula-configs/rollback`, ({ request }) => {
+    const forbidden = forbidNonSuperadminQuality(request);
+    if (forbidden) return forbidden;
+    const result = rollbackFormulaConfigRecord();
+    if (result.kind === "conflict")
+      return adminValidationError(result.reason);
+    return HttpResponse.json(result.config);
+  }),
+  http.post(
+    `${QUALITY_BASE}/formula-configs/:id/activate`,
+    ({ params, request }) => {
+      const forbidden = forbidNonSuperadminQuality(request);
+      if (forbidden) return forbidden;
+      const result = activateFormulaConfigRecord(Number(params.id));
+      if (result.kind === "not_found")
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      if (result.kind === "conflict")
+        return adminValidationError(result.reason);
+      return HttpResponse.json(result.config);
+    },
+  ),
+  http.get(`${QUALITY_BASE}/formula-configs/:id`, ({ params }) => {
+    const found = getFormulaConfigById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // Anomalies: list (resolved filter) + review (POST /{id}/review) + detail.
+  // Register the literal /review before /:id. Review gates SUPERADMIN.
+  http.get(`${QUALITY_BASE}/anomalies`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listAnomaliesPage({
+        service_id: queryNum(url.searchParams.get("service_id")),
+        provider_id: queryNum(url.searchParams.get("provider_id")),
+        severity: queryStr(url.searchParams.get("severity")),
+        event_type: queryStr(url.searchParams.get("event_type")),
+        resolved: queryBool(url.searchParams.get("resolved")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(
+    `${QUALITY_BASE}/anomalies/:id/review`,
+    ({ params, request }) => {
+      const forbidden = forbidNonSuperadminQuality(request);
+      if (forbidden) return forbidden;
+      const result = reviewAnomalyRecord(Number(params.id));
+      if (result.kind === "not_found")
+        return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+      if (result.kind === "conflict")
+        return adminValidationError(result.reason);
+      return HttpResponse.json(result.anomaly);
+    },
+  ),
+  http.get(`${QUALITY_BASE}/anomalies/:id`, ({ params }) => {
+    const found = getAnomalyById(Number(params.id));
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
