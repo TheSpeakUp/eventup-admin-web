@@ -12,6 +12,8 @@ export const PROMOTIONS_TABS = [
   "discount-rules",
   "monthly-discounts",
   "zones",
+  "orders",
+  "campaigns",
 ] as const;
 export type PromotionsTab = (typeof PROMOTIONS_TABS)[number];
 
@@ -237,4 +239,96 @@ export type ZoneUpdatePayload = {
 export type ZoneListQuery = {
   limit?: number;
   offset?: number;
+};
+
+// --------------------------------------------------------------------------- //
+// Orders — read-only (GET list, GET /{id} detail with line items) (M3b)        //
+// --------------------------------------------------------------------------- //
+
+// Decimal money columns (unit_price, discount_amount, final_price) are strings.
+export type OrderItemRead = {
+  id: number;
+  order_id: number;
+  tariff_id: number | null;
+  item_type: string;
+  units: number;
+  unit_price: string;
+  discount_percent: number;
+  discount_amount: string;
+  final_price: string;
+  period_start: string | null; // ISO date
+  period_unit: string | null;
+  periods_count: number | null;
+};
+
+// Summary row (no line items). total_price is a Decimal-string.
+export type OrderListItem = {
+  id: number;
+  service_id: number;
+  status: string;
+  total_price: string;
+  currency: string;
+  created_at: string;
+  paid_at: string | null;
+};
+
+export type OrderListResponse = {
+  items: OrderListItem[];
+  total: number;
+};
+
+export type OrderRead = {
+  id: number;
+  service_id: number;
+  status: string;
+  total_price: string;
+  currency: string;
+  created_at: string;
+  paid_at: string | null;
+  items: OrderItemRead[];
+};
+
+export type OrderListQuery = {
+  status?: string;
+  service_id?: number;
+  created_from?: string; // ISO datetime
+  created_to?: string;
+  limit?: number;
+  offset?: number;
+};
+
+// --------------------------------------------------------------------------- //
+// Campaigns — read (GET list, GET /{id}) + cancel (POST /{id}/cancel) (M3b)     //
+// --------------------------------------------------------------------------- //
+
+export type CampaignRead = {
+  id: number;
+  order_item_id: number;
+  service_id: number;
+  product_id: number;
+  zone_id: number | null;
+  status: string;
+  start_date: string; // ISO date
+  end_date: string;
+  time_unit: string;
+  slots_reserved: number;
+};
+
+export type CampaignListResponse = {
+  items: CampaignRead[];
+  total: number;
+};
+
+export type CampaignListQuery = {
+  status?: string;
+  zone_id?: number;
+  service_id?: number;
+  limit?: number;
+  offset?: number;
+};
+
+// Optional body for the cancel mutation. The backend returns the updated
+// CampaignRead (status flipped to ``canceled``).
+export type CampaignCancelPayload = {
+  reason?: string | null;
 };

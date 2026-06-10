@@ -60,6 +60,7 @@ import {
   buildTopListings,
 } from "./traffic-fixtures";
 import {
+  cancelCampaignRecord,
   createDiscountRuleRecord,
   createMonthlyDiscountRecord,
   createProductRecord,
@@ -68,10 +69,14 @@ import {
   deactivateDiscountRuleRecord,
   deactivateMonthlyDiscountRecord,
   deactivateProductRecord,
+  getCampaignById,
+  getOrderById,
   getProductById,
   getZoneById,
+  listCampaignsPage,
   listDiscountRulesPage,
   listMonthlyDiscountsPage,
+  listOrdersPage,
   listProductsPage,
   listTariffsPage,
   listZonesPage,
@@ -322,6 +327,9 @@ function queryNum(value: string | null): number | undefined {
   if (value === null) return undefined;
   const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
+}
+function queryStr(value: string | null): string | undefined {
+  return value === null || value === "" ? undefined : value;
 }
 
 function activeSuperadminCount(): number {
@@ -1259,5 +1267,59 @@ export const handlers = [
     if (!updated)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(updated);
+  }),
+
+  // ---- Promotions orders (M3b, READ-ONLY) -------------------------------
+  // list (status / service_id / created_from / created_to filters) + detail.
+  http.get(`${PROMOTIONS_BASE}/orders`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listOrdersPage({
+        status: queryStr(url.searchParams.get("status")),
+        service_id: queryNum(url.searchParams.get("service_id")),
+        created_from: queryStr(url.searchParams.get("created_from")),
+        created_to: queryStr(url.searchParams.get("created_to")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.get(`${PROMOTIONS_BASE}/orders/:id`, ({ params }) => {
+    const found = getOrderById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // ---- Promotions campaigns (M3b, READ + cancel) ------------------------
+  // Register list/create, then the literal /cancel before /:id so MSW's
+  // first-match doesn't route the cancel to the detail handler.
+  http.get(`${PROMOTIONS_BASE}/campaigns`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listCampaignsPage({
+        status: queryStr(url.searchParams.get("status")),
+        zone_id: queryNum(url.searchParams.get("zone_id")),
+        service_id: queryNum(url.searchParams.get("service_id")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.post(`${PROMOTIONS_BASE}/campaigns/:id/cancel`, ({ params }) => {
+    const result = cancelCampaignRecord(Number(params.id));
+    if (result.kind === "not_found")
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    if (result.kind === "conflict")
+      // Mirrors map_marketplace_exception: generic message + specific reason in
+      // meta.original_detail (the FE surfaces that first).
+      return adminValidationError(result.reason);
+    return HttpResponse.json(result.campaign);
+  }),
+  http.get(`${PROMOTIONS_BASE}/campaigns/:id`, ({ params }) => {
+    const found = getCampaignById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
   }),
 ];

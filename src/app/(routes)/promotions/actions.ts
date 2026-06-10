@@ -2,6 +2,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import {
+  cancelCampaign,
   createDiscountRule,
   createMonthlyDiscount,
   createProduct,
@@ -446,6 +447,26 @@ export async function updateZoneAction(
   if (Object.keys(payload).length === 0) return fail("Nothing to update");
 
   const res = await updateZone(id, payload);
+  if (!res.ok) return fail(res.message ?? `Request failed (${res.status})`);
+  revalidatePath("/promotions");
+  return ok();
+}
+
+// --------------------------------------------------------------------------- //
+// Campaigns — cancel only (orders are read-only; no actions)                   //
+// --------------------------------------------------------------------------- //
+
+// POST /campaigns/{id}/cancel. The backend rejects an already-canceled campaign
+// with a 4xx whose specific reason rides in meta.original_detail — surfaced to
+// the table via the same structured-error idiom as the deactivate buttons.
+export async function cancelCampaignAction(
+  _prev: ActionState,
+  fd: FormData,
+): Promise<ActionState> {
+  const id = idField(fd);
+  if (id === null) return fail("Invalid campaign id");
+  const reason = str(fd, "reason");
+  const res = await cancelCampaign(id, reason ? { reason } : {});
   if (!res.ok) return fail(res.message ?? `Request failed (${res.status})`);
   revalidatePath("/promotions");
   return ok();
