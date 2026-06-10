@@ -1,6 +1,9 @@
 // src/lib/categories/api.ts
 import { apiFetch, type ApiFetchResult } from "@/lib/api";
 import type {
+  CategoryAttributeBindingListResponse,
+  CategoryAttributeBindingRead,
+  CategoryAttributeBindingUpsertPayload,
   CategoryCursorPage,
   CategoryListQuery,
   CategoryMutationPayload,
@@ -53,6 +56,37 @@ export function deleteCategory(
 ): Promise<ApiFetchResult<{ success?: boolean; message?: string } | null>> {
   return apiFetch<{ success?: boolean; message?: string } | null>(
     `${BASE}/${id}`,
+    { method: "DELETE", redirectOn401: false },
+  );
+}
+
+// ---- Category↔attribute bindings sub-resource (F14) ----
+
+export function listCategoryBindings(
+  categoryId: number,
+): Promise<ApiFetchResult<CategoryAttributeBindingListResponse>> {
+  return apiFetch<CategoryAttributeBindingListResponse>(
+    `${BASE}/${categoryId}/bindings`,
+  );
+}
+
+export function upsertCategoryBinding(
+  categoryId: number,
+  attributeKey: string,
+  payload: CategoryAttributeBindingUpsertPayload,
+): Promise<ApiFetchResult<CategoryAttributeBindingRead>> {
+  return apiFetch<CategoryAttributeBindingRead>(
+    `${BASE}/${categoryId}/bindings/${encodeURIComponent(attributeKey)}`,
+    { method: "PUT", body: JSON.stringify(payload), redirectOn401: false },
+  );
+}
+
+export function deleteCategoryBinding(
+  categoryId: number,
+  attributeKey: string,
+): Promise<ApiFetchResult<{ success?: boolean; message?: string } | null>> {
+  return apiFetch<{ success?: boolean; message?: string } | null>(
+    `${BASE}/${categoryId}/bindings/${encodeURIComponent(attributeKey)}`,
     { method: "DELETE", redirectOn401: false },
   );
 }

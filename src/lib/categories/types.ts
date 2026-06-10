@@ -80,3 +80,34 @@ export type CategoryMutationPayload = {
 export function isCategorySort(value: string): value is CategorySort {
   return (CATEGORY_SORTS as readonly string[]).includes(value);
 }
+
+// ---- Category↔attribute bindings sub-resource (F14) ----
+
+export type CategoryAttributeBindingRead = {
+  binding_id: number;
+  category_id: number;
+  attribute_definition_id: number;
+  attribute_key: string;
+  descriptor: Record<string, unknown>;
+  group_name: string | null;
+  sort_order: number;
+  is_visible_in_filters: boolean;
+  is_visible_in_card: boolean;
+  is_system: boolean;
+};
+
+export type CategoryAttributeBindingListResponse = {
+  items: CategoryAttributeBindingRead[];
+  count: number;
+};
+
+// PUT is a FULL upsert: omitted fields fall back to schema defaults on the
+// backend (group_name=null, sort_order=100, flags=true) — they do NOT mean
+// "unchanged". All fields are required here so the form always sends them.
+export type CategoryAttributeBindingUpsertPayload = {
+  descriptor: Record<string, unknown> | string;
+  group_name: string | null;
+  sort_order: number;
+  is_visible_in_filters: boolean;
+  is_visible_in_card: boolean;
+};
