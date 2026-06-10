@@ -64,6 +64,11 @@ export function AttributeDefinitionForm({
         />
       </label>
 
+      {/* Hidden "false" sentinel so an unchecked box submits is_active=false.
+          Placed BEFORE checkbox so checkbox value comes last in FormData (checked → both present).
+          getAll() will include "true" if checkbox was checked; otherwise only "false". */}
+      <input type="hidden" name="is_active" value="false" />
+
       <label className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -74,10 +79,8 @@ export function AttributeDefinitionForm({
         />
         <span className="text-sm font-medium">Active</span>
       </label>
-      {/* Hidden "false" sentinel so an unchecked box submits is_active=false.
-          The checked box's value="true" wins when both are present (last value
-          read by the action is the checkbox); see bool() in actions.ts. */}
-      <input type="hidden" name="is_active" value="false" />
+
+      <input type="hidden" name="is_system" value="false" />
 
       <label className="flex items-center gap-2">
         <input
@@ -89,7 +92,6 @@ export function AttributeDefinitionForm({
         />
         <span className="text-sm font-medium">System</span>
       </label>
-      <input type="hidden" name="is_system" value="false" />
 
       <DescriptorEditor initial={d?.descriptor ?? null} />
 
