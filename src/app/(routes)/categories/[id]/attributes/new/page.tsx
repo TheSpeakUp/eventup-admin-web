@@ -133,7 +133,7 @@ export default async function NewBindingPage({
   return (
     <div className="p-8">
       <h1 className="text-2xl font-semibold">
-        Bind "{def.key}" to {catRes.data.name}
+        Bind &ldquo;{def.key}&rdquo; to {catRes.data.name}
       </h1>
       <div className="mt-4 max-w-2xl">
         <BindingForm
