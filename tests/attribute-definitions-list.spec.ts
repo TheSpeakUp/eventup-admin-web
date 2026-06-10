@@ -1,3 +1,4 @@
+// tests/attribute-definitions-list.spec.ts
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
 

@@ -2,8 +2,8 @@
 import { notFound } from "next/navigation";
 import { getAttributeDefinition } from "@/lib/attribute-definitions/api";
 import { getAdminSession } from "@/lib/auth/session";
-import { AttributeDefinitionForm } from "../_components/AttributeDefinitionForm";
-import { DeleteAttributeDefinitionButton } from "../_components/DeleteAttributeDefinitionButton";
+import { AttributeDefinitionForm } from "@/app/(routes)/attribute-definitions/_components/AttributeDefinitionForm";
+import { DeleteAttributeDefinitionButton } from "@/app/(routes)/attribute-definitions/_components/DeleteAttributeDefinitionButton";
 
 export default async function AttributeDefinitionDetailPage({
   params,
