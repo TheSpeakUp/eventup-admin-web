@@ -52,6 +52,16 @@ import {
   type CategoryWrite,
 } from "./categories-store";
 import {
+  createPromoCodeRecord,
+  deactivatePromoCodeRecord,
+  getPromoCodeById,
+  listPromoCodesPage,
+  updatePromoCodeRecord,
+  type PromoCodePatch,
+  type PromoCodeWrite,
+} from "./promo-codes-store";
+import type { TargetingRuleTree } from "@/lib/promo-codes/types";
+import {
   createAttributeDefinitionRecord,
   deleteAttributeDefinitionRecord,
   getAttributeDefinitionByKey,
@@ -124,6 +134,9 @@ const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
 const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
 const CATEGORIES_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/categories",
+);
+const PROMO_CODES_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/promo-codes",
 );
 const ANALYTICS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/analytics",
@@ -223,6 +236,64 @@ function toCategoryWrite(body: Record<string, unknown>): CategoryWrite {
       string,
       string
     >;
+  return out;
+}
+
+// Normalize an untyped promo-code create body into the store's write shape.
+// The server action validates/coerces every field upstream; here we pick known
+// keys so the store stays typed. Money/Decimal arrive as strings.
+function toPromoCodeWrite(body: Record<string, unknown>): PromoCodeWrite {
+  const out: PromoCodeWrite = {};
+  if (typeof body.code === "string") out.code = body.code;
+  if (typeof body.discount_type === "string")
+    out.discount_type = body.discount_type;
+  if (typeof body.discount_value === "string")
+    out.discount_value = body.discount_value;
+  if (typeof body.currency === "string" || body.currency === null)
+    out.currency = body.currency as string | null;
+  if (typeof body.max_uses === "number" || body.max_uses === null)
+    out.max_uses = body.max_uses as number | null;
+  if (
+    typeof body.min_order_amount_minor === "number" ||
+    body.min_order_amount_minor === null
+  )
+    out.min_order_amount_minor = body.min_order_amount_minor as number | null;
+  if (Array.isArray(body.allowed_item_types) || body.allowed_item_types === null)
+    out.allowed_item_types = body.allowed_item_types as string[] | null;
+  if (
+    Array.isArray(body.allowed_periods_count) ||
+    body.allowed_periods_count === null
+  )
+    out.allowed_periods_count = body.allowed_periods_count as number[] | null;
+  if (typeof body.valid_from === "string" || body.valid_from === null)
+    out.valid_from = body.valid_from as string | null;
+  if (typeof body.valid_until === "string" || body.valid_until === null)
+    out.valid_until = body.valid_until as string | null;
+  if (typeof body.is_active === "boolean") out.is_active = body.is_active;
+  if (typeof body.stripe_coupon_id === "string" || body.stripe_coupon_id === null)
+    out.stripe_coupon_id = body.stripe_coupon_id as string | null;
+  if (
+    body.targeting_rules === null ||
+    (typeof body.targeting_rules === "object" && body.targeting_rules !== null)
+  )
+    out.targeting_rules = body.targeting_rules as TargetingRuleTree | null;
+  return out;
+}
+
+// PATCH body coercion — mutable fields only.
+function toPromoCodePatch(body: Record<string, unknown>): PromoCodePatch {
+  const out: PromoCodePatch = {};
+  if (typeof body.is_active === "boolean" || body.is_active === null)
+    out.is_active = body.is_active as boolean | null;
+  if (typeof body.valid_until === "string" || body.valid_until === null)
+    out.valid_until = body.valid_until as string | null;
+  if (typeof body.max_uses === "number" || body.max_uses === null)
+    out.max_uses = body.max_uses as number | null;
+  if (
+    body.targeting_rules === null ||
+    (typeof body.targeting_rules === "object" && body.targeting_rules !== null)
+  )
+    out.targeting_rules = body.targeting_rules as TargetingRuleTree | null;
   return out;
 }
 
@@ -967,6 +1038,59 @@ export const handlers = [
     const ok = deleteCategoryRecord(id);
     if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // ---- Marketplace promo codes (literal /list + /:id/deactivate first) ----
+  http.post(`${PROMO_CODES_BASE}/list`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as {
+      code?: string;
+      is_active?: boolean;
+      item_type?: string;
+      limit?: number;
+      offset?: number;
+    };
+    return HttpResponse.json(listPromoCodesPage(body));
+  }),
+  http.post(`${PROMO_CODES_BASE}/:id/deactivate`, ({ params }) => {
+    const updated = deactivatePromoCodeRecord(Number(params.id));
+    if (!updated)
+      return HttpResponse.json(
+        {
+          error: {
+            message: "not_found",
+            meta: { original_detail: "Promo code not found" },
+          },
+        },
+        { status: 404 },
+      );
+    return HttpResponse.json(updated);
+  }),
+  http.post(PROMO_CODES_BASE, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const created = createPromoCodeRecord(toPromoCodeWrite(body));
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.get(`${PROMO_CODES_BASE}/:id`, ({ params }) => {
+    const found = getPromoCodeById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+  http.patch(`${PROMO_CODES_BASE}/:id`, async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const updated = updatePromoCodeRecord(
+      Number(params.id),
+      toPromoCodePatch(body),
+    );
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
   }),
 
   // ---- Marketplace attribute-definitions (literal /list before /:key) ----
