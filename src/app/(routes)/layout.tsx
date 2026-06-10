@@ -10,6 +10,7 @@ const navItems = [
   { href: "/traffic", label: "Traffic" },
   { href: "/categories", label: "Categories" },
   { href: "/attribute-definitions", label: "Attribute Definitions" },
+  { href: "/registry", label: "Registry" },
   { href: "/promotions", label: "Promotions" },
   { href: "/promo-codes", label: "Promo codes" },
   { href: "/quality", label: "Quality" },
