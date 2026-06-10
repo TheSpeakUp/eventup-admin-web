@@ -13,12 +13,15 @@ import type {
 } from "@/lib/providers/types";
 import { CONFLICT_SERVICE_ID } from "./fixtures";
 import { CONFLICT_PROVIDER_ID } from "./providers-fixtures";
-import { getAll, getById, setStatus } from "./store";
+import { getAll, getById, patchServiceFields, setStatus } from "./store";
 import {
   getAllProviders,
   getProviderById,
+  patchProviderFields,
   setProviderStatus,
 } from "./providers-store";
+import type { ProviderFieldsPatch } from "@/lib/providers/types";
+import type { ServiceFieldsPatch } from "@/lib/services/types";
 import type { ServiceDetail } from "@/lib/services/types";
 import type { ProviderDetail } from "@/lib/providers/types";
 import {
@@ -759,6 +762,38 @@ export const handlers = [
     );
   }),
 
+  // ── Service field-edit (M7) — partial DATA-field PATCH ────────────────
+  http.patch(`${BASE}/:id/fields`, async ({ params, request }) => {
+    const id = parseIntId(params.id);
+    if (id === null)
+      return HttpResponse.json({ detail: "Invalid id" }, { status: 422 });
+    const body = await parseJsonBody<ServiceFieldsPatch>(request);
+    if (body === null)
+      return adminValidationError("Malformed request body");
+    // Required (NON-nullable) strings cannot be sent empty — exercise 422.
+    if (typeof body.title === "string" && body.title.trim() === "") {
+      return HttpResponse.json(
+        { detail: "title must not be empty" },
+        { status: 422 },
+      );
+    }
+    if (
+      typeof body.pricing_type === "string" &&
+      body.pricing_type.trim() === ""
+    ) {
+      return HttpResponse.json(
+        { detail: "pricing_type must not be empty" },
+        { status: 422 },
+      );
+    }
+    const result = patchServiceFields(id, body);
+    if (result === "not_found")
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    if (result === "invalid")
+      return adminValidationError("Field cannot be cleared (non-nullable)");
+    return HttpResponse.json(result);
+  }),
+
   // ── Providers list ────────────────────────────────────────────────────
   http.get(PROVIDERS_BASE, ({ request }) => {
     const url = new URL(request.url);
@@ -872,6 +907,38 @@ export const handlers = [
       message_key: "admin.marketplace.provider.canceled",
       message: "Provider canceled",
     });
+  }),
+
+  // ── Provider field-edit (M7) — partial DATA-field PATCH ───────────────
+  http.patch(`${PROVIDERS_BASE}/:id/fields`, async ({ params, request }) => {
+    const id = parseIntId(params.id);
+    if (id === null)
+      return HttpResponse.json({ detail: "Invalid id" }, { status: 422 });
+    const body = await parseJsonBody<ProviderFieldsPatch>(request);
+    if (body === null)
+      return adminValidationError("Malformed request body");
+    // Required (NON-nullable) strings cannot be sent empty — exercise 422.
+    if (typeof body.name === "string" && body.name.trim() === "") {
+      return HttpResponse.json(
+        { detail: "name must not be empty" },
+        { status: 422 },
+      );
+    }
+    if (
+      typeof body.account_currency === "string" &&
+      body.account_currency.trim() === ""
+    ) {
+      return HttpResponse.json(
+        { detail: "account_currency must not be empty" },
+        { status: 422 },
+      );
+    }
+    const result = patchProviderFields(id, body);
+    if (result === "not_found")
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    if (result === "invalid")
+      return adminValidationError("Field cannot be cleared (non-nullable)");
+    return HttpResponse.json(result);
   }),
 
   // ── Offers SLA queue ──────────────────────────────────────────────────

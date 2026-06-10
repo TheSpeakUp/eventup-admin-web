@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProvider } from "@/lib/providers/api";
 import ProviderDetailView from "./_components/ProviderDetail";
+import ProviderFieldEditForm from "./_components/ProviderFieldEditForm";
 import ProviderModerationPanel from "./_components/ProviderModerationPanel";
 
 type Params = Promise<{ id: string }>;
@@ -34,7 +35,10 @@ export default async function ProviderDetailPage({ params }: { params: Params })
         ← Back to providers
       </Link>
       <div className="grid grid-cols-[1fr_280px] gap-6">
-        <ProviderDetailView provider={result.data} />
+        <div className="space-y-5">
+          <ProviderDetailView provider={result.data} />
+          <ProviderFieldEditForm provider={result.data} />
+        </div>
         <aside className="space-y-3">
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
           <ProviderModerationPanel

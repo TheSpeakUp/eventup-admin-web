@@ -2,6 +2,7 @@ import { apiFetch, type ApiFetchResult } from "@/lib/api";
 import type {
   ProviderCursorPage,
   ProviderDetail,
+  ProviderFieldsPatch,
   ProviderListQuery,
   ProviderModerationResponse,
   ProviderStats,
@@ -72,6 +73,22 @@ export function deleteProvider(
 ): Promise<ApiFetchResult<ProviderModerationResponse>> {
   return apiFetch<ProviderModerationResponse>(`${BASE}/${id}`, {
     method: "DELETE",
+    redirectOn401: false,
+  });
+}
+
+/**
+ * M7 — partial DATA-field edit. Sends only the changed keys (omit = unchanged,
+ * explicit `null` = clear a nullable column). The backend re-runs the detail
+ * read and returns the same `ProviderDetail` shape the page already renders.
+ */
+export function patchProviderFields(
+  id: number,
+  payload: ProviderFieldsPatch,
+): Promise<ApiFetchResult<ProviderDetail>> {
+  return apiFetch<ProviderDetail>(`${BASE}/${id}/fields`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
     redirectOn401: false,
   });
 }
