@@ -29,8 +29,34 @@ export type ProviderDetail = ProviderListItem & {
   contact_email: string | null;
   phone: string | null;
   website: string | null;
+  // Editable DATA fields (M7 field-edit) — account_currency is NON-nullable;
+  // address / logo_url are nullable-clearable.
+  account_currency: string;
+  address: string | null;
+  logo_url: string | null;
   verification_message: string | null;
   block_reason: string | null;
+};
+
+/**
+ * Partial DATA-field update body for `PATCH /providers/{id}/fields` (M7).
+ *
+ * Mirrors backend `ProviderFieldsUpdate`: every key is OPTIONAL. Semantics:
+ *  - key OMITTED → leave unchanged;
+ *  - key present with a value → set;
+ *  - key present with `null` → clear (nullable columns only).
+ *
+ * `name` and `account_currency` are NON-nullable: an explicit `null` is rejected
+ * by the backend with a 400 — the form never sends `null` for those.
+ */
+export type ProviderFieldsPatch = {
+  name?: string;
+  description?: string | null;
+  website?: string | null;
+  account_currency?: string;
+  location_id?: number | null;
+  address?: string | null;
+  logo_url?: string | null;
 };
 
 export type ProviderCursorPage = {

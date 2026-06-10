@@ -48,9 +48,45 @@ export type ServiceDetail = ServiceListItem & {
   pricing_type: string;
   pricing_interval_minutes: number | null;
   max_units_per_order: number | null;
+  // Editable DATA fields (M7 field-edit). publication_discount_enabled is
+  // NON-nullable; publication_discount_percent / promo_code are nullable.
+  publication_discount_enabled: boolean;
+  publication_discount_percent: number | null;
+  publication_discount_promo_code: string | null;
   external_url: string | null;
   address: string | null;
   attributes: Record<string, unknown> | null;
+};
+
+/**
+ * Partial DATA-field update body for `PATCH /services/{id}/fields` (M7).
+ *
+ * Mirrors backend `ServiceFieldsUpdate`: every key is OPTIONAL. Semantics:
+ *  - key OMITTED → leave unchanged;
+ *  - key present with a value → set;
+ *  - key present with `null` → clear (nullable columns only).
+ *
+ * NON-nullable columns (`title`, `recipient_type`, `remote_available`,
+ * `pricing_type`, `publication_discount_enabled`) reject an explicit `null`
+ * with a 400 — the form never sends `null` for those.
+ */
+export type ServiceFieldsPatch = {
+  title?: string;
+  description?: string | null;
+  category_id?: number | null;
+  recipient_type?: number;
+  remote_available?: boolean;
+  base_price_minor?: number | null;
+  currency?: string | null;
+  pricing_type?: string;
+  pricing_interval_minutes?: number | null;
+  max_units_per_order?: number | null;
+  publication_discount_enabled?: boolean;
+  publication_discount_percent?: number | null;
+  publication_discount_promo_code?: string | null;
+  external_url?: string | null;
+  address?: string | null;
+  attributes?: Record<string, unknown> | null;
 };
 
 export type ServiceCursorPage = {

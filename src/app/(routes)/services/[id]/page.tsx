@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService } from "@/lib/services/api";
 import ServiceDetailView from "./_components/ServiceDetail";
+import ServiceFieldEditForm from "./_components/ServiceFieldEditForm";
 import ServiceModerationPanel from "./_components/ServiceModerationPanel";
 
 type Params = Promise<{ id: string }>;
@@ -34,7 +35,10 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
         ← Back to services
       </Link>
       <div className="grid grid-cols-[1fr_280px] gap-6">
-        <ServiceDetailView service={result.data} />
+        <div className="space-y-5">
+          <ServiceDetailView service={result.data} />
+          <ServiceFieldEditForm service={result.data} />
+        </div>
         <aside className="space-y-3">
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
           <ServiceModerationPanel

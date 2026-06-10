@@ -2,6 +2,7 @@ import { apiFetch, type ApiFetchResult } from "@/lib/api";
 import type {
   ServiceCursorPage,
   ServiceDetail,
+  ServiceFieldsPatch,
   ServiceListQuery,
   ServiceModerationResponse,
   ServiceStats,
@@ -85,6 +86,22 @@ export function archiveService(
   const qs = reason ? `?reason=${encodeURIComponent(reason)}` : "";
   return apiFetch<ServiceModerationResponse>(`${BASE}/${id}/archive${qs}`, {
     method: "POST",
+    redirectOn401: false,
+  });
+}
+
+/**
+ * M7 — partial DATA-field edit. Sends only the changed keys (omit = unchanged,
+ * explicit `null` = clear a nullable column). The backend re-runs the detail
+ * read and returns the same `ServiceDetail` shape the page already renders.
+ */
+export function patchServiceFields(
+  id: number,
+  payload: ServiceFieldsPatch,
+): Promise<ApiFetchResult<ServiceDetail>> {
+  return apiFetch<ServiceDetail>(`${BASE}/${id}/fields`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
     redirectOn401: false,
   });
 }
