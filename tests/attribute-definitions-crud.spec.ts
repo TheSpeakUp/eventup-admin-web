@@ -36,7 +36,9 @@ test.describe("Attribute definitions CRUD", () => {
 
   // Creates its OWN definition and edits THAT one — never the seeded fixtures
   // (cuisine/seats/legacy_flag), which the list spec asserts on (shared store).
-  test("edit a freshly created definition and verify changes", async ({
+  // Verifies the edit actually PERSISTS through the write+read path: a partial
+  // update (group_name) plus the is_active toggle must survive a reload.
+  test("edit persists a field + is_active toggle on a created definition", async ({
     page,
   }) => {
     await loginAsMockAdmin(page, "/attribute-definitions/new");
@@ -51,13 +53,31 @@ test.describe("Attribute definitions CRUD", () => {
     await expect(
       page.getByTestId("attribute-definition-key"),
     ).toHaveAttribute("readonly", "");
+    // Created active by default.
+    await expect(
+      page.getByTestId("attribute-definition-active"),
+    ).toBeChecked();
 
-    // Update group_name and submit form successfully (action returns success).
+    // Edit: set group_name and toggle Active off, then save.
     await page.getByTestId("attribute-definition-group").fill("misc");
+    await page.getByTestId("attribute-definition-active").uncheck();
     await page.getByTestId("attribute-definition-submit").click();
-    // Verify no error message is shown (successful submission).
+    // Barrier: the in-place update has no redirect, so wait for the submit
+    // button to leave its "Saving…" pending state before asserting/reloading.
+    await expect(
+      page.getByTestId("attribute-definition-submit"),
+    ).toHaveText("Save");
     await expect(
       page.getByTestId("attribute-definition-error"),
     ).toHaveCount(0);
+
+    // Reload the detail page — persisted server values must reflect the edit.
+    await page.goto("/attribute-definitions/editable_attr");
+    await expect(
+      page.getByTestId("attribute-definition-group"),
+    ).toHaveValue("misc");
+    await expect(
+      page.getByTestId("attribute-definition-active"),
+    ).not.toBeChecked();
   });
 });
