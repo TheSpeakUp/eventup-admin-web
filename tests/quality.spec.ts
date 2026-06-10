@@ -69,8 +69,13 @@ test.describe("Quality / ranking (M4)", () => {
     await row.getByTestId("anomaly-review-1-note").fill("Confirmed benign");
     await row.getByTestId("anomaly-review-1").click();
 
-    // After review the row drops out of the unreviewed filter; switch to
-    // reviewed and confirm it now shows as Reviewed.
+    // Barrier: reviewAnomalyAction revalidates /quality with no redirect, so the
+    // reviewed row drops out of the unreviewed filter on THIS page. Wait for that
+    // before navigating — otherwise the goto below can race ahead of the mutation
+    // commit and the reviewed list won't yet contain #1 (the actual flake).
+    await expect(page.getByTestId("anomaly-row-1")).toHaveCount(0);
+
+    // Switch to reviewed and confirm it now shows as Reviewed.
     await page.goto("/quality?tab=anomalies&resolved=true");
     await expect(
       page.getByTestId("anomaly-row-1").getByTestId("anomaly-reviewed-1"),
