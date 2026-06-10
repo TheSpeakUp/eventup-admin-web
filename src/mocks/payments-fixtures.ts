@@ -148,6 +148,10 @@ export function buildFixturePayments(): PaymentDetail[] {
       service_title: s.service_title,
       created_at: `2026-05-${day}T10:00:00.000Z`,
       updated_at: `2026-06-${day}T14:30:00.000Z`,
+      refunded_amount_minor: 0,
+      // Mirrors backend semantics: only succeeded payments are refundable.
+      refundable_amount_minor: s.status === "succeeded" ? totalGross : 0,
+      refunds: [],
     });
   }
 
@@ -173,6 +177,9 @@ export function buildFixturePayments(): PaymentDetail[] {
     service_title: "String quartet (full evening)",
     created_at: "2026-05-15T09:15:00.000Z",
     updated_at: "2026-06-01T11:45:00.000Z",
+    refunded_amount_minor: 0,
+    refundable_amount_minor: 237500,
+    refunds: [],
   });
 
   return out;

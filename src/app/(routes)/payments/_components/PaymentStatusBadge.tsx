@@ -23,6 +23,10 @@ const STYLES: Record<string, { label: string; cls: string }> = {
     label: "Canceled",
     cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
   },
+  partially_refunded: {
+    label: "Partially refunded",
+    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+  },
   refunded: {
     label: "Refunded",
     cls: "bg-violet-100 text-violet-800 ring-violet-200",

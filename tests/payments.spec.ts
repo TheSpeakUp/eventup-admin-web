@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
 
-test.describe("payments (read-only)", () => {
+test.describe("payments", () => {
   test("nav opens /payments and the list renders with offset paging", async ({
     page,
   }) => {
@@ -79,7 +79,7 @@ test.describe("payments (read-only)", () => {
     await expect(page.getByTestId("payments-empty")).toBeVisible();
   });
 
-  test("row opens detail with all fields + formatted money, no action controls", async ({
+  test("row opens detail with all fields + formatted money + refund panel", async ({
     page,
   }) => {
     await loginAsMockAdmin(page, "/payments");
@@ -110,17 +110,15 @@ test.describe("payments (read-only)", () => {
     await expect(page.getByTestId("payment-field-created")).toBeVisible();
     await expect(page.getByTestId("payment-field-updated")).toBeVisible();
 
-    // SCOPE GUARD: no refund / write / action control on the detail surface.
-    // (The only chrome buttons are the shared shell header's logout — scope
-    // the no-button assertion to the detail card.)
-    await expect(
-      page.getByRole("button", { name: /refund/i }),
-    ).toHaveCount(0);
-    await expect(page.getByText(/refund/i)).toHaveCount(0);
-    const detailCard = page
-      .getByTestId("payment-detail-title")
-      .locator("xpath=ancestor::div[contains(@class,'rounded-md')][1]");
-    await expect(detailCard.getByRole("button")).toHaveCount(0);
+    // Refund panel (M5 refund-write) renders with the full gross refundable
+    // (237500 minor USD) and no history yet. No mutation here — later refund
+    // tests use other fixture ids so this read stays pristine.
+    await expect(page.getByTestId("refund-panel")).toBeVisible();
+    await expect(page.getByTestId("refundable-total")).toContainText(
+      "2,375.00",
+    );
+    await expect(page.getByTestId("refunds-empty")).toBeVisible();
+    await expect(page.getByTestId("refund-open")).toBeEnabled();
   });
 
   test("zero-decimal currency (JPY) renders without fractional units", async ({
@@ -146,5 +144,74 @@ test.describe("payments (read-only)", () => {
     await expect(
       page.getByText("This page could not be found."),
     ).toBeVisible();
+  });
+
+  // ---- M5 refund-write -----------------------------------------------
+  // Mutating tests run LAST and use fixture ids the read tests above never
+  // assert on (store mutations persist for the server's lifetime).
+
+  test("full refund flips status to refunded and disables the action", async ({
+    page,
+  }) => {
+    // id 11: succeeded EUR 21000 + 5% tax → gross 22050 refundable.
+    await loginAsMockAdmin(page, "/payments/11");
+    await expect(page.getByTestId("refund-open")).toBeEnabled();
+
+    await page.getByTestId("refund-open").click();
+    // Empty amount ⇒ full refund; dialog states the revoke consequence.
+    await expect(page.getByTestId("refund-form")).toContainText(
+      "Full refund",
+    );
+    await page.getByTestId("refund-reason").fill("duplicate charge");
+    await page.getByTestId("refund-submit").click();
+
+    await expect(page.getByTestId("payment-status-badge")).toHaveAttribute(
+      "data-status",
+      "refunded",
+    );
+    await expect(page.getByTestId("refunded-total")).toContainText("220.50");
+    await expect(page.getByTestId("refund-open")).toBeDisabled();
+    await expect(page.getByTestId("refunds-table")).toContainText(
+      "duplicate charge",
+    );
+  });
+
+  test("partial refund keeps payment refundable", async ({ page }) => {
+    // id 2: succeeded EUR 8000 + 400 tax → gross 8400 refundable.
+    await loginAsMockAdmin(page, "/payments/2");
+    await page.getByTestId("refund-open").click();
+
+    // 10.00 EUR → 1000 minor; dialog flags it as partial.
+    await page.getByTestId("refund-amount").fill("10");
+    await expect(page.getByTestId("refund-form")).toContainText(
+      "Partial refund",
+    );
+    await page.getByTestId("refund-submit").click();
+
+    await expect(page.getByTestId("payment-status-badge")).toHaveAttribute(
+      "data-status",
+      "partially_refunded",
+    );
+    await expect(page.getByTestId("refunded-total")).toContainText("10.00");
+    await expect(page.getByTestId("refundable-total")).toContainText("74.00");
+    // Still refundable — the action stays armed for the remainder.
+    await expect(page.getByTestId("refund-open")).toBeEnabled();
+    await expect(page.getByTestId("refunds-table")).toBeVisible();
+  });
+
+  test("over-amount is blocked client-side", async ({ page }) => {
+    // id 9: succeeded USD 9900 + 495 tax → gross 10395 refundable.
+    await loginAsMockAdmin(page, "/payments/9");
+    await page.getByTestId("refund-open").click();
+    await page.getByTestId("refund-amount").fill("99999");
+    await expect(page.getByTestId("refund-amount-error")).toBeVisible();
+    await expect(page.getByTestId("refund-submit")).toBeDisabled();
+  });
+
+  test("non-refundable payment has the action disabled", async ({ page }) => {
+    // id 5: failed AED payment — backend reports refundable 0.
+    await loginAsMockAdmin(page, "/payments/5");
+    await expect(page.getByTestId("refund-panel")).toBeVisible();
+    await expect(page.getByTestId("refund-open")).toBeDisabled();
   });
 });

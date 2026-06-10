@@ -3,6 +3,8 @@ import type {
   PaymentDetail,
   PaymentListQuery,
   PaymentListResponse,
+  RefundCreateBody,
+  RefundRead,
 } from "./types";
 
 const BASE = "/eventup-admin/v1/marketplace/payments";
@@ -31,4 +33,15 @@ export function getPayment(
   id: number,
 ): Promise<ApiFetchResult<PaymentDetail>> {
   return apiFetch<PaymentDetail>(`${BASE}/${id}`);
+}
+
+export function refundPayment(
+  id: number,
+  body: RefundCreateBody,
+): Promise<ApiFetchResult<RefundRead>> {
+  return apiFetch<RefundRead>(`${BASE}/${id}/refund`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    redirectOn401: false,
+  });
 }

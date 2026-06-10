@@ -36,7 +36,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
   "XPF",
 ]);
 
-function minorUnitExponent(currency: string): number {
+export function minorUnitExponent(currency: string): number {
   return ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase()) ? 0 : 2;
 }
 

@@ -14,6 +14,7 @@ export const PAYMENT_STATUSES = [
   "succeeded",
   "failed",
   "canceled",
+  "partially_refunded",
   "refunded",
 ] as const;
 
@@ -39,6 +40,21 @@ export type PaymentListItem = {
   created_at: string;
 };
 
+// One refund row — mirrors AdminRefundRead.
+export type RefundRead = {
+  id: number;
+  payment_id: number;
+  amount_minor: number;
+  currency: string;
+  status: string;
+  reason: string | null;
+  stripe_refund_id: string | null;
+  failure_code: string | null;
+  failure_message: string | null;
+  initiated_by_admin_id: string | null;
+  created_at: string;
+};
+
 export type PaymentDetail = {
   id: number;
   provider: string;
@@ -61,6 +77,16 @@ export type PaymentDetail = {
   service_title: string | null;
   created_at: string;
   updated_at: string;
+  // Refund aggregate (M5 refund-write). refundable === 0 hides/disables the
+  // refund action; partial refunds keep the purchased service running.
+  refunded_amount_minor: number;
+  refundable_amount_minor: number;
+  refunds: RefundRead[];
+};
+
+export type RefundCreateBody = {
+  amount_minor?: number;
+  reason?: string;
 };
 
 export type PaymentListResponse = {

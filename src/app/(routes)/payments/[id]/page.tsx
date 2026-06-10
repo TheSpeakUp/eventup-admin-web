@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayment } from "@/lib/payments/api";
 import PaymentDetailView from "./_components/PaymentDetailView";
+import RefundPanel from "./_components/RefundPanel";
 
 type Params = Promise<{ id: string }>;
 
-// Read-only payment detail (M5). Refund / mutation path is deliberately NOT
-// built — deferred (Stripe + money). This page renders fields only; there is
-// no action panel.
+// Payment detail (M5) + refund action panel (M5 refund-write): full or
+// partial Stripe refund, SUPERADMIN-gated on the backend.
 export default async function PaymentDetailPage({
   params,
 }: {
@@ -45,6 +45,13 @@ export default async function PaymentDetailPage({
         ← Back to payments
       </Link>
       <PaymentDetailView payment={result.data} />
+      <RefundPanel
+        paymentId={result.data.id}
+        currency={result.data.currency}
+        refundableAmountMinor={result.data.refundable_amount_minor}
+        refundedAmountMinor={result.data.refunded_amount_minor}
+        refunds={result.data.refunds}
+      />
     </div>
   );
 }

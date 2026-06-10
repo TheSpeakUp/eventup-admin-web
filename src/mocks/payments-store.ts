@@ -4,6 +4,7 @@ import type {
   PaymentListQuery,
 } from "@/lib/payments/types";
 import { buildFixturePayments } from "./payments-fixtures";
+import type { RefundRead } from "@/lib/payments/types";
 
 const payments = new Map<number, PaymentDetail>();
 
@@ -70,4 +71,59 @@ export function listPaymentsPage(query: PaymentListQuery): {
   const limit = Math.max(1, Math.min(200, query.limit ?? 50));
   const items = rows.slice(offset, offset + limit).map(toListItem);
   return { items, total };
+}
+
+// M5 refund-write mock. Mirrors the backend rules: only succeeded /
+// partially_refunded payments with refundable remaining accept a refund;
+// omitted amount means "the full remainder"; reaching the charged total flips
+// the payment to refunded, anything less to partially_refunded.
+export function applyRefund(
+  id: number,
+  amountMinor: number | undefined,
+  reason: string | undefined,
+): { ok: true; refund: RefundRead } | { ok: false; status: number; message: string } {
+  ensureSeed();
+  const p = payments.get(id);
+  if (!p) return { ok: false, status: 404, message: "Not found" };
+  if (p.status !== "succeeded" && p.status !== "partially_refunded") {
+    return {
+      ok: false,
+      status: 400,
+      message: `Payment status '${p.status}' is not refundable`,
+    };
+  }
+  const remaining = p.refundable_amount_minor;
+  if (remaining <= 0)
+    return { ok: false, status: 400, message: "No refundable amount remaining" };
+  const amount = amountMinor ?? remaining;
+  if (amount <= 0 || amount > remaining) {
+    return {
+      ok: false,
+      status: 400,
+      message: `Refund amount ${amount} exceeds refundable remaining ${remaining}`,
+    };
+  }
+  const refund: RefundRead = {
+    id: p.refunds.length + 1,
+    payment_id: p.id,
+    amount_minor: amount,
+    currency: p.currency,
+    status: "succeeded",
+    reason: reason ?? null,
+    stripe_refund_id: `re_mock_${p.id}_${p.refunds.length + 1}`,
+    failure_code: null,
+    failure_message: null,
+    initiated_by_admin_id: null,
+    created_at: new Date("2026-06-10T12:00:00.000Z").toISOString(),
+  };
+  const refunded = p.refunded_amount_minor + amount;
+  const charged = p.total_gross_minor ?? p.amount_minor;
+  payments.set(id, {
+    ...p,
+    refunds: [refund, ...p.refunds],
+    refunded_amount_minor: refunded,
+    refundable_amount_minor: Math.max(0, charged - refunded),
+    status: refunded >= charged ? "refunded" : "partially_refunded",
+  });
+  return { ok: true, refund };
 }
