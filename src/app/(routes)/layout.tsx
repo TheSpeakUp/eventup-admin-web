@@ -7,6 +7,7 @@ const navItems = [
   { href: "/services", label: "Services" },
   { href: "/providers", label: "Providers" },
   { href: "/offers", label: "Offers" },
+  { href: "/traffic", label: "Traffic" },
   { href: "/categories", label: "Categories" },
   // Admin-team management is SUPERADMIN-only — the page itself guards access,
   // but a non-SUPERADMIN should not even see the link (defense-in-depth, and

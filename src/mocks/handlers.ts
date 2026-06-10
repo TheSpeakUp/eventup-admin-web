@@ -52,6 +52,13 @@ import {
   type CategoryWrite,
 } from "./categories-store";
 import type { AttributeSchema } from "@/lib/categories/types";
+import {
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  buildListingDetail,
+  buildSummary,
+  buildTopListings,
+} from "./traffic-fixtures";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -60,6 +67,11 @@ const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
 const CATEGORIES_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/categories",
 );
+const ANALYTICS_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/analytics",
+);
+
+const ANALYTICS_TYPES = new Set(["service", "offer"]);
 
 function toAdminListItem(a: AdminDetail): AdminListItem {
   return {
@@ -828,4 +840,49 @@ export const handlers = [
     if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
   }),
+
+  // ── M2 traffic analytics (read-only) ───────────────────────────────────
+  http.get(`${ANALYTICS_BASE}/summary`, ({ request }) => {
+    const url = new URL(request.url);
+    const from = url.searchParams.get("date_from") ?? DEFAULT_FROM;
+    const to = url.searchParams.get("date_to") ?? DEFAULT_TO;
+    return HttpResponse.json(buildSummary(from, to));
+  }),
+  http.get(`${ANALYTICS_BASE}/top-listings`, ({ request }) => {
+    const url = new URL(request.url);
+    const type = url.searchParams.get("type") ?? "service";
+    if (!ANALYTICS_TYPES.has(type)) {
+      return HttpResponse.json(
+        { detail: `unknown subject type '${type}'` },
+        { status: 400 },
+      );
+    }
+    const from = url.searchParams.get("date_from") ?? DEFAULT_FROM;
+    const to = url.searchParams.get("date_to") ?? DEFAULT_TO;
+    const limit = Number(url.searchParams.get("limit") ?? "20");
+    return HttpResponse.json(buildTopListings(type, from, to, limit));
+  }),
+  http.get(
+    `${ANALYTICS_BASE}/listings/:type/:id`,
+    ({ params, request }) => {
+      const type = String(params.type);
+      if (!ANALYTICS_TYPES.has(type)) {
+        return HttpResponse.json(
+          { detail: `unknown subject type '${type}'` },
+          { status: 400 },
+        );
+      }
+      const url = new URL(request.url);
+      const from = url.searchParams.get("date_from") ?? DEFAULT_FROM;
+      const to = url.searchParams.get("date_to") ?? DEFAULT_TO;
+      const detail = buildListingDetail(type, Number(params.id), from, to);
+      if (!detail) {
+        return HttpResponse.json(
+          { detail: `no traffic for ${type} #${params.id}` },
+          { status: 404 },
+        );
+      }
+      return HttpResponse.json(detail);
+    },
+  ),
 ];
