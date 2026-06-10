@@ -60,7 +60,8 @@ export async function upsertBindingAction(
     return fail("Group name must be at most 64 characters");
 
   const sortRaw = str(formData, "sort_order");
-  const sortOrder = Number(sortRaw ?? "100");
+  if (sortRaw === undefined) return fail("Sort order is required");
+  const sortOrder = Number(sortRaw);
   if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 10000)
     return fail("Sort order must be an integer 0–10000");
 

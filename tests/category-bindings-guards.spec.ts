@@ -28,4 +28,11 @@ test.describe("Category bindings role gating", () => {
     });
     await expect(page.getByTestId("binding-delete")).toBeVisible();
   });
+
+  test("SUPERADMIN sees the delete button on a binding", async ({ page }) => {
+    await loginAsMockAdmin(page, "/categories/1/attributes/cuisine", {
+      email: "admin@example.com",
+    });
+    await expect(page.getByTestId("binding-delete")).toBeVisible();
+  });
 });

@@ -63,9 +63,20 @@ export default async function NewBindingPage({
       is_active: true,
       limit: 100,
     });
-    const options = defsRes.ok
-      ? defsRes.data.items.filter((d) => !bound.has(d.key))
-      : [];
+    if (!defsRes.ok) {
+      return (
+        <div className="p-8">
+          <h1 className="text-2xl font-semibold">Add attribute</h1>
+          <div
+            data-testid="bindings-error"
+            className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          >
+            {`Failed to load attribute definitions: ${defsRes.message}`}
+          </div>
+        </div>
+      );
+    }
+    const options = defsRes.data.items.filter((d) => !bound.has(d.key));
     return (
       <div className="p-8">
         <h1 className="text-2xl font-semibold">
