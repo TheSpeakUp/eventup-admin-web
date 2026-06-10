@@ -37,8 +37,10 @@ export default async function AttributeDefinitionTranslationsPage({
   }
 
   const tr = trRes.data;
-  // Key-remount so a revalidated GET resets the editor's seeded state.
-  const formKey = `${tr.attribute_key}:${tr.field_translations.length}:${tr.enum_value_translations.length}`;
+  // No key-remount here: TranslationsEditor is fully controlled (useState rows),
+  // so a revalidated GET must NOT remount it — a remount would wipe the form's
+  // post-save success state. The editor's own state already reflects the save
+  // (full-replace), and a fresh navigation re-seeds from the server GET.
 
   return (
     <div className="p-8">
@@ -55,7 +57,6 @@ export default async function AttributeDefinitionTranslationsPage({
       </div>
       <div className="mt-4 max-w-3xl">
         <TranslationsEditor
-          key={formKey}
           attrKey={tr.attribute_key}
           initialFields={tr.field_translations}
           initialEnums={tr.enum_value_translations}
