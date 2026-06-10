@@ -1,4 +1,5 @@
 // src/app/(routes)/categories/[id]/page.tsx
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCategory, listCategories } from "@/lib/categories/api";
 import { getAdminSession } from "@/lib/auth/session";
@@ -50,6 +51,13 @@ export default async function CategoryDetailPage({
       <h1 className="text-2xl font-semibold" data-testid="category-detail-name">
         {category.name}
       </h1>
+      <Link
+        href={`/categories/${category.id}/attributes`}
+        data-testid="category-attributes-link"
+        className="mt-1 inline-block text-sm text-blue-700"
+      >
+        Manage attributes →
+      </Link>
       <div className="mt-4 max-w-2xl space-y-6">
         {/*
           Translations are intentionally NOT passed on edit: the backend
