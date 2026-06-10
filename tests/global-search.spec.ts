@@ -12,7 +12,7 @@ test.describe("global header search", () => {
     await expect(page.getByTestId("global-search-input")).toBeVisible();
   });
 
-  test("submitting fans out to providers + services and links to detail", async ({
+  test("submitting queries the search endpoint and links to detail", async ({
     page,
   }) => {
     await loginAsMockAdmin(page, "/services");
@@ -42,6 +42,25 @@ test.describe("global header search", () => {
     await expect(page.getByTestId("search-group-services")).toContainText(
       "Photography",
     );
+  });
+
+  test("offer term surfaces matching offers and links to detail", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, "/services");
+    // Offers seed 1..40, so "Offer 17" is a unique title match.
+    await page.getByTestId("global-search-input").fill("Offer 17");
+    await page.getByTestId("global-search-input").press("Enter");
+    await page.waitForURL(/\/search\?q=Offer/);
+
+    const offersGroup = page.getByTestId("search-group-offers");
+    await expect(offersGroup).toContainText("Offer 17");
+    await expect(page.getByTestId("search-group-providers")).toContainText(
+      "No matching providers",
+    );
+
+    await offersGroup.getByRole("link").first().click();
+    await page.waitForURL(/\/offers\/17/);
   });
 
   test("no matches shows an empty state", async ({ page }) => {
