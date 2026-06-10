@@ -11,6 +11,7 @@ const navItems = [
   { href: "/categories", label: "Categories" },
   { href: "/attribute-definitions", label: "Attribute Definitions" },
   { href: "/promotions", label: "Promotions" },
+  { href: "/promo-codes", label: "Promo codes" },
   { href: "/quality", label: "Quality" },
   { href: "/payments", label: "Payments" },
   { href: "/audit", label: "Audit log" },
