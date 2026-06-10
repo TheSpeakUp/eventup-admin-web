@@ -46,8 +46,17 @@ export default async function RoutesLayout({
         </nav>
       </aside>
       <div className="flex-1 flex flex-col">
-        <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-6">
-          <span className="text-sm text-zinc-500">Marketplace operator console</span>
+        <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-6 gap-4">
+          <form action="/search" role="search" className="flex-1 max-w-md">
+            <input
+              type="search"
+              name="q"
+              data-testid="global-search-input"
+              placeholder="Search providers and services…"
+              aria-label="Global search"
+              className="w-full rounded-md border border-zinc-200 px-3 py-1.5 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+            />
+          </form>
           <div className="flex items-center gap-3 text-sm">
             <span data-testid="admin-email" className="text-zinc-700">
               {session?.email ?? "not signed in"}
