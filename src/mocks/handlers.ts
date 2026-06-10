@@ -116,6 +116,7 @@ import {
   type OverrideWrite,
 } from "./quality-store";
 import { getPaymentById, listPaymentsPage } from "./payments-store";
+import { getAuditEventById, listAuditEventsPage } from "./audit-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -139,6 +140,7 @@ const ATTRIBUTE_DEFINITIONS_BASE = buildApiUrl(
 const PAYMENTS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/payments",
 );
+const AUDIT_BASE = buildApiUrl("/eventup-admin/v1/audit");
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
 
@@ -1642,6 +1644,37 @@ export const handlers = [
     if (id === null)
       return HttpResponse.json({ detail: "Invalid id" }, { status: 422 });
     const found = getPaymentById(id);
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // ---- Unified audit log (M6, READ-ONLY) --------------------------------
+  // The list lives at the router ROOT (AUDIT_BASE, no sub-segment) and the
+  // detail hangs off `${AUDIT_BASE}/:id` (UUID). MSW matches `/audit` and
+  // `/audit/:id` distinctly, so the detail handler does not shadow the list.
+  // Offset/limit list with actor_email / action / entity_type / success /
+  // realm / actor_id / date-range filters. THIS SURFACE IS THE AUDIT LOG —
+  // there is no write path by design.
+  http.get(AUDIT_BASE, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listAuditEventsPage({
+        actor_id: queryStr(url.searchParams.get("actor_id")),
+        actor_email: queryStr(url.searchParams.get("actor_email")),
+        action: queryStr(url.searchParams.get("action")),
+        entity_type: queryStr(url.searchParams.get("entity_type")),
+        success: queryBool(url.searchParams.get("success")),
+        realm: queryStr(url.searchParams.get("realm")),
+        occurred_from: queryStr(url.searchParams.get("occurred_from")),
+        occurred_to: queryStr(url.searchParams.get("occurred_to")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.get(`${AUDIT_BASE}/:id`, ({ params }) => {
+    const found = getAuditEventById(String(params.id));
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
