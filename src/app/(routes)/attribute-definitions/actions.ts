@@ -20,10 +20,11 @@ function str(formData: FormData, key: string): string | undefined {
 }
 
 // A hidden checkbox carries "true"/"false"; absence → undefined (leave unchanged).
+// Use getAll to check if the "true" value is present (checkbox checked).
 function bool(formData: FormData, key: string): boolean | undefined {
-  const v = formData.get(key);
-  if (typeof v !== "string" || v === "") return undefined;
-  return v === "true";
+  const values = formData.getAll(key);
+  if (values.length === 0) return undefined;
+  return values.includes("true");
 }
 
 // Build the payload. `requireKey`/`requireDescriptor` = true for create.
