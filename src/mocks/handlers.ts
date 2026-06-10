@@ -142,6 +142,7 @@ import type { RevalidationRunPayload } from "@/lib/registry/types";
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
 const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
+const SEARCH_BASE = buildApiUrl("/eventup-admin/v1/marketplace/search");
 const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
 const CATEGORIES_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/categories",
@@ -801,6 +802,64 @@ export const handlers = [
     if (result === "invalid")
       return adminValidationError("Field cannot be cleared (non-nullable)");
     return HttpResponse.json(result);
+  }),
+
+  // ── Global search (Layer-4) ───────────────────────────────────────────
+  http.get(SEARCH_BASE, ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get("q")?.trim().toLowerCase() ?? "";
+    if (!q) {
+      return HttpResponse.json({ detail: "q is required" }, { status: 422 });
+    }
+    const limitParam = Number(url.searchParams.get("limit") ?? "8");
+    const limit =
+      Number.isInteger(limitParam) && limitParam >= 1 && limitParam <= 50
+        ? limitParam
+        : 8;
+
+    const providerRows = getAllProviders().filter((p) =>
+      p.name.toLowerCase().includes(q),
+    );
+    const serviceRows = getAll().filter((s) =>
+      s.title.toLowerCase().includes(q),
+    );
+    const offerRows = getAllOffers().filter((o) =>
+      (o.offer_title ?? "").toLowerCase().includes(q),
+    );
+
+    return HttpResponse.json({
+      query: url.searchParams.get("q") ?? "",
+      providers: {
+        items: providerRows.slice(0, limit).map((p) => ({
+          id: p.id,
+          name: p.name,
+          verification_status: p.verification_status,
+        })),
+        total: providerRows.length,
+      },
+      services: {
+        items: serviceRows.slice(0, limit).map((s) => ({
+          id: s.id,
+          title: s.title,
+          status: s.status,
+          provider_id: s.provider_id,
+          provider_name: s.provider_name,
+        })),
+        total: serviceRows.length,
+      },
+      offers: {
+        items: offerRows.slice(0, limit).map((o) => ({
+          id: o.offer_id,
+          title: o.offer_title ?? "",
+          status: o.status,
+          service_id: o.service_id,
+          service_title: o.service_title,
+          provider_id: o.provider_id,
+          provider_name: o.provider_name,
+        })),
+        total: offerRows.length,
+      },
+    });
   }),
 
   // ── Providers list ────────────────────────────────────────────────────

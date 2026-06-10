@@ -1,44 +1,56 @@
 // src/lib/search/api.ts
-import { listProviders } from "@/lib/providers/api";
-import { listServices } from "@/lib/services/api";
-import type { GlobalSearchResults } from "./types";
+import { apiFetch } from "@/lib/api";
+import type { GlobalSearchApiResponse, GlobalSearchResults } from "./types";
 
-// Per-source cap. The header search is a quick-jump, not a full listing — each
+const BASE = "/eventup-admin/v1/marketplace/search";
+
+// Per-group cap. The header search is a quick-jump, not a full listing — each
 // surface has its own page for exhaustive browsing/pagination.
-const PER_SOURCE_LIMIT = 8;
+const PER_GROUP_LIMIT = 8;
+
+const EMPTY: GlobalSearchResults = {
+  query: "",
+  providers: { items: [], total: 0, error: null },
+  services: { items: [], total: 0, error: null },
+  offers: { items: [], total: 0, error: null },
+};
 
 /**
- * Global operator search. Backend exposes no dedicated `/search` endpoint yet
- * (that is Layer-4), so we fan out across the existing `search`-filtered list
- * endpoints in parallel and group the results. Offers are intentionally
- * excluded — that domain has no text-search list endpoint (SLA/queue only).
+ * Global operator search via the dedicated Layer-4 backend endpoint — one
+ * round-trip returning grouped providers/services/offers hits (replaces the
+ * old client-side fan-out across the list endpoints, which could not search
+ * offers at all).
  *
- * Each group fails independently: one source erroring does not blank the others.
+ * The single call failing sets the same error on every group so the page keeps
+ * its per-group failure rendering.
  */
 export async function globalSearch(
   rawQuery: string,
 ): Promise<GlobalSearchResults> {
   const query = rawQuery.trim();
-  if (!query) {
+  if (!query) return EMPTY;
+
+  const params = new URLSearchParams({
+    q: query,
+    limit: String(PER_GROUP_LIMIT),
+  });
+  const res = await apiFetch<GlobalSearchApiResponse>(
+    `${BASE}?${params.toString()}`,
+  );
+
+  if (!res.ok) {
     return {
-      query: "",
-      providers: { items: [], error: null },
-      services: { items: [], error: null },
+      query,
+      providers: { items: [], total: 0, error: res.message },
+      services: { items: [], total: 0, error: res.message },
+      offers: { items: [], total: 0, error: res.message },
     };
   }
 
-  const [providersRes, servicesRes] = await Promise.all([
-    listProviders({ search: query, limit: PER_SOURCE_LIMIT }),
-    listServices({ search: query, limit: PER_SOURCE_LIMIT }),
-  ]);
-
   return {
     query,
-    providers: providersRes.ok
-      ? { items: providersRes.data.items, error: null }
-      : { items: [], error: providersRes.message },
-    services: servicesRes.ok
-      ? { items: servicesRes.data.items, error: null }
-      : { items: [], error: servicesRes.message },
+    providers: { ...res.data.providers, error: null },
+    services: { ...res.data.services, error: null },
+    offers: { ...res.data.offers, error: null },
   };
 }
