@@ -5,8 +5,10 @@
 // is fetched per render. A 403 from any list surfaces the same "requires an
 // admin role" panel as categories.
 import {
+  listCampaigns,
   listDiscountRules,
   listMonthlyDiscounts,
+  listOrders,
   listProducts,
   listTariffs,
   listZones,
@@ -27,6 +29,10 @@ import MonthlyDiscountsTable from "./_components/MonthlyDiscountsTable";
 import MonthlyDiscountForm from "./_components/MonthlyDiscountForm";
 import ZonesTable from "./_components/ZonesTable";
 import ZoneForm from "./_components/ZoneForm";
+import OrdersTable from "./_components/OrdersTable";
+import CampaignsTable from "./_components/CampaignsTable";
+import OrdersFilter from "./_components/OrdersFilter";
+import CampaignsFilter from "./_components/CampaignsFilter";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
@@ -41,7 +47,15 @@ function ErrorPanel({ message, status }: { message: string; status: number }) {
   );
 }
 
-async function TabContent({ tab }: { tab: PromotionsTab }) {
+type Filters = { status?: string; service_id?: number };
+
+async function TabContent({
+  tab,
+  filters,
+}: {
+  tab: PromotionsTab;
+  filters: Filters;
+}) {
   if (tab === "products") {
     const res = await listProducts({ limit: 200 });
     if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
@@ -93,15 +107,43 @@ async function TabContent({ tab }: { tab: PromotionsTab }) {
       </div>
     );
   }
-  // zones
-  const res = await listZones({ limit: 200 });
+  if (tab === "zones") {
+    const res = await listZones({ limit: 200 });
+    if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
+    return (
+      <div className="mt-4 space-y-4">
+        <NewItemPanel label="New zone" testid="zone-new">
+          <ZoneForm mode="create" />
+        </NewItemPanel>
+        <ZonesTable rows={res.data.items} />
+      </div>
+    );
+  }
+  if (tab === "orders") {
+    const res = await listOrders({
+      limit: 200,
+      status: filters.status,
+      service_id: filters.service_id,
+    });
+    if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
+    return (
+      <div className="mt-4 space-y-4">
+        <OrdersFilter status={filters.status} serviceId={filters.service_id} />
+        <OrdersTable rows={res.data.items} />
+      </div>
+    );
+  }
+  // campaigns
+  const res = await listCampaigns({
+    limit: 200,
+    status: filters.status,
+    service_id: filters.service_id,
+  });
   if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
   return (
     <div className="mt-4 space-y-4">
-      <NewItemPanel label="New zone" testid="zone-new">
-        <ZoneForm mode="create" />
-      </NewItemPanel>
-      <ZonesTable rows={res.data.items} />
+      <CampaignsFilter status={filters.status} serviceId={filters.service_id} />
+      <CampaignsTable rows={res.data.items} />
     </div>
   );
 }
@@ -109,11 +151,23 @@ async function TabContent({ tab }: { tab: PromotionsTab }) {
 export default async function PromotionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    status?: string;
+    service_id?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const tab: PromotionsTab =
     sp.tab && isPromotionsTab(sp.tab) ? sp.tab : "products";
+  const serviceIdNum =
+    sp.service_id && Number.isFinite(Number(sp.service_id))
+      ? Number(sp.service_id)
+      : undefined;
+  const filters: Filters = {
+    status: sp.status || undefined,
+    service_id: serviceIdNum,
+  };
 
   return (
     <div className="p-8">
@@ -121,7 +175,7 @@ export default async function PromotionsPage({
       <div className="mt-4">
         <PromotionsTabs active={tab} />
       </div>
-      <TabContent tab={tab} />
+      <TabContent tab={tab} filters={filters} />
     </div>
   );
 }

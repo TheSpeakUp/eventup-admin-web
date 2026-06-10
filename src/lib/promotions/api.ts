@@ -8,6 +8,10 @@
 // entity are wired here — see per-entity notes.
 import { apiFetch, type ApiFetchResult } from "@/lib/api";
 import type {
+  CampaignCancelPayload,
+  CampaignListQuery,
+  CampaignListResponse,
+  CampaignRead,
   DiscountRuleCreatePayload,
   DiscountRuleListQuery,
   DiscountRuleListResponse,
@@ -18,6 +22,9 @@ import type {
   MonthlyDiscountListResponse,
   MonthlyDiscountRead,
   MonthlyDiscountUpdatePayload,
+  OrderListQuery,
+  OrderListResponse,
+  OrderRead,
   ProductCreatePayload,
   ProductListQuery,
   ProductListResponse,
@@ -262,6 +269,67 @@ export function updateZone(
 ): Promise<ApiFetchResult<ZoneRead>> {
   return apiFetch<ZoneRead>(`${BASE}/zones/${id}`, {
     method: "PATCH",
+    body: JSON.stringify(payload),
+    redirectOn401: false,
+  });
+}
+
+function appendStr(params: URLSearchParams, key: string, v: string | undefined) {
+  if (v !== undefined && v !== "") params.set(key, v);
+}
+
+// --------------------------------------------------------------------------- //
+// Orders — read-only (list + detail). No writes.                              //
+// --------------------------------------------------------------------------- //
+
+export function listOrders(
+  query: OrderListQuery = {},
+): Promise<ApiFetchResult<OrderListResponse>> {
+  const params = new URLSearchParams();
+  appendStr(params, "status", query.status);
+  appendNum(params, "service_id", query.service_id);
+  appendStr(params, "created_from", query.created_from);
+  appendStr(params, "created_to", query.created_to);
+  appendNum(params, "limit", query.limit);
+  appendNum(params, "offset", query.offset);
+  return apiFetch<OrderListResponse>(withQs(`${BASE}/orders`, params));
+}
+
+export function getOrder(id: number): Promise<ApiFetchResult<OrderRead>> {
+  return apiFetch<OrderRead>(`${BASE}/orders/${id}`);
+}
+
+// --------------------------------------------------------------------------- //
+// Campaigns — read (list + detail) + cancel (mutating, audited backend-side).  //
+// --------------------------------------------------------------------------- //
+
+export function listCampaigns(
+  query: CampaignListQuery = {},
+): Promise<ApiFetchResult<CampaignListResponse>> {
+  const params = new URLSearchParams();
+  appendStr(params, "status", query.status);
+  appendNum(params, "zone_id", query.zone_id);
+  appendNum(params, "service_id", query.service_id);
+  appendNum(params, "limit", query.limit);
+  appendNum(params, "offset", query.offset);
+  return apiFetch<CampaignListResponse>(withQs(`${BASE}/campaigns`, params));
+}
+
+export function getCampaign(
+  id: number,
+): Promise<ApiFetchResult<CampaignRead>> {
+  return apiFetch<CampaignRead>(`${BASE}/campaigns/${id}`);
+}
+
+// POST /{id}/cancel — body is optional ({reason}); returns the updated
+// CampaignRead. redirectOn401:false so the Server Action surfaces a structured
+// error to the table instead of redirecting.
+export function cancelCampaign(
+  id: number,
+  payload: CampaignCancelPayload = {},
+): Promise<ApiFetchResult<CampaignRead>> {
+  return apiFetch<CampaignRead>(`${BASE}/campaigns/${id}/cancel`, {
+    method: "POST",
     body: JSON.stringify(payload),
     redirectOn401: false,
   });

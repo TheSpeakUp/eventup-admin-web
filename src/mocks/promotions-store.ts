@@ -5,10 +5,14 @@
 // pattern as categories-store.ts. The server actions validate/coerce every
 // field before the handler reaches here, so the *Write inputs are already typed.
 import type {
+  CampaignListResponse,
+  CampaignRead,
   DiscountRuleListResponse,
   DiscountRuleRead,
   MonthlyDiscountListResponse,
   MonthlyDiscountRead,
+  OrderListResponse,
+  OrderRead,
   ProductListResponse,
   ProductRead,
   TariffListResponse,
@@ -17,11 +21,14 @@ import type {
   ZoneRead,
 } from "@/lib/promotions/types";
 import {
+  buildFixtureCampaigns,
   buildFixtureDiscountRules,
   buildFixtureMonthlyDiscounts,
+  buildFixtureOrders,
   buildFixtureProducts,
   buildFixtureTariffs,
   buildFixtureZones,
+  toOrderListItem,
 } from "./promotions-fixtures";
 
 const products = new Map<number, ProductRead>();
@@ -29,6 +36,8 @@ const tariffs = new Map<number, TariffRead>();
 const discountRules = new Map<number, DiscountRuleRead>();
 const monthlyDiscounts = new Map<number, MonthlyDiscountRead>();
 const zones = new Map<number, ZoneRead>();
+const orders = new Map<number, OrderRead>();
+const campaigns = new Map<number, CampaignRead>();
 
 let nextProductId = 100;
 let nextTariffId = 100;
@@ -44,6 +53,8 @@ function ensureSeed(): void {
   for (const m of buildFixtureMonthlyDiscounts())
     monthlyDiscounts.set(m.id, m);
   for (const z of buildFixtureZones()) zones.set(z.id, z);
+  for (const o of buildFixtureOrders()) orders.set(o.id, o);
+  for (const c of buildFixtureCampaigns()) campaigns.set(c.id, c);
 }
 
 export function resetPromotionsStore(): void {
@@ -52,6 +63,8 @@ export function resetPromotionsStore(): void {
   discountRules.clear();
   monthlyDiscounts.clear();
   zones.clear();
+  orders.clear();
+  campaigns.clear();
   nextProductId = 100;
   nextTariffId = 100;
   nextDiscountRuleId = 100;
@@ -429,4 +442,94 @@ export function updateZoneRecord(
   };
   zones.set(id, updated);
   return updated;
+}
+
+// ---- Orders (read-only) ---------------------------------------------------- //
+
+export function listOrdersPage(opts: {
+  status?: string;
+  service_id?: number;
+  created_from?: string;
+  created_to?: string;
+  limit?: number;
+  offset?: number;
+}): OrderListResponse {
+  ensureSeed();
+  let rows = Array.from(orders.values());
+  if (opts.status !== undefined)
+    rows = rows.filter((r) => r.status === opts.status);
+  if (opts.service_id !== undefined)
+    rows = rows.filter((r) => r.service_id === opts.service_id);
+  if (opts.created_from !== undefined)
+    rows = rows.filter((r) => r.created_at >= opts.created_from!);
+  if (opts.created_to !== undefined)
+    rows = rows.filter((r) => r.created_at <= opts.created_to!);
+  rows.sort((a, b) => a.id - b.id);
+  const page = paginate(rows, opts.limit, opts.offset);
+  return { items: page.items.map(toOrderListItem), total: page.total };
+}
+
+export function getOrderById(id: number): OrderRead | null {
+  ensureSeed();
+  return orders.get(id) ?? null;
+}
+
+// ---- Campaigns (read + cancel) --------------------------------------------- //
+
+export function listCampaignsPage(opts: {
+  status?: string;
+  zone_id?: number;
+  service_id?: number;
+  limit?: number;
+  offset?: number;
+}): CampaignListResponse {
+  ensureSeed();
+  let rows = Array.from(campaigns.values());
+  if (opts.status !== undefined)
+    rows = rows.filter((r) => r.status === opts.status);
+  if (opts.zone_id !== undefined)
+    rows = rows.filter((r) => r.zone_id === opts.zone_id);
+  if (opts.service_id !== undefined)
+    rows = rows.filter((r) => r.service_id === opts.service_id);
+  rows.sort((a, b) => a.id - b.id);
+  return paginate(rows, opts.limit, opts.offset);
+}
+
+export function getCampaignById(id: number): CampaignRead | null {
+  ensureSeed();
+  return campaigns.get(id) ?? null;
+}
+
+// Cancel mirrors the backend service: missing → "not_found"; already terminal
+// (canceled / expired) or otherwise non-cancelable → "conflict" (a clean 4xx,
+// exercises the error path); otherwise status flips to ``canceled`` and the
+// updated row is returned.
+//
+// Campaign #3 is seeded active but flagged non-cancelable here so the cancel
+// error path can be exercised in-UI (an active row still renders a Cancel
+// button; the backend then rejects it) — see promotions-fixtures.
+const NON_CANCELABLE_CAMPAIGN_IDS = new Set<number>([3]);
+
+export type CancelCampaignResult =
+  | { kind: "ok"; campaign: CampaignRead }
+  | { kind: "not_found" }
+  | { kind: "conflict"; reason: string };
+
+export function cancelCampaignRecord(id: number): CancelCampaignResult {
+  ensureSeed();
+  const current = campaigns.get(id);
+  if (!current) return { kind: "not_found" };
+  if (current.status === "canceled" || current.status === "expired")
+    return {
+      kind: "conflict",
+      reason: `Campaign ${id} is already ${current.status} and cannot be canceled`,
+    };
+  if (NON_CANCELABLE_CAMPAIGN_IDS.has(id))
+    return {
+      kind: "conflict",
+      reason: `Campaign ${id} has already been settled and cannot be canceled`,
+    };
+  const updated: CampaignRead = { ...current, status: "canceled" };
+  campaigns.set(id, updated);
+  return { kind: "ok", campaign: updated };
 }

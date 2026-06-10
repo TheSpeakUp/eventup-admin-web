@@ -10,6 +10,8 @@ const LABELS: Record<PromotionsTab, string> = {
   "discount-rules": "Discount rules",
   "monthly-discounts": "Monthly discounts",
   zones: "Zones",
+  orders: "Orders",
+  campaigns: "Campaigns",
 };
 
 export default function PromotionsTabs({ active }: { active: PromotionsTab }) {
