@@ -4,6 +4,8 @@ import type {
   AttributeDefinitionListQuery,
   AttributeDefinitionMutationPayload,
   AttributeDefinitionRead,
+  AttributeDefinitionTranslations,
+  AttributeDefinitionTranslationsPayload,
 } from "./types";
 
 const BASE = "/eventup-admin/v1/marketplace/attribute-definitions";
@@ -60,5 +62,23 @@ export function deleteAttributeDefinition(
   return apiFetch<{ success?: boolean; message?: string } | null>(
     `${BASE}/${encodeURIComponent(key)}`,
     { method: "DELETE", redirectOn401: false },
+  );
+}
+
+export function getAttributeDefinitionTranslations(
+  key: string,
+): Promise<ApiFetchResult<AttributeDefinitionTranslations>> {
+  return apiFetch<AttributeDefinitionTranslations>(
+    `${BASE}/${encodeURIComponent(key)}/translations`,
+  );
+}
+
+export function putAttributeDefinitionTranslations(
+  key: string,
+  payload: AttributeDefinitionTranslationsPayload,
+): Promise<ApiFetchResult<AttributeDefinitionTranslations>> {
+  return apiFetch<AttributeDefinitionTranslations>(
+    `${BASE}/${encodeURIComponent(key)}/translations`,
+    { method: "PUT", body: JSON.stringify(payload), redirectOn401: false },
   );
 }
