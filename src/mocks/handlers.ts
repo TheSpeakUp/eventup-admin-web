@@ -136,7 +136,7 @@ import {
   setServiceOverrideRecord,
   type OverrideWrite,
 } from "./quality-store";
-import { getPaymentById, listPaymentsPage } from "./payments-store";
+import { applyRefund, getPaymentById, listPaymentsPage } from "./payments-store";
 import { getAuditEventById, listAuditEventsPage } from "./audit-store";
 import {
   listRegistrySnapshotsPage,
@@ -2061,6 +2061,31 @@ export const handlers = [
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
+  }),
+
+  // ---- Payment refund (M5 refund-write) ---------------------------------
+  http.post(`${PAYMENTS_BASE}/:id/refund`, async ({ params, request }) => {
+    const id = parseIntId(params.id);
+    if (id === null)
+      return HttpResponse.json({ detail: "Invalid id" }, { status: 422 });
+    const body = (await request.json().catch(() => ({}))) as {
+      amount_minor?: number;
+      reason?: string;
+    };
+    if (body.amount_minor !== undefined && body.amount_minor < 1) {
+      return HttpResponse.json(
+        { detail: "amount_minor must be >= 1" },
+        { status: 422 },
+      );
+    }
+    const result = applyRefund(id, body.amount_minor, body.reason);
+    if (!result.ok) {
+      return HttpResponse.json(
+        { error: { message: result.message } },
+        { status: result.status },
+      );
+    }
+    return HttpResponse.json(result.refund);
   }),
 
   // ---- Attribute registry snapshots + revalidation (F13) ----------------
