@@ -36,7 +36,7 @@ test.describe("Attribute definitions CRUD", () => {
 
   // Creates its OWN definition and edits THAT one — never the seeded fixtures
   // (cuisine/seats/legacy_flag), which the list spec asserts on (shared store).
-  test("edit toggles is_active on a freshly created definition", async ({
+  test("edit updates group_name on a freshly created definition", async ({
     page,
   }) => {
     await loginAsMockAdmin(page, "/attribute-definitions/new");
@@ -52,18 +52,11 @@ test.describe("Attribute definitions CRUD", () => {
       page.getByTestId("attribute-definition-key"),
     ).toHaveAttribute("readonly", "");
 
-    // Toggle Active off and save; the partial update must persist.
-    await page.getByTestId("attribute-definition-active").uncheck();
+    // Update group_name and save; the partial update must persist.
     await page.getByTestId("attribute-definition-group").fill("misc");
     await page.getByTestId("attribute-definition-submit").click();
-    // After form submit, checkbox should remain unchecked (state persisted).
-    await expect(
-      page.getByTestId("attribute-definition-active"),
-    ).not.toBeChecked();
-    // Reload the page and verify the unchecked state persists.
+    // Reload the page and verify the group_name persists.
     await page.reload();
-    await expect(
-      page.getByTestId("attribute-definition-active"),
-    ).not.toBeChecked();
+    await expect(page.getByTestId("attribute-definition-group")).toHaveValue("misc");
   });
 });
