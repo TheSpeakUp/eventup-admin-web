@@ -40,6 +40,7 @@ export function resetAttributeDefinitionsStore(): void {
   defs.clear();
   nextId = 100;
   ensureSeed();
+  ensureTranslationSeed();
 }
 
 export function getAttributeDefinitionByKey(
