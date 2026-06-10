@@ -115,6 +115,7 @@ import {
   setServiceOverrideRecord,
   type OverrideWrite,
 } from "./quality-store";
+import { getPaymentById, listPaymentsPage } from "./payments-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -134,6 +135,9 @@ const QUALITY_BASE = buildApiUrl(
 );
 const ATTRIBUTE_DEFINITIONS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/attribute-definitions",
+);
+const PAYMENTS_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/payments",
 );
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
@@ -1610,6 +1614,34 @@ export const handlers = [
   ),
   http.get(`${QUALITY_BASE}/anomalies/:id`, ({ params }) => {
     const found = getAnomalyById(Number(params.id));
+    if (!found)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  // ---- Marketplace payments (M5, READ-ONLY) -----------------------------
+  // Offset/limit list with status / currency / resource_type / q filters,
+  // plus detail (404 on unknown id). No write/refund path exists by design.
+  http.get(PAYMENTS_BASE, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json(
+      listPaymentsPage({
+        resource_type: queryStr(url.searchParams.get("resource_type")),
+        status: queryStr(url.searchParams.get("status")),
+        currency: queryStr(url.searchParams.get("currency")),
+        created_from: queryStr(url.searchParams.get("created_from")),
+        created_to: queryStr(url.searchParams.get("created_to")),
+        q: queryStr(url.searchParams.get("q")),
+        limit: queryNum(url.searchParams.get("limit")),
+        offset: queryNum(url.searchParams.get("offset")),
+      }),
+    );
+  }),
+  http.get(`${PAYMENTS_BASE}/:id`, ({ params }) => {
+    const id = parseIntId(params.id);
+    if (id === null)
+      return HttpResponse.json({ detail: "Invalid id" }, { status: 422 });
+    const found = getPaymentById(id);
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
