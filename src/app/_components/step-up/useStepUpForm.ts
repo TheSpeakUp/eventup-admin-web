@@ -15,7 +15,7 @@ import { useStepUpContext } from "./StepUpProvider";
  */
 export function useStepUpForm<S>(
   action: (prev: S, fd: FormData) => Promise<S>,
-  initialState: S,
+  initialState: Awaited<S>,
   fallbackPermission: string,
 ): [S, (fd: FormData) => void, boolean] {
   const { openStepUp } = useStepUpContext();
@@ -52,7 +52,7 @@ export function useStepUpForm<S>(
     [action, openStepUp, fallbackPermission],
   );
 
-  const [state, formAction, pending] = useActionState<S, FormData>(wrapped, initialState as unknown as Awaited<S>);
+  const [state, formAction, pending] = useActionState<S, FormData>(wrapped, initialState);
   useEffect(() => {
     formActionRef.current = formAction;
   }, [formAction]);
