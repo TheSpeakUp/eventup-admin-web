@@ -11,9 +11,9 @@ type StepUpState = { stepUp?: { permission?: string } };
  * `stepUp` marker. On that marker it opens the step-up modal and, after a
  * successful OTP verify, re-dispatches the same FormData.
  */
-export function useStepUpForm<S extends StepUpState>(
+export function useStepUpForm<S extends StepUpState = StepUpState>(
   action: (prev: S, fd: FormData) => Promise<S>,
-  initialState: S,
+  initialState: Awaited<S>,
   fallbackPermission: string,
 ): [S, (fd: FormData) => void, boolean] {
   const { openStepUp } = useStepUpContext();
@@ -48,8 +48,7 @@ export function useStepUpForm<S extends StepUpState>(
     [action, openStepUp, fallbackPermission],
   );
 
-  // @ts-expect-error wrapped signature is compatible with useActionState FormData overload
-  const [state, formAction, pending] = useActionState(wrapped, initialState);
+  const [state, formAction, pending] = useActionState<S, FormData>(wrapped, initialState);
   useEffect(() => {
     formActionRef.current = formAction;
   }, [formAction]);
