@@ -156,6 +156,11 @@ test.describe("Quality / ranking (M4)", () => {
     // Service override controls hidden on the detail route.
     await page.goto("/quality/services/501");
     await expect(page.getByTestId("service-metric-id")).toBeVisible();
+    // Admin polish: header renders resolved labels.
+    await expect(page.getByTestId("service-metric-id")).toHaveText(
+      "Wedding photography premium",
+    );
+    await expect(page.getByText("Aurora Events Co.")).toBeVisible();
     await expect(page.getByTestId("override-controls")).toHaveCount(0);
   });
 });

@@ -52,6 +52,16 @@ test.describe("Promotions orders + campaigns (M3b)", () => {
     await expect(page.getByTestId("campaign-detail-id")).toHaveText(
       "Campaign #1",
     );
+    // Admin polish: resolved labels render instead of raw FK ids.
+    await expect(page.getByTestId("campaign-service-label")).toContainText(
+      "Wedding photography premium",
+    );
+    await expect(page.getByTestId("campaign-product-label")).toContainText(
+      "FEATURED_WEEK",
+    );
+    await expect(page.getByTestId("campaign-zone-label")).toHaveText(
+      "home_top",
+    );
   });
 
   test("an unknown campaign id shows a not-found state", async ({ page }) => {

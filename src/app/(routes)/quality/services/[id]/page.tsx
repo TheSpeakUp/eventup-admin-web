@@ -66,11 +66,12 @@ export default async function ServiceMetricDetailPage({
     <div className="p-8">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-semibold" data-testid="service-metric-id">
-          Service #{m.service_id}
+          {m.service_title ?? `Service #${m.service_id}`}
         </h1>
         <TierBadge tier={m.quality_tier} />
         <span className="text-sm text-zinc-500">
-          provider #{m.provider_id} · formula {m.formula_version}
+          {m.provider_name ?? `provider #${m.provider_id}`} · formula{" "}
+          {m.formula_version}
         </span>
       </div>
 
