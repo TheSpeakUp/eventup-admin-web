@@ -1098,7 +1098,10 @@ export const handlers = [
   http.post(`${OFFERS_BASE}/:id/enable`, ({ params }) => moderateOffer(params.id, "active", "enable")),
   http.post(`${OFFERS_BASE}/review-sla/dispatch`, () => {
     if (!stepUpGranted) {
-      return HttpResponse.json({ detail: "step_up_required" }, { status: 403 });
+      return HttpResponse.json(
+        { error: { message: "step_up_required", meta: { original_detail: "step_up_required" } } },
+        { status: 403 },
+      );
     }
     // Consume the single-use grant to ensure test isolation.
     stepUpGranted = false;
@@ -2195,6 +2198,9 @@ export const handlers = [
         expires_in_seconds: 600,
       });
     }
-    return HttpResponse.json({ detail: "step_up_verify_rejected" }, { status: 401 });
+    return HttpResponse.json(
+      { error: { message: "step_up_verify_rejected", meta: { original_detail: "step_up_verify_rejected" } } },
+      { status: 401 },
+    );
   }),
 ];

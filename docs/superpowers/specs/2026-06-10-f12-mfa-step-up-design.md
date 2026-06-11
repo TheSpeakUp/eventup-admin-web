@@ -109,10 +109,11 @@ export type ApiFetchResult<T> =
   | { ok: false; status: number; message: string; stepUp?: { permission?: string } };
 ```
 
-On `res.status === 403`, parse `detail`. If `detail === "step_up_required"`, return
-`{ ok:false, status:403, message, stepUp:{ permission } }`. The permission is read
-from the response body if present (backend may include the required permission;
-if not, leave `permission` undefined and the challenge requests the call-site's
+On `res.status === 403`, parse the backend error envelope. Detection reads
+`body.error.meta.original_detail ?? body.detail` and checks if it equals
+`"step_up_required"`. If so, return `{ ok:false, status:403, message, stepUp:{ permission } }`.
+The permission is read from the response body if present (backend may include the required
+permission; if not, leave `permission` undefined and the challenge requests the call-site's
 declared permission — see hook). 503 with `step_up_service_unavailable` returns the
 normal failure with its message (surfaced as "MFA unavailable"). 401 path unchanged.
 

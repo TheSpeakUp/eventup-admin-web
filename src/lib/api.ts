@@ -176,13 +176,18 @@ export async function apiFetch<T>(
     return { ok: false, status: 401, message: "Not authenticated" };
   }
   if (res.status === 403) {
-    const body = await readJson<{ detail?: string; permission?: string }>(res.clone());
-    if (body?.detail === "step_up_required") {
+    const body = await readJson<{
+      detail?: string;
+      permission?: string;
+      error?: { message?: string; meta?: { original_detail?: string; permission?: string } };
+    }>(res.clone());
+    const detail = body?.error?.meta?.original_detail ?? body?.detail;
+    if (detail === "step_up_required") {
       return {
         ok: false,
         status: 403,
         message: "Step-up verification required",
-        stepUp: { permission: body.permission },
+        stepUp: { permission: body?.permission ?? body?.error?.meta?.permission },
       };
     }
   }
