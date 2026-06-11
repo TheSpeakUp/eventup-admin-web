@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
 import { ADMIN_ROLES, type AdminRole } from "@/lib/admins/types";
 import { inviteAdminAction } from "../actions";
 import { INVITE_EMPTY } from "../action-types";
@@ -8,10 +8,7 @@ import { INVITE_EMPTY } from "../action-types";
 const DEFAULT_ROLE: AdminRole = "MODERATOR";
 
 export default function InviteForm() {
-  const [state, formAction, pending] = useActionState(
-    inviteAdminAction,
-    INVITE_EMPTY,
-  );
+  const [state, formAction, pending] = useStepUpForm(inviteAdminAction, INVITE_EMPTY, "admin.users.mgmt");
 
   return (
     <form
