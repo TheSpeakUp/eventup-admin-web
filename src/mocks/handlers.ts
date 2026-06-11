@@ -145,13 +145,11 @@ import {
 } from "./registry-store";
 import type { RevalidationRunPayload } from "@/lib/registry/types";
 import type {
-  AdminReviewRead,
-  ReviewListQuery,
   ReviewModeratePayload,
   ReplyModeratePayload,
+  ReviewStatus,
 } from "@/lib/reviews/types";
 import {
-  getAllReviews,
   getReviewById,
   filterReviews,
   setReviewStatus,
@@ -2334,8 +2332,8 @@ export const handlers = [
     const providerId = providerIdParam ? Number(providerIdParam) : undefined;
     const rating = ratingParam ? Number(ratingParam) : undefined;
 
-    let rows = filterReviews(
-      (statusParam ?? undefined) as any,
+    const rows = filterReviews(
+      (statusParam ?? undefined) as ReviewStatus | undefined,
       providerId,
       rating,
       qParam ?? undefined,
@@ -2380,7 +2378,7 @@ export const handlers = [
     >;
 
     const payload: ReviewModeratePayload = {
-      action: (body.action as any) ?? "hide",
+      action: (body.action as ReviewModeratePayload["action"]) ?? "hide",
     };
     if (typeof body.reason === "string") {
       payload.reason = body.reason;
@@ -2416,7 +2414,7 @@ export const handlers = [
     >;
 
     const payload: ReplyModeratePayload = {
-      action: (body.action as any) ?? "hide",
+      action: (body.action as ReplyModeratePayload["action"]) ?? "hide",
     };
 
     if (!["hide", "restore"].includes(payload.action)) {
