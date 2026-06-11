@@ -144,6 +144,19 @@ import {
   runRevalidationRecord,
 } from "./registry-store";
 import type { RevalidationRunPayload } from "@/lib/registry/types";
+import type {
+  AdminReviewRead,
+  ReviewListQuery,
+  ReviewModeratePayload,
+  ReplyModeratePayload,
+} from "@/lib/reviews/types";
+import {
+  getAllReviews,
+  getReviewById,
+  filterReviews,
+  setReviewStatus,
+  setReplyStatus,
+} from "./reviews-store";
 
 const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
@@ -174,6 +187,7 @@ const PAYMENTS_BASE = buildApiUrl(
 );
 const AUDIT_BASE = buildApiUrl("/eventup-admin/v1/audit");
 const REGISTRY_BASE = buildApiUrl("/eventup-admin/v1/marketplace");
+const REVIEWS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/reviews");
 const AUTH_BASE = buildApiUrl("/eventup-admin/v1/auth");
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
@@ -2307,5 +2321,117 @@ export const handlers = [
       { error: { message: "step_up_verify_rejected", meta: { original_detail: "step_up_verify_rejected" } } },
       { status: 401 },
     );
+  }),
+
+  // ── Admin reviews moderation (list, moderate review, moderate reply) ────
+  http.get(REVIEWS_BASE, ({ request }) => {
+    const url = new URL(request.url);
+    const statusParam = url.searchParams.get("status");
+    const providerIdParam = url.searchParams.get("provider_id");
+    const ratingParam = url.searchParams.get("rating");
+    const qParam = url.searchParams.get("q");
+
+    const providerId = providerIdParam ? Number(providerIdParam) : undefined;
+    const rating = ratingParam ? Number(ratingParam) : undefined;
+
+    let rows = filterReviews(
+      (statusParam ?? undefined) as any,
+      providerId,
+      rating,
+      qParam ?? undefined,
+    );
+
+    // Sort DESC by id to match backend cursor semantics.
+    rows.sort((a, b) => b.id - a.id);
+
+    const lastIdParam = url.searchParams.get("last_id");
+    const limitParam = url.searchParams.get("limit");
+    const last_id = lastIdParam ? Number(lastIdParam) : null;
+    const limit = Math.max(1, Math.min(100, Number(limitParam ?? "20")));
+    const filtered = last_id !== null ? rows.filter((r) => r.id < last_id) : rows;
+    const page = filtered.slice(0, limit);
+    const has_more = filtered.length > limit;
+    const next_last_id =
+      has_more && page.length > 0 ? (page[page.length - 1]?.id ?? null) : null;
+
+    return HttpResponse.json({
+      items: page,
+      count: page.length,
+      has_more,
+      next_last_id,
+    });
+  }),
+
+  // Literal path before :id — GET /{id}
+  http.get(`${REVIEWS_BASE}/:id`, ({ params }) => {
+    const id = Number(params.id);
+    const review = getReviewById(id);
+    if (!review)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(review);
+  }),
+
+  // PATCH /{id}/moderate — moderates the review
+  http.patch(`${REVIEWS_BASE}/:id/moderate`, async ({ params, request }) => {
+    const id = Number(params.id);
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+
+    const payload: ReviewModeratePayload = {
+      action: (body.action as any) ?? "hide",
+    };
+    if (typeof body.reason === "string") {
+      payload.reason = body.reason;
+    }
+
+    if (!["hide", "remove", "restore"].includes(payload.action)) {
+      return HttpResponse.json(
+        { detail: "Invalid action" },
+        { status: 422 },
+      );
+    }
+
+    const updated = setReviewStatus(
+      id,
+      payload.action === "hide"
+        ? "hidden"
+        : payload.action === "remove"
+          ? "removed"
+          : "published",
+      payload.reason,
+    );
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
+  }),
+
+  // PATCH /{id}/reply/moderate — moderates the provider reply
+  http.patch(`${REVIEWS_BASE}/:id/reply/moderate`, async ({ params, request }) => {
+    const id = Number(params.id);
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+
+    const payload: ReplyModeratePayload = {
+      action: (body.action as any) ?? "hide",
+    };
+
+    if (!["hide", "restore"].includes(payload.action)) {
+      return HttpResponse.json(
+        { detail: "Invalid action" },
+        { status: 422 },
+      );
+    }
+
+    const updated = setReplyStatus(
+      id,
+      payload.action === "hide" ? "hidden" : "published",
+    );
+    if (!updated)
+      return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(updated);
   }),
 ];
