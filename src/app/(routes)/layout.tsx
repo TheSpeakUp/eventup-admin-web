@@ -21,6 +21,9 @@ const navItems = [
   // but a non-SUPERADMIN should not even see the link (defense-in-depth, and
   // it avoids dangling them at a permission-denied screen).
   { href: "/admins", label: "Admin team", superadminOnly: true },
+  // Broadcast fans an announcement to every provider — SUPERADMIN-only
+  // (ADMIN_NOTIFICATIONS_WRITE on the backend).
+  { href: "/broadcast", label: "Broadcast", superadminOnly: true },
 ];
 
 export default async function RoutesLayout({

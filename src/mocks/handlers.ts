@@ -149,6 +149,7 @@ const BASE = buildApiUrl("/eventup-admin/v1/marketplace/services");
 const PROVIDERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/providers");
 const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
 const SEARCH_BASE = buildApiUrl("/eventup-admin/v1/marketplace/search");
+const MARKETPLACE_BASE = buildApiUrl("/eventup-admin/v1/marketplace");
 const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
 const CATEGORIES_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/categories",
@@ -2047,6 +2048,41 @@ export const handlers = [
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
+  }),
+
+  // ---- Broadcast (Layer 4) ----------------------------------------------
+  // Counts mirror the audience semantics; POST validates like the backend.
+  http.get(`${MARKETPLACE_BASE}/broadcast/preview`, ({ request }) => {
+    const url = new URL(request.url);
+    const audience = url.searchParams.get("audience") ?? "all";
+    const counts: Record<string, { providers: number; recipients: number }> = {
+      all: { providers: 5, recipients: 9 },
+      verified: { providers: 3, recipients: 6 },
+      pending: { providers: 1, recipients: 2 },
+      blocked: { providers: 1, recipients: 1 },
+    };
+    const c = counts[audience];
+    if (!c)
+      return HttpResponse.json({ detail: "unknown audience" }, { status: 422 });
+    return HttpResponse.json({ audience, ...c });
+  }),
+  http.post(`${MARKETPLACE_BASE}/broadcast`, async ({ request }) => {
+    const body = (await request.json()) as {
+      title?: string;
+      body?: string;
+      audience?: string;
+    };
+    if (!body.title || !body.body) {
+      return HttpResponse.json({ detail: "title/body required" }, { status: 422 });
+    }
+    const recipients = body.audience === "verified" ? 6 : 9;
+    return HttpResponse.json({
+      broadcast_id: "bc_mock_1",
+      audience: body.audience ?? "all",
+      providers: 3,
+      recipients,
+      enqueued: recipients,
+    });
   }),
 
   // ---- Marketplace payments (M5, READ-ONLY) -----------------------------
