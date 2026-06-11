@@ -93,7 +93,7 @@ export type ApiFetchOptions = RequestInit & {
 
 export type ApiFetchResult<T> =
   | { ok: true; status: number; data: T }
-  | { ok: false; status: number; message: string };
+  | { ok: false; status: number; message: string; stepUp?: { permission?: string } };
 
 async function readJson<T>(res: Response): Promise<T | null> {
   try {
@@ -174,6 +174,22 @@ export async function apiFetch<T>(
   if (res.status === 401) {
     if (redirectOn401) redirect("/login");
     return { ok: false, status: 401, message: "Not authenticated" };
+  }
+  if (res.status === 403) {
+    const body = await readJson<{
+      detail?: string;
+      permission?: string;
+      error?: { message?: string; meta?: { original_detail?: string; permission?: string } };
+    }>(res.clone());
+    const detail = body?.error?.meta?.original_detail ?? body?.detail;
+    if (detail === "step_up_required") {
+      return {
+        ok: false,
+        status: 403,
+        message: "Step-up verification required",
+        stepUp: { permission: body?.permission ?? body?.error?.meta?.permission },
+      };
+    }
   }
   if (!res.ok) {
     return { ok: false, status: res.status, message: await readError(res) };

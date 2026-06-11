@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAdminSession } from "@/lib/auth/session";
 import MockBackendBoot from "@/app/_components/MockBackendBoot";
+import StepUpProvider from "@/app/_components/step-up/StepUpProvider";
 import LogoutButton from "./LogoutButton";
 
 const navItems = [
@@ -72,7 +73,9 @@ export default async function RoutesLayout({
             <LogoutButton />
           </div>
         </header>
-        <main className="flex-1">{children}</main>
+        <StepUpProvider>
+          <main className="flex-1">{children}</main>
+        </StepUpProvider>
       </div>
     </div>
   );

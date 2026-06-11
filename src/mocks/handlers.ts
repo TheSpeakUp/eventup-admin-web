@@ -173,8 +173,13 @@ const PAYMENTS_BASE = buildApiUrl(
 );
 const AUDIT_BASE = buildApiUrl("/eventup-admin/v1/audit");
 const REGISTRY_BASE = buildApiUrl("/eventup-admin/v1/marketplace");
+const AUTH_BASE = buildApiUrl("/eventup-admin/v1/auth");
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
+
+// Step-up mock state: force-offer-dispatch 403s until a verify succeeds this session.
+let stepUpGranted = false;
+const STEP_UP_TEST_CODE = "123456";
 
 function toAdminListItem(a: AdminDetail): AdminListItem {
   return {
@@ -1092,8 +1097,16 @@ export const handlers = [
   http.post(`${OFFERS_BASE}/:id/archive`, ({ params }) => moderateOffer(params.id, "archived", "archive")),
   http.post(`${OFFERS_BASE}/:id/disable`, ({ params }) => moderateOffer(params.id, "disabled", "disable")),
   http.post(`${OFFERS_BASE}/:id/enable`, ({ params }) => moderateOffer(params.id, "active", "enable")),
-  http.post(`${OFFERS_BASE}/review-sla/dispatch`, () =>
-    HttpResponse.json({
+  http.post(`${OFFERS_BASE}/review-sla/dispatch`, () => {
+    if (!stepUpGranted) {
+      return HttpResponse.json(
+        { error: { message: "step_up_required", meta: { original_detail: "step_up_required" } } },
+        { status: 403 },
+      );
+    }
+    // Consume the single-use grant to ensure test isolation.
+    stepUpGranted = false;
+    return HttpResponse.json({
       generated_at: new Date(0).toISOString(),
       auto_close_enabled: true,
       checked_offers: 10,
@@ -1103,8 +1116,8 @@ export const handlers = [
       auto_closed_offer_ids: [4],
       escalations_sent: 0,
       escalated_service_ids: [],
-    }),
-  ),
+    });
+  }),
   http.post(`${OFFERS_BASE}/review-sla/providers/dispatch`, () =>
     HttpResponse.json({
       generated_at: new Date(0).toISOString(),
@@ -2206,5 +2219,34 @@ export const handlers = [
     if (!found)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(found);
+  }),
+
+  // ---- MFA step-up (F12) ----
+  http.post(`${AUTH_BASE}/mfa/challenge`, () =>
+    HttpResponse.json({
+      success: true,
+      challenge_id: "test-challenge",
+      method: "email_otp",
+      expires_in_seconds: 300,
+      delivery_hint: "a***n@example.com",
+    }),
+  ),
+  http.post(`${AUTH_BASE}/mfa/verify`, async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as { code?: unknown };
+    const code = typeof body.code === "string" ? body.code : "";
+    if (code === STEP_UP_TEST_CODE) {
+      // Single-use grant: set to true here, consume it in dispatch handler,
+      // then reset to false to ensure test isolation.
+      stepUpGranted = true;
+      return HttpResponse.json({
+        success: true,
+        permissions: [],
+        expires_in_seconds: 600,
+      });
+    }
+    return HttpResponse.json(
+      { error: { message: "step_up_verify_rejected", meta: { original_detail: "step_up_verify_rejected" } } },
+      { status: 401 },
+    );
   }),
 ];

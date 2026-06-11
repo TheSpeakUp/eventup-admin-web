@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
 import ErrorToast from "@/app/_components/ErrorToast";
 import {
   forceOfferDispatchAction,
@@ -26,6 +27,7 @@ function ConfirmButton({
   label,
   description,
   action,
+  permission,
   hiddenFields,
   variant = "primary",
 }: {
@@ -33,10 +35,11 @@ function ConfirmButton({
   label: string;
   description: string;
   action: OpsAction;
+  permission: string;
   hiddenFields?: Record<string, string>;
   variant?: "primary" | "danger" | "ghost";
 }) {
-  const [state, formAction, pending] = useActionState(action, EMPTY_OPS_STATE);
+  const [state, formAction, pending] = useStepUpForm(action, EMPTY_OPS_STATE, permission);
   const [confirmed, setConfirmed] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const lastSettled = useRef<OpsActionState | null>(null);
@@ -114,18 +117,21 @@ export default function ForceDispatchButtons() {
           label="Force offer dispatch"
           description="Sends push/email reminders to speakers with on_review offers, auto-closes overdue ones."
           action={forceOfferDispatchAction}
+          permission="admin.marketplace.offers.dispatch"
         />
         <ConfirmButton
           testid="force-provider-dispatch"
           label="Force provider dispatch"
           description="Sends escalation notifications to providers with overdue offers."
           action={forceProviderDispatchAction}
+          permission="admin.marketplace.providers.dispatch"
         />
         <ConfirmButton
           testid="dlq-replay-dry"
           label="DLQ replay — dry run"
           description="Counts what would be retried. Sends nothing."
           action={replayDlqAction}
+          permission="admin.marketplace.providers.dispatch"
           hiddenFields={{ mode: "dry_run" }}
           variant="ghost"
         />
@@ -134,6 +140,7 @@ export default function ForceDispatchButtons() {
           label="DLQ replay — apply"
           description="Actually retries failed deliveries. Side-effects persist."
           action={replayDlqAction}
+          permission="admin.marketplace.providers.dispatch"
           hiddenFields={{ mode: "apply" }}
           variant="danger"
         />

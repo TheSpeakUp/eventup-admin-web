@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
 import {
   ADMIN_ROLES,
   GRANTABLE_SCOPES,
@@ -23,10 +23,7 @@ function RoleActiveForm({
   role: AdminRole;
   isActive: boolean;
 }) {
-  const [state, formAction, pending] = useActionState(
-    updateAdminAction,
-    EMPTY_STATE,
-  );
+  const [state, formAction, pending] = useStepUpForm(updateAdminAction, EMPTY_STATE, "admin.users.mgmt");
   return (
     <form
       action={formAction}
@@ -94,9 +91,10 @@ function RevokeScopeButton({
   adminId: string;
   permissionKey: string;
 }) {
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending] = useStepUpForm(
     revokeScopeAction,
     EMPTY_STATE,
+    "admin.users.mgmt",
   );
   return (
     <form action={formAction} className="inline">
@@ -124,9 +122,10 @@ function GrantScopeForm({
   adminId: string;
   heldKeys: Set<string>;
 }) {
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending] = useStepUpForm(
     grantScopeAction,
     EMPTY_STATE,
+    "admin.users.mgmt",
   );
   const available = GRANTABLE_SCOPES.filter((k) => !heldKeys.has(k));
   return (

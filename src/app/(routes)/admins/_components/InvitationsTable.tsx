@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
 import type { AdminInvitationItem } from "@/lib/admins/types";
 import { RoleBadge } from "./RoleBadge";
 import { revokeInvitationAction } from "../actions";
@@ -24,10 +24,7 @@ function statusLabel(inv: AdminInvitationItem): {
 }
 
 function RevokeButton({ id }: { id: string }) {
-  const [state, formAction, pending] = useActionState(
-    revokeInvitationAction,
-    EMPTY_STATE,
-  );
+  const [state, formAction, pending] = useStepUpForm(revokeInvitationAction, EMPTY_STATE, "admin.users.mgmt");
   return (
     <form action={formAction} className="inline-flex flex-col items-end">
       <input type="hidden" name="invitationId" value={id} />

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { completeStepUp } from "./helpers/step-up";
 
 test("ops page renders all four sections + force-dispatch buttons", async ({ page }) => {
   await loginAsMockAdmin(page, "/offers/ops");
@@ -18,6 +19,7 @@ test("force offer dispatch shows confirm step and reports counts", async ({ page
   await page.getByTestId("force-offer-dispatch-open").click();
   await expect(page.getByTestId("force-offer-dispatch-confirm")).toBeVisible();
   await page.getByTestId("force-offer-dispatch-confirm").click();
+  await completeStepUp(page);
   await expect(page.getByTestId("force-offer-dispatch-result")).toContainText(/Checked 10/);
 });
 
