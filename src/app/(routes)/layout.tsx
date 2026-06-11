@@ -15,6 +15,7 @@ const navItems = [
   { href: "/promotions", label: "Promotions" },
   { href: "/promo-codes", label: "Promo codes" },
   { href: "/quality", label: "Quality" },
+  { href: "/reviews", label: "Reviews" },
   { href: "/payments", label: "Payments" },
   { href: "/audit", label: "Audit log" },
   // Admin-team management is SUPERADMIN-only — the page itself guards access,
