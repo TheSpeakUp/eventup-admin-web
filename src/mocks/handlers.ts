@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, delay } from "msw";
 import { decodeJwt } from "jose";
 import { buildApiUrl } from "@/lib/api-config";
 import {
@@ -177,8 +177,13 @@ const AUTH_BASE = buildApiUrl("/eventup-admin/v1/auth");
 
 const ANALYTICS_TYPES = new Set(["service", "offer"]);
 
-// Step-up mock state: force-offer-dispatch 403s until a verify succeeds this session.
-let stepUpGranted = false;
+// Step-up mock state: gated dispatch endpoints 403 until a verify grants their
+// specific permission this session. The grant is permission-scoped (mirrors the
+// backend), so a grant earned for permission A does NOT satisfy a gated call for
+// permission B — this is what lets the second-gated-action test reproduce the
+// "Session changed" dead-end pre-fix.
+let lastChallengedPerms: string[] = [];
+const grantedStepUpPerms = new Set<string>();
 const STEP_UP_TEST_CODE = "123456";
 
 function toAdminListItem(a: AdminDetail): AdminListItem {
@@ -1097,15 +1102,20 @@ export const handlers = [
   http.post(`${OFFERS_BASE}/:id/archive`, ({ params }) => moderateOffer(params.id, "archived", "archive")),
   http.post(`${OFFERS_BASE}/:id/disable`, ({ params }) => moderateOffer(params.id, "disabled", "disable")),
   http.post(`${OFFERS_BASE}/:id/enable`, ({ params }) => moderateOffer(params.id, "active", "enable")),
-  http.post(`${OFFERS_BASE}/review-sla/dispatch`, () => {
-    if (!stepUpGranted) {
+  http.post(`${OFFERS_BASE}/review-sla/dispatch`, async () => {
+    // Atomic check-and-consume: delete() returns true only if the scoped grant
+    // was present, then removes it (single-use, keeps tests isolated).
+    if (!grantedStepUpPerms.delete("admin.marketplace.offers.dispatch")) {
+      // Brief delay on the challenge path keeps the modal-opening window open
+      // long enough for a second gated action to fire in-flight (the race the
+      // second-action test exercises) — comfortably wider than the inter-click
+      // gap, even on a loaded CI runner. The granted retry path stays instant.
+      await delay(500);
       return HttpResponse.json(
         { error: { message: "step_up_required", meta: { original_detail: "step_up_required" } } },
         { status: 403 },
       );
     }
-    // Consume the single-use grant to ensure test isolation.
-    stepUpGranted = false;
     return HttpResponse.json({
       generated_at: new Date(0).toISOString(),
       auto_close_enabled: true,
@@ -1118,16 +1128,23 @@ export const handlers = [
       escalated_service_ids: [],
     });
   }),
-  http.post(`${OFFERS_BASE}/review-sla/providers/dispatch`, () =>
-    HttpResponse.json({
+  http.post(`${OFFERS_BASE}/review-sla/providers/dispatch`, async () => {
+    if (!grantedStepUpPerms.delete("admin.marketplace.providers.dispatch")) {
+      await delay(500);
+      return HttpResponse.json(
+        { error: { message: "step_up_required", meta: { original_detail: "step_up_required" } } },
+        { status: 403 },
+      );
+    }
+    return HttpResponse.json({
       generated_at: new Date(0).toISOString(),
       checked_providers: 5,
       escalations_sent: 1,
       escalated_provider_ids: [201],
       channels: ["email"],
       delivery_outcomes: [],
-    }),
-  ),
+    });
+  }),
   http.post(`${OFFERS_BASE}/review-sla/providers/dlq/replay`, async ({ request }) => {
     const body = (await request.json().catch(() => ({ mode: "dry_run" }))) as { mode?: string };
     const mode = body.mode === "apply" ? "apply" : "dry_run";
@@ -2222,25 +2239,31 @@ export const handlers = [
   }),
 
   // ---- MFA step-up (F12) ----
-  http.post(`${AUTH_BASE}/mfa/challenge`, () =>
-    HttpResponse.json({
+  http.post(`${AUTH_BASE}/mfa/challenge`, async ({ request }) => {
+    // Remember which permission(s) this challenge is for, so verify can grant a
+    // permission-scoped (not blanket) credential.
+    const body = (await request.json().catch(() => ({}))) as { permissions?: unknown };
+    lastChallengedPerms = Array.isArray(body.permissions)
+      ? body.permissions.filter((p): p is string => typeof p === "string")
+      : [];
+    return HttpResponse.json({
       success: true,
       challenge_id: "test-challenge",
       method: "email_otp",
       expires_in_seconds: 300,
       delivery_hint: "a***n@example.com",
-    }),
-  ),
+    });
+  }),
   http.post(`${AUTH_BASE}/mfa/verify`, async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as { code?: unknown };
     const code = typeof body.code === "string" ? body.code : "";
     if (code === STEP_UP_TEST_CODE) {
-      // Single-use grant: set to true here, consume it in dispatch handler,
-      // then reset to false to ensure test isolation.
-      stepUpGranted = true;
+      // Grant only the challenged permission(s); each is single-use, consumed by
+      // its dispatch handler. A grant for action A cannot satisfy action B.
+      for (const perm of lastChallengedPerms) grantedStepUpPerms.add(perm);
       return HttpResponse.json({
         success: true,
-        permissions: [],
+        permissions: [...lastChallengedPerms],
         expires_in_seconds: 600,
       });
     }

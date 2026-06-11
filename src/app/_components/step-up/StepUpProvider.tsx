@@ -23,7 +23,14 @@ export function useStepUpContext(): StepUpContextValue {
 export default function StepUpProvider({ children }: { children: React.ReactNode }) {
   const [request, setRequest] = useState<StepUpRequest | null>(null);
 
-  const openStepUp = useCallback((req: StepUpRequest) => setRequest(req), []);
+  // Ignore new requests while a challenge is already active: the modal's
+  // open-effect only (re)challenges on the rising edge of `request`, so
+  // overwriting it would leave the visible challenge bound to action A while
+  // verify fires action B's onVerified — a dead-end. First request wins; the
+  // second form stays armed and re-fires once the modal closes.
+  const openStepUp = useCallback((req: StepUpRequest) => {
+    setRequest((cur) => cur ?? req);
+  }, []);
   const close = useCallback(() => setRequest(null), []);
 
   const handleVerified = useCallback(() => {
