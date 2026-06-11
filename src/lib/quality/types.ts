@@ -26,6 +26,9 @@ export function isQualityTab(value: string): value is QualityTab {
 export type ServiceQualityMetricRead = {
   service_id: number;
   provider_id: number;
+  // Resolved labels (admin polish) — null when the referenced row is gone.
+  service_title: string | null;
+  provider_name: string | null;
   formula_version: string;
   trust_score: number;
   ranking_score: number;
@@ -81,6 +84,8 @@ export type QualityOverrideSetPayload = {
 
 export type ProviderQualityMetricRead = {
   provider_id: number;
+  // Resolved label (admin polish).
+  provider_name: string | null;
   formula_version: string;
   trust_score: number;
   verification_score: number;

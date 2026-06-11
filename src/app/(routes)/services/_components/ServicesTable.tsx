@@ -51,7 +51,9 @@ export default function ServicesTable({ rows }: { rows: ServiceListItem[] }) {
                   {row.title}
                 </Link>
               </td>
-              <td className="px-4 py-2.5 text-zinc-700">#{row.provider_id}</td>
+              <td className="px-4 py-2.5 text-zinc-700">
+                {row.provider_name ?? `#${row.provider_id}`}
+              </td>
               <td className="px-4 py-2.5 text-zinc-700">
                 {formatPrice(row.base_price_minor, row.currency)}
               </td>

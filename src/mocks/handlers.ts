@@ -553,6 +553,7 @@ function toServiceListItem(svc: ServiceDetail): ServiceListItem {
     id: svc.id,
     title: svc.title,
     provider_id: svc.provider_id,
+    provider_name: svc.provider_name,
     status: svc.status,
     category_id: svc.category_id,
     recipient_type: svc.recipient_type,

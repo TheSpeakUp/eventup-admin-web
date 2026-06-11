@@ -30,6 +30,8 @@ export type ServiceListItem = {
   id: number;
   title: string;
   provider_id: number;
+  // Resolved provider label (admin polish) — null if provider row is gone.
+  provider_name: string | null;
   status: ServiceStatus;
   category_id: number | null;
   recipient_type: number;

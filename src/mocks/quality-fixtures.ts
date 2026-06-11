@@ -19,6 +19,8 @@ export function buildFixtureServiceMetrics(): ServiceQualityMetricRead[] {
     {
       service_id: 501,
       provider_id: 201,
+      service_title: "Wedding photography premium",
+      provider_name: "Aurora Events Co.",
       formula_version: "v3",
       trust_score: 0.82,
       ranking_score: 0.91,
@@ -47,6 +49,8 @@ export function buildFixtureServiceMetrics(): ServiceQualityMetricRead[] {
     {
       service_id: 502,
       provider_id: 202,
+      service_title: "Catering deluxe",
+      provider_name: "Blackbird Studios",
       formula_version: "v3",
       trust_score: 0.61,
       ranking_score: 0.58,
@@ -79,6 +83,7 @@ export function buildFixtureProviderMetrics(): ProviderQualityMetricRead[] {
   return [
     {
       provider_id: 201,
+      provider_name: "Aurora Events Co.",
       formula_version: "v3",
       trust_score: 0.86,
       verification_score: 1.0,
@@ -95,6 +100,7 @@ export function buildFixtureProviderMetrics(): ProviderQualityMetricRead[] {
     },
     {
       provider_id: 202,
+      provider_name: "Blackbird Studios",
       formula_version: "v3",
       trust_score: 0.57,
       verification_score: 0.5,

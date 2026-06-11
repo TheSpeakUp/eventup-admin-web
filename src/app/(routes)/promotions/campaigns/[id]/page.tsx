@@ -53,16 +53,28 @@ export default async function CampaignDetailPage({
       </div>
       <dl className="mt-4 max-w-xl space-y-2 text-sm text-zinc-700">
         <div className="flex gap-2">
-          <dt className="w-40 text-zinc-500">Service id</dt>
-          <dd>{c.service_id}</dd>
+          <dt className="w-40 text-zinc-500">Service</dt>
+          <dd data-testid="campaign-service-label">
+            {c.service_title ?? `#${c.service_id}`}
+            {c.service_title ? (
+              <span className="ml-1 text-zinc-400">#{c.service_id}</span>
+            ) : null}
+          </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="w-40 text-zinc-500">Product id</dt>
-          <dd>{c.product_id}</dd>
+          <dt className="w-40 text-zinc-500">Product</dt>
+          <dd data-testid="campaign-product-label">
+            {c.product_code ?? `#${c.product_id}`}
+            {c.product_code ? (
+              <span className="ml-1 text-zinc-400">#{c.product_id}</span>
+            ) : null}
+          </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="w-40 text-zinc-500">Zone id</dt>
-          <dd>{c.zone_id ?? "—"}</dd>
+          <dt className="w-40 text-zinc-500">Zone</dt>
+          <dd data-testid="campaign-zone-label">
+            {c.zone_id === null ? "—" : (c.zone_code ?? `#${c.zone_id}`)}
+          </dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 text-zinc-500">Order item id</dt>

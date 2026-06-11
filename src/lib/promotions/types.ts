@@ -307,6 +307,10 @@ export type CampaignRead = {
   service_id: number;
   product_id: number;
   zone_id: number | null;
+  // Resolved labels (admin polish) — null when the referenced row is gone.
+  service_title: string | null;
+  product_code: string | null;
+  zone_code: string | null;
   status: string;
   start_date: string; // ISO date
   end_date: string;

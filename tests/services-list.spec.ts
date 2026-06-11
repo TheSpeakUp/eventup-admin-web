@@ -7,6 +7,10 @@ test.describe("services list", () => {
 
     await expect(page.getByRole("heading", { name: "Services moderation" })).toBeVisible();
     await expect(page.getByTestId("services-table")).toBeVisible();
+    // Admin polish: provider column renders the resolved name, not "#id".
+    await expect(
+      page.getByTestId("services-table").getByText(/Provider \d+ Studio/).first(),
+    ).toBeVisible();
 
     // Page-1 shows LIMIT=10 rows out of 26 total fixtures.
     await expect(page.getByTestId("services-count")).toHaveText("10 services on this page");
