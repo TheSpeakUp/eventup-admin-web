@@ -1,3 +1,5 @@
+"use client";
+
 // src/app/(routes)/reviews/_components/ReplyModerationButton.tsx
 "use client";
 import { useActionState } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 // src/app/(routes)/reviews/_components/ReviewsFilter.tsx
 // Filter bar for reviews list: status (all/published/hidden/removed),
 // rating (all/1-5), provider_id, and search query. Submits via GET so the
