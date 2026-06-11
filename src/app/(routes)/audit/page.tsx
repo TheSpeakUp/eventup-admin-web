@@ -9,6 +9,7 @@ import { listAuditEvents } from "@/lib/audit/api";
 import AuditFilters from "./_components/AuditFilters";
 import AuditPagination from "./_components/AuditPagination";
 import AuditTable from "./_components/AuditTable";
+import ExportCsvButton from "@/app/_components/ExportCsvButton";
 
 const LIMIT = 10;
 
@@ -84,6 +85,7 @@ export default async function AuditPage({
     <div className="p-8 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Audit log</h1>
+        <ExportCsvButton surface="audit" params={preserved} />
         <span className="text-xs text-zinc-500" data-testid="audit-total">
           {total} event{total === 1 ? "" : "s"} total
         </span>

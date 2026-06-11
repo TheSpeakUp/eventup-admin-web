@@ -3,6 +3,7 @@ import { isQueueStatus, type QueueStatus, type SlaSummaryQuery } from "@/lib/off
 import CountersCard from "./_components/CountersCard";
 import OffersFilters from "./_components/OffersFilters";
 import OffersTable from "./_components/OffersTable";
+import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import Link from "next/link";
 
 const DEFAULT_QUEUE: QueueStatus[] = ["overdue_response", "warning"];
@@ -46,6 +47,15 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
     <main className="space-y-4 p-6">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Offers — SLA queue</h1>
+        <ExportCsvButton
+          surface="offers-queue"
+          params={{
+            service_id:
+              query.service_id !== undefined ? String(query.service_id) : undefined,
+            provider_id:
+              query.provider_id !== undefined ? String(query.provider_id) : undefined,
+          }}
+        />
         <Link href="/offers/ops" data-testid="offers-ops-link" className="text-sm underline">
           SLA ops →
         </Link>

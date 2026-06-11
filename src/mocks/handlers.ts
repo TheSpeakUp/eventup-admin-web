@@ -2041,6 +2041,26 @@ export const handlers = [
   // plus detail (404 on unknown id). No write/refund path exists by design.
   http.get(PAYMENTS_BASE, ({ request }) => {
     const url = new URL(request.url);
+    if (url.searchParams.get("format") === "csv") {
+      // Layer-4 export branch: header + one line per filtered payment.
+      const all = listPaymentsPage({
+        status: queryStr(url.searchParams.get("status")),
+        currency: queryStr(url.searchParams.get("currency")),
+        q: queryStr(url.searchParams.get("q")),
+        limit: 200,
+        offset: 0,
+      });
+      const lines = ["id,status,currency,amount_minor"];
+      for (const p of all.items) {
+        lines.push(`${p.id},${p.status},${p.currency},${p.amount_minor}`);
+      }
+      return new HttpResponse(lines.join("\n"), {
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="payments.csv"',
+        },
+      });
+    }
     return HttpResponse.json(
       listPaymentsPage({
         resource_type: queryStr(url.searchParams.get("resource_type")),

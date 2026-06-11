@@ -3,6 +3,7 @@ import { isServiceStatus, type ServiceStatus } from "@/lib/services/types";
 import Pagination from "./_components/Pagination";
 import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
+import ExportCsvButton from "@/app/_components/ExportCsvButton";
 
 const LIMIT = 10;
 
@@ -56,6 +57,14 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
     <div className="p-8 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Services moderation</h1>
+        <ExportCsvButton
+          surface="services"
+          params={{
+            search,
+            status,
+            provider_id: providerId !== undefined ? String(providerId) : undefined,
+          }}
+        />
         <span className="text-xs text-zinc-500" data-testid="services-count">
           {count} service{count === 1 ? "" : "s"} on this page
         </span>
