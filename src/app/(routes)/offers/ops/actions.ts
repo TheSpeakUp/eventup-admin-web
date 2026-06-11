@@ -10,10 +10,17 @@ function fail(message: string): OpsActionState {
   return { ok: false, error: message, message: null };
 }
 
+function stepUpHalt(stepUp: { permission?: string }): OpsActionState {
+  return { ok: false, error: "", message: null, stepUp };
+}
+
 export async function forceOfferDispatchAction(_prev: OpsActionState, _fd: FormData): Promise<OpsActionState> {
   const key = randomUUID();
   const result = await forceOfferDispatch(key);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) return stepUpHalt(result.stepUp);
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidatePath("/offers/ops");
   return {
     ok: true,
@@ -25,7 +32,10 @@ export async function forceOfferDispatchAction(_prev: OpsActionState, _fd: FormD
 export async function forceProviderDispatchAction(_prev: OpsActionState, _fd: FormData): Promise<OpsActionState> {
   const key = randomUUID();
   const result = await forceProviderDispatch(key);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) return stepUpHalt(result.stepUp);
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidatePath("/offers/ops");
   return {
     ok: true,
@@ -38,7 +48,10 @@ export async function replayDlqAction(_prev: OpsActionState, formData: FormData)
   const raw = formData.get("mode");
   const mode: DlqReplayMode = raw === "apply" ? "apply" : "dry_run";
   const result = await replayDlq({ mode });
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) return stepUpHalt(result.stepUp);
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidatePath("/offers/ops");
   return {
     ok: true,

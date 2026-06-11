@@ -30,6 +30,9 @@ export async function inviteAdminAction(
   }
   const result = await createInvitation(parsed.data.email, parsed.data.role);
   if (!result.ok) {
+    if (result.stepUp) {
+      return { ok: false, error: "", email: null, stepUp: result.stepUp };
+    }
     return { ok: false, error: result.message ?? `Request failed (${result.status})`, email: null };
   }
   revalidatePath("/admins");
@@ -43,7 +46,12 @@ export async function revokeInvitationAction(
   const parsed = idSchema.safeParse(formData.get("invitationId"));
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid id");
   const result = await revokeInvitation(parsed.data);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) {
+      return { ok: false, error: "", stepUp: result.stepUp };
+    }
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidatePath("/admins");
   return { ok: true, error: null };
 }

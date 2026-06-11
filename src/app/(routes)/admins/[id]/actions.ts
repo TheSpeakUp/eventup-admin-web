@@ -59,7 +59,12 @@ export async function updateAdminAction(
   // reason in error.meta.original_detail (read first by readError in lib/api),
   // so the generic path below surfaces it verbatim — no client-side pre-emption.
   const result = await updateAdmin(idR.id, payload);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) {
+      return { ok: false, error: "", stepUp: result.stepUp };
+    }
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidate(idR.id);
   return { ok: true, error: null };
 }
@@ -73,7 +78,12 @@ export async function grantScopeAction(
   const scopeR = scopeSchema.safeParse(formData.get("permissionKey"));
   if (!scopeR.success) return fail(scopeR.error.issues[0]?.message ?? "Invalid scope");
   const result = await grantReviewerScope(idR.id, scopeR.data);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) {
+      return { ok: false, error: "", stepUp: result.stepUp };
+    }
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidate(idR.id);
   return { ok: true, error: null };
 }
@@ -87,7 +97,12 @@ export async function revokeScopeAction(
   const scopeR = scopeSchema.safeParse(formData.get("permissionKey"));
   if (!scopeR.success) return fail(scopeR.error.issues[0]?.message ?? "Invalid scope");
   const result = await revokeReviewerScope(idR.id, scopeR.data);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  if (!result.ok) {
+    if (result.stepUp) {
+      return { ok: false, error: "", stepUp: result.stepUp };
+    }
+    return fail(result.message ?? `Request failed (${result.status})`);
+  }
   revalidate(idR.id);
   return { ok: true, error: null };
 }
