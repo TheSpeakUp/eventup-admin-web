@@ -61,8 +61,8 @@ export default async function ServicesPage({
     return (
       <div className="p-8 space-y-5">
         <PageHeader
-          title="Services"
-          description="Review, publish and moderate marketplace service listings."
+          title="Services moderation"
+          description="Review, publish and verify marketplace service listings."
         />
         <Alert variant="danger" data-testid="services-error">
           Failed to load services: {result.message}
@@ -80,8 +80,8 @@ export default async function ServicesPage({
   return (
     <div className="p-8 space-y-5">
       <PageHeader
-        title="Services"
-        description="Review, publish and moderate marketplace service listings."
+        title="Services moderation"
+        description="Review, publish and verify marketplace service listings."
         actions={
           <ExportCsvButton
             surface="services"

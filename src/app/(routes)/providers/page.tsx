@@ -38,7 +38,7 @@ export default async function ProvidersPage({
     return (
       <div className="p-8 space-y-5">
         <PageHeader
-          title="Providers"
+          title="Providers moderation"
           description="Moderate provider profiles and verification status."
         />
         <Alert variant="danger" data-testid="providers-error">
@@ -53,7 +53,7 @@ export default async function ProvidersPage({
   return (
     <div className="p-8 space-y-5">
       <PageHeader
-        title="Providers"
+        title="Providers moderation"
         description="Moderate provider profiles and verification status."
         actions={<ExportCsvButton surface="providers" params={{ search }} />}
       />
