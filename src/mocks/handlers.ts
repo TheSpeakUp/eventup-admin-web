@@ -45,6 +45,14 @@ import {
   revokeScopeRecord,
   updateAdminRecord,
 } from "./admins-store";
+import { MOCK_PASSWORD } from "@/lib/auth/mock";
+import {
+  getLoginHistoryPage,
+  getSelfDisplayNameOverride,
+  hasSelfDisplayNameOverride,
+  setSelfDisplayName,
+} from "./self-store";
+import type { AdminSelfRead } from "@/lib/self/types";
 import {
   createCategoryRecord,
   deleteCategoryRecord,
@@ -162,6 +170,7 @@ const OFFERS_BASE = buildApiUrl("/eventup-admin/v1/marketplace/offers");
 const SEARCH_BASE = buildApiUrl("/eventup-admin/v1/marketplace/search");
 const MARKETPLACE_BASE = buildApiUrl("/eventup-admin/v1/marketplace");
 const ADMINS_BASE = buildApiUrl("/eventup-admin/v1/admins");
+const SELF_BASE = buildApiUrl("/eventup-admin/v1/self");
 const CATEGORIES_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/categories",
 );
@@ -210,6 +219,24 @@ function toAdminListItem(a: AdminDetail): AdminListItem {
     is_active: a.is_active,
     display_name: a.display_name,
     last_login_at: a.last_login_at,
+  };
+}
+
+// Self profile = base identity from admins-store + the self-editable display
+// name overlay + the static MFA block (email OTP, always enrolled, enforced on
+// prod). Mirrors GET /eventup-admin/v1/self.
+function toSelfRead(admin: AdminDetail, sub: string): AdminSelfRead {
+  const display_name = hasSelfDisplayNameOverride(sub)
+    ? getSelfDisplayNameOverride(sub)
+    : admin.display_name;
+  return {
+    id: admin.id,
+    email: admin.email,
+    role: admin.role,
+    display_name,
+    last_login_at: admin.last_login_at,
+    is_active: admin.is_active,
+    mfa: { method: "email_otp", enrolled: true, enforced: true },
   };
 }
 
@@ -1647,6 +1674,78 @@ export const handlers = [
     const ok = revokeScopeRecord(String(params.id), String(params.key));
     if (!ok) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  // ── Self profile (every admin tier) ────────────────────────────────────
+  http.get(SELF_BASE, ({ request }) => {
+    const sub = operatorSub(request);
+    if (!sub) return HttpResponse.json({ detail: "Not authenticated" }, { status: 401 });
+    const admin = getAdminById(sub);
+    if (!admin) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    return HttpResponse.json(toSelfRead(admin, sub));
+  }),
+  http.patch(`${SELF_BASE}/profile`, async ({ request }) => {
+    const sub = operatorSub(request);
+    if (!sub) return HttpResponse.json({ detail: "Not authenticated" }, { status: 401 });
+    const admin = getAdminById(sub);
+    if (!admin) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    const body = (await request.json().catch(() => ({}))) as {
+      display_name?: unknown;
+    };
+    let displayName: string | null;
+    if (typeof body.display_name === "string") {
+      const trimmed = body.display_name.trim();
+      displayName = trimmed.length > 0 ? trimmed : null;
+    } else if (body.display_name === null) {
+      displayName = null;
+    } else {
+      return HttpResponse.json(
+        { detail: "display_name must be a string or null" },
+        { status: 422 },
+      );
+    }
+    setSelfDisplayName(sub, displayName);
+    return HttpResponse.json(toSelfRead(admin, sub));
+  }),
+  http.post(`${SELF_BASE}/password`, async ({ request }) => {
+    const sub = operatorSub(request);
+    if (!sub) return HttpResponse.json({ detail: "Not authenticated" }, { status: 401 });
+    const body = (await request.json().catch(() => ({}))) as {
+      current_password?: unknown;
+      new_password?: unknown;
+    };
+    const current = typeof body.current_password === "string" ? body.current_password : "";
+    const next = typeof body.new_password === "string" ? body.new_password : "";
+    // Length gate runs before any server logic (mirrors the backend 422).
+    if (next.length < 12) {
+      return HttpResponse.json(
+        { detail: "New password must be at least 12 characters." },
+        { status: 422 },
+      );
+    }
+    if (current !== MOCK_PASSWORD) {
+      return HttpResponse.json(
+        { detail: "Current password is incorrect." },
+        { status: 400 },
+      );
+    }
+    if (next === current) {
+      return HttpResponse.json(
+        { detail: "New password must be different from the current password." },
+        { status: 400 },
+      );
+    }
+    return new HttpResponse(null, { status: 204 });
+  }),
+  http.get(`${SELF_BASE}/login-history`, ({ request }) => {
+    const sub = operatorSub(request);
+    if (!sub) return HttpResponse.json({ detail: "Not authenticated" }, { status: 401 });
+    const url = new URL(request.url);
+    const rawLimit = Number(url.searchParams.get("limit") ?? 50);
+    const rawOffset = Number(url.searchParams.get("offset") ?? 0);
+    const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 50, 1), 200);
+    const offset = Math.max(Number.isFinite(rawOffset) ? rawOffset : 0, 0);
+    return HttpResponse.json(getLoginHistoryPage(limit, offset));
   }),
 
   // ── M2 traffic analytics (read-only) ───────────────────────────────────
