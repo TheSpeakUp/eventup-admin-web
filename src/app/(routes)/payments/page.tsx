@@ -52,12 +52,16 @@ export default async function PaymentsPage({
   const status = rawStatus && isPaymentStatus(rawStatus) ? rawStatus : undefined;
   const currency = pickString(sp.currency)?.trim() || undefined;
   const q = pickString(sp.q)?.trim() || undefined;
+  const createdFrom = pickString(sp.created_from)?.trim() || undefined;
+  const createdTo = pickString(sp.created_to)?.trim() || undefined;
   const offset = pickOffset(pickString(sp.offset));
 
   const result = await listPayments({
     status,
     currency,
     q,
+    created_from: createdFrom,
+    created_to: createdTo,
     limit: LIMIT,
     offset,
   });
@@ -76,7 +80,13 @@ export default async function PaymentsPage({
   }
 
   const { items, total } = result.data;
-  const preserved = { status, currency, q };
+  const preserved = {
+    status,
+    currency,
+    q,
+    created_from: createdFrom,
+    created_to: createdTo,
+  };
 
   return (
     <div className="p-8 space-y-5">
@@ -84,7 +94,7 @@ export default async function PaymentsPage({
         title="Payments"
         description={DESCRIPTION}
         actions={
-          <ExportCsvButton surface="payments" params={{ status, currency, q }} />
+          <ExportCsvButton surface="payments" params={preserved} />
         }
       />
       <Panel
@@ -103,7 +113,12 @@ export default async function PaymentsPage({
             options={STATUS_OPTIONS}
             current={status}
             basePath="/payments"
-            searchParams={{ currency, q }}
+            searchParams={{
+              currency,
+              q,
+              created_from: createdFrom,
+              created_to: createdTo,
+            }}
             testidPrefix="payments-status"
           />
           <PaymentsFilters />

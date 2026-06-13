@@ -15,8 +15,20 @@ export default function PaymentsFilters() {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
-  // Currency is select-driven (immediate); search `q` is owned by SearchInput.
+  // Currency + the created date range are immediate; search `q` is owned by
+  // SearchInput.
   const currency = params.get("currency") ?? "";
+  const createdFrom = params.get("created_from") ?? "";
+  const createdTo = params.get("created_to") ?? "";
+  const controlClass =
+    "h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none";
+
+  function setParam(key: string, value: string): void {
+    pushImmediate((next) => {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    });
+  }
 
   function pushImmediate(mutate: (next: URLSearchParams) => void): void {
     const next = new URLSearchParams(params.toString());
@@ -42,13 +54,8 @@ export default function PaymentsFilters() {
       <select
         value={currency}
         data-testid="payments-currency-filter"
-        onChange={(e) =>
-          pushImmediate((next) => {
-            if (e.target.value) next.set("currency", e.target.value);
-            else next.delete("currency");
-          })
-        }
-        className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+        onChange={(e) => setParam("currency", e.target.value)}
+        className={controlClass}
       >
         <option value="">All currencies</option>
         {CURRENCIES.map((c) => (
@@ -57,6 +64,25 @@ export default function PaymentsFilters() {
           </option>
         ))}
       </select>
+      <div className="flex items-center gap-1.5">
+        <input
+          type="date"
+          value={createdFrom}
+          aria-label="Created from"
+          data-testid="payments-date-from"
+          onChange={(e) => setParam("created_from", e.target.value)}
+          className={controlClass}
+        />
+        <span className="text-xs text-ink-tertiary">→</span>
+        <input
+          type="date"
+          value={createdTo}
+          aria-label="Created to"
+          data-testid="payments-date-to"
+          onChange={(e) => setParam("created_to", e.target.value)}
+          className={controlClass}
+        />
+      </div>
     </div>
   );
 }
