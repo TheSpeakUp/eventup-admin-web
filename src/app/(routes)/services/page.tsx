@@ -5,6 +5,7 @@ import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 
 const LIMIT = 10;
 
@@ -58,10 +59,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader
-        title="Services moderation"
-        actions={
-          <>
+      <PageHeader title="Services moderation" />
+      <Panel
+        title="All services"
+        accent="primary"
+        bodyClassName="p-0"
+        action={
+          <div className="flex items-center gap-3">
             <ExportCsvButton
               surface="services"
               params={{
@@ -73,23 +77,28 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
             <span className="text-xs text-zinc-500" data-testid="services-count">
               {count} service{count === 1 ? "" : "s"} on this page
             </span>
-          </>
+          </div>
         }
-      />
-      <ServicesFilters />
-      <ServicesTable rows={items} />
-      <Pagination
-        nextLastId={next_last_id}
-        hasMore={has_more}
-        count={count}
-        basePath="/services"
-        searchParams={{
-          search,
-          status,
-          provider_id: providerId !== undefined ? String(providerId) : undefined,
-        }}
-        lastId={lastId}
-      />
+      >
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
+          <ServicesFilters />
+        </div>
+        <ServicesTable rows={items} />
+        <div className="px-4 py-3 border-t border-hairline">
+          <Pagination
+            nextLastId={next_last_id}
+            hasMore={has_more}
+            count={count}
+            basePath="/services"
+            searchParams={{
+              search,
+              status,
+              provider_id: providerId !== undefined ? String(providerId) : undefined,
+            }}
+            lastId={lastId}
+          />
+        </div>
+      </Panel>
     </div>
   );
 }

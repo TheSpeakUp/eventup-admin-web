@@ -55,7 +55,7 @@ export default function InvitationsTable({
     );
   }
   return (
-    <div className="overflow-x-auto rounded-md border border-zinc-200">
+    <div className="overflow-x-auto">
       <Table data-testid="invitations-table" className="min-w-full">
         <Thead>
           <tr>

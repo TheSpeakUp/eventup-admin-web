@@ -10,6 +10,7 @@ import type { ReviewListQuery, ReviewStatus } from "@/lib/reviews/types";
 import ReviewsTable from "./_components/ReviewsTable";
 import ReviewsFilter from "./_components/ReviewsFilter";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
@@ -53,17 +54,17 @@ export default async function ReviewsPage({
   return (
     <div className="p-8">
       <PageHeader title="Reviews" />
-      <div className="mt-4">
-        <ReviewsFilter
-          status={sp.status as ReviewStatus | undefined}
-          provider_id={sp.provider_id}
-          rating={sp.rating}
-          q={sp.q}
-        />
-      </div>
-      <div className="mt-4">
+      <Panel title="Reviews" accent="primary" bodyClassName="p-0" className="mt-4">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+          <ReviewsFilter
+            status={sp.status as ReviewStatus | undefined}
+            provider_id={sp.provider_id}
+            rating={sp.rating}
+            q={sp.q}
+          />
+        </div>
         <ReviewsTable rows={res.data.items} canManage={canManage} />
-      </div>
+      </Panel>
     </div>
   );
 }

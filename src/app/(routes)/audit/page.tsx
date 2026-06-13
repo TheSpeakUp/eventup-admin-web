@@ -11,6 +11,7 @@ import AuditPagination from "./_components/AuditPagination";
 import AuditTable from "./_components/AuditTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 
 const LIMIT = 10;
 
@@ -86,26 +87,34 @@ export default async function AuditPage({
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader
+      <PageHeader title="Audit log" />
+      <Panel
         title="Audit log"
-        actions={
-          <>
+        accent="primary"
+        bodyClassName="p-0"
+        action={
+          <div className="flex items-center gap-3">
             <ExportCsvButton surface="audit" params={preserved} />
             <span className="text-xs text-zinc-500" data-testid="audit-total">
               {total} event{total === 1 ? "" : "s"} total
             </span>
-          </>
+          </div>
         }
-      />
-      <AuditFilters />
-      <AuditTable rows={items} />
-      <AuditPagination
-        total={total}
-        limit={LIMIT}
-        offset={offset}
-        basePath="/audit"
-        searchParams={preserved}
-      />
+      >
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
+          <AuditFilters />
+        </div>
+        <AuditTable rows={items} />
+        <div className="px-4 py-3 border-t border-hairline">
+          <AuditPagination
+            total={total}
+            limit={LIMIT}
+            offset={offset}
+            basePath="/audit"
+            searchParams={preserved}
+          />
+        </div>
+      </Panel>
     </div>
   );
 }

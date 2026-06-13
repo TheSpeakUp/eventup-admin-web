@@ -3,6 +3,7 @@ import { listAttributeDefinitions } from "@/lib/attribute-definitions/api";
 import { isAttributeDefinitionSort } from "@/lib/attribute-definitions/types";
 import PageHeader from "@/app/_components/ui/PageHeader";
 import { buttonClass } from "@/app/_components/ui/Button";
+import { Panel } from "@/app/_components/ui";
 import { AttributeDefinitionsTable } from "./_components/AttributeDefinitionsTable";
 
 export default async function AttributeDefinitionsPage({
@@ -63,45 +64,44 @@ export default async function AttributeDefinitionsPage({
         }
       />
 
-      <form
-        className="mt-4 flex flex-wrap gap-2"
-        data-testid="attribute-definitions-search"
-      >
-        <input
-          name="search"
-          placeholder="Search key or group"
-          defaultValue={sp.search ?? ""}
-          className="rounded border px-2 py-1"
-        />
-        <input
-          name="group_name"
-          placeholder="Group name"
-          defaultValue={sp.group_name ?? ""}
-          className="rounded border px-2 py-1"
-        />
-        <select
-          name="is_active"
-          defaultValue={sp.is_active ?? ""}
-          className="rounded border px-2 py-1"
+      <Panel title="Attribute definitions" accent="primary" bodyClassName="p-0" className="mt-4">
+        <form
+          className="flex flex-wrap gap-2 px-4 py-3 border-b border-hairline"
+          data-testid="attribute-definitions-search"
         >
-          <option value="">Any status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
-        <select name="sort" defaultValue={sort} className="rounded border px-2 py-1">
-          <option value="sort_order_asc">Sort ↑</option>
-          <option value="sort_order_desc">Sort ↓</option>
-          <option value="key_asc">Key A–Z</option>
-          <option value="key_desc">Key Z–A</option>
-        </select>
-        <button type="submit" className="rounded border px-3 py-1">
-          Apply
-        </button>
-      </form>
-
-      <div className="mt-4">
+          <input
+            name="search"
+            placeholder="Search key or group"
+            defaultValue={sp.search ?? ""}
+            className="rounded border px-2 py-1"
+          />
+          <input
+            name="group_name"
+            placeholder="Group name"
+            defaultValue={sp.group_name ?? ""}
+            className="rounded border px-2 py-1"
+          />
+          <select
+            name="is_active"
+            defaultValue={sp.is_active ?? ""}
+            className="rounded border px-2 py-1"
+          >
+            <option value="">Any status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+          <select name="sort" defaultValue={sort} className="rounded border px-2 py-1">
+            <option value="sort_order_asc">Sort ↑</option>
+            <option value="sort_order_desc">Sort ↓</option>
+            <option value="key_asc">Key A–Z</option>
+            <option value="key_desc">Key Z–A</option>
+          </select>
+          <button type="submit" className="rounded border px-3 py-1">
+            Apply
+          </button>
+        </form>
         <AttributeDefinitionsTable rows={rows} />
-      </div>
+      </Panel>
     </div>
   );
 }

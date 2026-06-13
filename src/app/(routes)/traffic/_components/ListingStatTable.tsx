@@ -32,7 +32,7 @@ export default function ListingStatTable({
   return (
     <Table
       data-testid={testid}
-      className="border-collapse overflow-hidden rounded border border-zinc-200 bg-surface-1"
+      className="border-collapse overflow-hidden bg-surface-1"
     >
       <Thead>
         <tr>

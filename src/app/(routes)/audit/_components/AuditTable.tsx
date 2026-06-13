@@ -23,7 +23,7 @@ export default function AuditTable({ rows }: { rows: AuditEventListItem[] }) {
     );
   }
   return (
-    <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
+    <div className="overflow-hidden">
       <Table className="min-w-full" data-testid="audit-table">
         <Thead>
           <tr>

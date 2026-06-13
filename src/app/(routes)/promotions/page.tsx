@@ -20,6 +20,7 @@ import {
 import PromotionsTabs from "./_components/PromotionsTabs";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 import NewItemPanel from "./_components/NewItemPanel";
 import ProductsTable from "./_components/ProductsTable";
 import ProductForm from "./_components/ProductForm";
@@ -66,7 +67,9 @@ async function TabContent({
         <NewItemPanel label="New product" testid="product-new">
           <ProductForm mode="create" />
         </NewItemPanel>
-        <ProductsTable rows={res.data.items} />
+        <Panel title="Products" accent="primary" bodyClassName="p-0">
+          <ProductsTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -78,7 +81,9 @@ async function TabContent({
         <NewItemPanel label="New tariff" testid="tariff-new">
           <TariffForm mode="create" />
         </NewItemPanel>
-        <TariffsTable rows={res.data.items} />
+        <Panel title="Tariffs" accent="primary" bodyClassName="p-0">
+          <TariffsTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -90,7 +95,9 @@ async function TabContent({
         <NewItemPanel label="New discount rule" testid="discount-rule-new">
           <DiscountRuleForm mode="create" />
         </NewItemPanel>
-        <DiscountRulesTable rows={res.data.items} />
+        <Panel title="Discount rules" accent="primary" bodyClassName="p-0">
+          <DiscountRulesTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -105,7 +112,9 @@ async function TabContent({
         >
           <MonthlyDiscountForm mode="create" />
         </NewItemPanel>
-        <MonthlyDiscountsTable rows={res.data.items} />
+        <Panel title="Monthly discounts" accent="primary" bodyClassName="p-0">
+          <MonthlyDiscountsTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -117,7 +126,9 @@ async function TabContent({
         <NewItemPanel label="New zone" testid="zone-new">
           <ZoneForm mode="create" />
         </NewItemPanel>
-        <ZonesTable rows={res.data.items} />
+        <Panel title="Zones" accent="primary" bodyClassName="p-0">
+          <ZonesTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -130,8 +141,12 @@ async function TabContent({
     if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
     return (
       <div className="mt-4 space-y-4">
-        <OrdersFilter status={filters.status} serviceId={filters.service_id} />
-        <OrdersTable rows={res.data.items} />
+        <Panel title="Orders" accent="primary" bodyClassName="p-0">
+          <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+            <OrdersFilter status={filters.status} serviceId={filters.service_id} />
+          </div>
+          <OrdersTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -144,8 +159,12 @@ async function TabContent({
   if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
   return (
     <div className="mt-4 space-y-4">
-      <CampaignsFilter status={filters.status} serviceId={filters.service_id} />
-      <CampaignsTable rows={res.data.items} />
+      <Panel title="Campaigns" accent="primary" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+          <CampaignsFilter status={filters.status} serviceId={filters.service_id} />
+        </div>
+        <CampaignsTable rows={res.data.items} />
+      </Panel>
     </div>
   );
 }
