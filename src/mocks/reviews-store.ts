@@ -6,15 +6,33 @@
 import type { AdminReviewRead, ReviewStatus, ReplyStatus } from "@/lib/reviews/types";
 import { reviews as seedReviews } from "./reviews-fixtures";
 
-// Clone the seed data to avoid mutating fixtures across test runs.
-let reviewsDb = seedReviews.map((r) => ({ ...r }));
+// Fresh clone of the seed data — never mutate the imported fixtures directly.
+function seed(): AdminReviewRead[] {
+  return seedReviews.map((r) => ({ ...r }));
+}
+
+// The store is held on `globalThis`, NOT a plain module-level binding, because
+// Next/Turbopack can compile this module into more than one chunk (e.g. the MSW
+// node server bundle that serves reads vs. the route-handler bundle that calls
+// resetReviewsStore). Separate chunks would each get their own module-scoped
+// copy, so a reset in one would not be visible to reads in the other. Anchoring
+// the single backing array on the process-global object makes every chunk share
+// one instance — the only thing that makes the test reset actually take effect.
+const globalStore = globalThis as typeof globalThis & {
+  __eventupReviewsDb?: AdminReviewRead[];
+};
+globalStore.__eventupReviewsDb ??= seed();
+
+function reviewsDb(): AdminReviewRead[] {
+  return (globalStore.__eventupReviewsDb ??= seed());
+}
 
 export function getAllReviews(): AdminReviewRead[] {
-  return reviewsDb;
+  return reviewsDb();
 }
 
 export function getReviewById(id: number): AdminReviewRead | null {
-  return reviewsDb.find((r) => r.id === id) ?? null;
+  return reviewsDb().find((r) => r.id === id) ?? null;
 }
 
 export function filterReviews(
@@ -23,7 +41,7 @@ export function filterReviews(
   rating?: number,
   q?: string,
 ): AdminReviewRead[] {
-  let rows = [...reviewsDb];
+  let rows = [...reviewsDb()];
 
   if (status !== undefined) {
     rows = rows.filter((r) => r.status === status);
@@ -77,6 +95,10 @@ export function setReplyStatus(
   return review;
 }
 
-export function resetReviews(): void {
-  reviewsDb = seedReviews.map((r) => ({ ...r }));
+// Restore the store to its seeded state. Wired into a test-only reset route
+// (src/app/api/e2e/reset-reviews) so the e2e suite can guarantee a clean
+// reviews store per test — the moderation specs mutate seeded rows (hide #1,
+// hide #3's reply) and must not leak that state across tests or runs.
+export function resetReviewsStore(): void {
+  globalStore.__eventupReviewsDb = seed();
 }
