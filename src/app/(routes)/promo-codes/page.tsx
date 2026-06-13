@@ -3,12 +3,17 @@ import Link from "next/link";
 import { listPromoCodes } from "@/lib/promo-codes/api";
 import type { PromoCodeFilter } from "@/lib/promo-codes/types";
 import PromoCodesTable from "./_components/PromoCodesTable";
+import PromoCodesGrid from "./_components/PromoCodesGrid";
+import { loadMorePromoCodes } from "./load-more-action";
+import { PROMO_GRID_LIMIT } from "./grid-config";
 import { buttonClass } from "@/app/_components/ui/Button";
 import {
   Alert,
   PageHeader,
   Panel,
   StatusSegments,
+  ViewToggle,
+  parseView,
   type SegmentOption,
 } from "@/app/_components/ui";
 
@@ -20,13 +25,18 @@ const STATUS_OPTIONS: SegmentOption[] = [
 export default async function PromoCodesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ code?: string; status?: string }>;
+  searchParams: Promise<{ code?: string; status?: string; view?: string }>;
 }) {
   const sp = await searchParams;
   const status =
     sp.status === "active" || sp.status === "inactive" ? sp.status : undefined;
+  const view = parseView(sp.view);
 
-  const filter: PromoCodeFilter = { limit: 100 };
+  // Grid accumulates client-side from page one, so it fetches a grid-sized
+  // first page from offset 0; the table keeps its larger single-page load.
+  const filter: PromoCodeFilter = {
+    limit: view === "grid" ? PROMO_GRID_LIMIT : 100,
+  };
   if (sp.code) filter.code = sp.code;
   if (status === "active") filter.is_active = true;
   if (status === "inactive") filter.is_active = false;
@@ -50,6 +60,7 @@ export default async function PromoCodesPage({
   }
 
   const rows = result.data.items;
+  const { total, has_more } = result.data;
   const otherParams = { code: sp.code };
 
   return (
@@ -78,24 +89,47 @@ export default async function PromoCodesPage({
             searchParams={otherParams}
             testidPrefix="promo-status"
           />
-          <form className="flex gap-2" data-testid="promo-codes-search">
-            {/* GET form — carry the active status segment so a code search
-                doesn't drop the current active/inactive filter. */}
-            {status ? (
-              <input type="hidden" name="status" value={status} />
-            ) : null}
-            <input
-              name="code"
-              placeholder="Search by code"
-              defaultValue={sp.code ?? ""}
-              className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+          <div className="flex items-center gap-2">
+            <form className="flex gap-2" data-testid="promo-codes-search">
+              {/* GET form — carry the active status segment so a code search
+                  doesn't drop the current active/inactive filter. */}
+              {status ? (
+                <input type="hidden" name="status" value={status} />
+              ) : null}
+              <input
+                name="code"
+                placeholder="Search by code"
+                defaultValue={sp.code ?? ""}
+                className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+              />
+              <button type="submit" className={buttonClass("secondary", "sm")}>
+                Apply
+              </button>
+            </form>
+            <ViewToggle
+              current={view}
+              basePath="/promo-codes"
+              searchParams={{ status, code: sp.code }}
+              testidPrefix="promo-view"
             />
-            <button type="submit" className={buttonClass("secondary", "sm")}>
-              Apply
-            </button>
-          </form>
+          </div>
         </div>
-        <PromoCodesTable rows={rows} />
+        {view === "grid" ? (
+          <PromoCodesGrid
+            initial={{
+              items: rows,
+              nextCursor: has_more ? String(PROMO_GRID_LIMIT) : null,
+              hasMore: has_more,
+            }}
+            loadAction={loadMorePromoCodes.bind(null, {
+              status,
+              code: sp.code,
+            })}
+            total={total}
+          />
+        ) : (
+          <PromoCodesTable rows={rows} />
+        )}
       </Panel>
     </div>
   );
