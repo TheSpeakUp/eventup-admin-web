@@ -1,4 +1,5 @@
 export { default as Badge, type BadgeTone } from "./Badge";
+export { default as Icon, type IconName } from "./Icon";
 export {
   default as Button,
   buttonClass,
