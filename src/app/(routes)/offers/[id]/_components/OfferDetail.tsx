@@ -9,7 +9,7 @@ function formatMoney(minor: number | null, currency: string | null): string {
 
 export default function OfferDetail({ offer }: { offer: OfferDetailCard }) {
   return (
-    <section data-testid="offer-detail" className="space-y-3 rounded-md border border-zinc-200 bg-surface-1 p-4">
+    <section data-testid="offer-detail" className="space-y-3">
       <div className="flex items-center gap-2">
         <OfferStatusBadge status={offer.status} />
         <QueueStatusBadge status={offer.queue_status} />

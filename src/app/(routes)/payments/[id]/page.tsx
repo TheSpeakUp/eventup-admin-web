@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayment } from "@/lib/payments/api";
+import { Panel } from "@/app/_components/ui";
 import PaymentDetailView from "./_components/PaymentDetailView";
 import RefundPanel from "./_components/RefundPanel";
 
@@ -23,7 +24,7 @@ export default async function PaymentDetailPage({
       <div className="p-8">
         <Link
           href="/payments"
-          className="text-sm text-zinc-500 hover:underline"
+          className="text-sm text-ink-subtle hover:underline"
         >
           ← Back to payments
         </Link>
@@ -41,17 +42,21 @@ export default async function PaymentDetailPage({
 
   return (
     <div className="p-8 space-y-5">
-      <Link href="/payments" className="text-sm text-zinc-500 hover:underline">
+      <Link href="/payments" className="text-sm text-ink-subtle hover:underline">
         ← Back to payments
       </Link>
-      <PaymentDetailView payment={result.data} />
-      <RefundPanel
-        paymentId={result.data.id}
-        currency={result.data.currency}
-        refundableAmountMinor={result.data.refundable_amount_minor}
-        refundedAmountMinor={result.data.refunded_amount_minor}
-        refunds={result.data.refunds}
-      />
+      <Panel title="Payment details" accent="info">
+        <PaymentDetailView payment={result.data} />
+      </Panel>
+      <Panel title="Refund" accent="warning">
+        <RefundPanel
+          paymentId={result.data.id}
+          currency={result.data.currency}
+          refundableAmountMinor={result.data.refundable_amount_minor}
+          refundedAmountMinor={result.data.refunded_amount_minor}
+          refunds={result.data.refunds}
+        />
+      </Panel>
     </div>
   );
 }

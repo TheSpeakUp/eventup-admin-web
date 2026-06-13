@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProvider } from "@/lib/providers/api";
+import { Panel } from "@/app/_components/ui";
 import ProviderDetailView from "./_components/ProviderDetail";
 import ProviderFieldEditForm from "./_components/ProviderFieldEditForm";
 import ProviderModerationPanel from "./_components/ProviderModerationPanel";
@@ -16,7 +17,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
     if (result.status === 404) notFound();
     return (
       <div className="p-8">
-        <Link href="/providers" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/providers" className="text-sm text-ink-subtle hover:underline">
           ← Back to providers
         </Link>
         <div
@@ -31,20 +32,25 @@ export default async function ProviderDetailPage({ params }: { params: Params })
 
   return (
     <div className="p-8 space-y-5">
-      <Link href="/providers" className="text-sm text-zinc-500 hover:underline">
+      <Link href="/providers" className="text-sm text-ink-subtle hover:underline">
         ← Back to providers
       </Link>
       <div className="grid grid-cols-[1fr_280px] gap-6">
         <div className="space-y-5">
-          <ProviderDetailView provider={result.data} />
-          <ProviderFieldEditForm provider={result.data} />
+          <Panel title="Provider profile" accent="primary">
+            <ProviderDetailView provider={result.data} />
+          </Panel>
+          <Panel title="Edit fields" accent="info">
+            <ProviderFieldEditForm provider={result.data} />
+          </Panel>
         </div>
-        <aside className="space-y-3">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
-          <ProviderModerationPanel
-            providerId={result.data.id}
-            status={result.data.verification_status}
-          />
+        <aside>
+          <Panel title="Moderation" accent="warning">
+            <ProviderModerationPanel
+              providerId={result.data.id}
+              status={result.data.verification_status}
+            />
+          </Panel>
         </aside>
       </div>
     </div>

@@ -26,12 +26,8 @@ export default function ProviderFieldEditForm({
     <form
       action={formAction}
       data-testid="provider-field-edit-form"
-      className="space-y-4 rounded-md border border-zinc-200 bg-surface-1 p-6"
+      className="space-y-4"
     >
-      <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-        Edit fields
-      </h2>
-
       <input type="hidden" name="providerId" value={provider.id} />
       {/* Current-value mirrors used by the action to compute the diff. */}
       <input type="hidden" name="__cur_name" value={provider.name} />

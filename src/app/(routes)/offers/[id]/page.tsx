@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getOfferDetailCard } from "@/lib/offers/api";
 import { isOfferStatus } from "@/lib/offers/types";
+import { Panel } from "@/app/_components/ui";
 import OfferDetail from "./_components/OfferDetail";
 import OfferModerationPanel from "./_components/OfferModerationPanel";
 
@@ -30,8 +31,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   return (
     <main className="space-y-4 p-6">
       <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
-      <OfferDetail offer={offer} />
-      <OfferModerationPanel offerId={offerId} status={offer.status} />
+      <Panel title="Offer details" accent="info">
+        <OfferDetail offer={offer} />
+      </Panel>
+      <Panel title="Moderation" accent="warning">
+        <OfferModerationPanel offerId={offerId} status={offer.status} />
+      </Panel>
     </main>
   );
 }

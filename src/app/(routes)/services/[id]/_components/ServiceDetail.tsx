@@ -13,7 +13,7 @@ function formatPrice(minor: number | null, currency: string | null): string {
 
 export default function ServiceDetailView({ service }: { service: ServiceDetail }) {
   return (
-    <div className="space-y-5 rounded-md border border-zinc-200 bg-surface-1 p-6">
+    <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold" data-testid="service-detail-title">
