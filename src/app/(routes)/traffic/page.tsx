@@ -13,7 +13,7 @@ function ErrorPanel({ message, status }: { message: string; status: number }) {
       <h1 className="text-2xl font-semibold">Traffic</h1>
       <div
         data-testid="traffic-error"
-        className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+        className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
       >
         {status === 403
           ? "Viewing traffic analytics requires an admin role."

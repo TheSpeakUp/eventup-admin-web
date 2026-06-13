@@ -59,7 +59,7 @@ export default function ServiceMetricsTable({
               <Link
                 href={`/quality/services/${r.service_id}`}
                 data-testid={`service-metric-view-${r.service_id}`}
-                className="text-blue-700"
+                className="text-primary-hover"
               >
                 View
               </Link>

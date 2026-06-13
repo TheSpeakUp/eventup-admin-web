@@ -48,7 +48,7 @@ export default function ProductsTable({ rows }: { rows: ProductRead[] }) {
                   onClick={() =>
                     setEditing((cur) => (cur === r.id ? null : r.id))
                   }
-                  className="text-blue-700"
+                  className="text-primary-hover"
                 >
                   {editing === r.id ? "Close" : "Edit"}
                 </button>

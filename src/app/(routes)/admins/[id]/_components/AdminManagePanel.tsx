@@ -76,7 +76,7 @@ function RoleActiveForm({
         </button>
       </div>
       {state && !state.ok && state.error ? (
-        <p data-testid="admin-update-error" className="text-sm text-red-700">
+        <p data-testid="admin-update-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}
@@ -104,12 +104,12 @@ function RevokeScopeButton({
         type="submit"
         disabled={pending}
         data-testid={`scope-revoke-${permissionKey}`}
-        className="text-xs font-medium text-red-600 hover:text-red-800 disabled:text-zinc-400"
+        className="text-xs font-medium text-red-600 hover:text-red-300 disabled:text-zinc-400"
       >
         {pending ? "…" : "Revoke"}
       </button>
       {state && !state.ok && state.error ? (
-        <span className="ml-2 text-xs text-red-700">{state.error}</span>
+        <span className="ml-2 text-xs text-red-300">{state.error}</span>
       ) : null}
     </form>
   );
@@ -162,7 +162,7 @@ function GrantScopeForm({
         {pending ? "Granting…" : "Grant"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="grant-scope-error" className="w-full text-sm text-red-700">
+        <p data-testid="grant-scope-error" className="w-full text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

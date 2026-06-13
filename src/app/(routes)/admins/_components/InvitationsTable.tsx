@@ -1,6 +1,7 @@
 "use client";
 
 import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
+import Badge, { type BadgeTone } from "@/app/_components/ui/Badge";
 import type { AdminInvitationItem } from "@/lib/admins/types";
 import { RoleBadge } from "./RoleBadge";
 import { revokeInvitationAction } from "../actions";
@@ -14,13 +15,11 @@ function fmtDate(value: string | null): string {
 
 function statusLabel(inv: AdminInvitationItem): {
   text: string;
-  cls: string;
+  tone: BadgeTone;
 } {
-  if (inv.is_accepted)
-    return { text: "Accepted", cls: "bg-emerald-100 text-emerald-800 ring-emerald-200" };
-  if (inv.is_expired)
-    return { text: "Expired", cls: "bg-zinc-100 text-zinc-500 ring-zinc-200" };
-  return { text: "Pending", cls: "bg-amber-100 text-amber-800 ring-amber-200" };
+  if (inv.is_accepted) return { text: "Accepted", tone: "success" };
+  if (inv.is_expired) return { text: "Expired", tone: "neutral" };
+  return { text: "Pending", tone: "warning" };
 }
 
 function RevokeButton({ id }: { id: string }) {
@@ -32,12 +31,12 @@ function RevokeButton({ id }: { id: string }) {
         type="submit"
         disabled={pending}
         data-testid={`invitation-revoke-${id}`}
-        className="text-sm font-medium text-red-600 hover:text-red-800 disabled:text-zinc-400"
+        className="text-sm font-medium text-red-600 hover:text-red-300 disabled:text-zinc-400"
       >
         {pending ? "Revoking…" : "Revoke"}
       </button>
       {state && !state.ok && state.error ? (
-        <span className="text-xs text-red-700">{state.error}</span>
+        <span className="text-xs text-red-300">{state.error}</span>
       ) : null}
     </form>
   );
@@ -81,11 +80,7 @@ export default function InvitationsTable({
                   <RoleBadge role={inv.role} />
                 </td>
                 <td className="px-4 py-2.5">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${status.cls}`}
-                  >
-                    {status.text}
-                  </span>
+                  <Badge tone={status.tone}>{status.text}</Badge>
                 </td>
                 <td className="px-4 py-2.5 text-zinc-600">
                   {fmtDate(inv.expires_at)}

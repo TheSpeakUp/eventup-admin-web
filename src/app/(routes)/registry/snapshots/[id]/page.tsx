@@ -33,7 +33,7 @@ export default async function RegistrySnapshotPage({
         </Link>
         <div
           data-testid="snapshot-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           {found.status === 403
             ? "Viewing registry snapshots requires the marketplace-read permission."

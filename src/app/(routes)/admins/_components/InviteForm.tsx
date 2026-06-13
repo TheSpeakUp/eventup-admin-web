@@ -60,12 +60,12 @@ export default function InviteForm() {
         {pending ? "Sending…" : "Send invite"}
       </button>
       {!state.ok && state.error ? (
-        <p data-testid="invite-error" className="w-full text-sm text-red-700">
+        <p data-testid="invite-error" className="w-full text-sm text-red-300">
           {state.error}
         </p>
       ) : null}
       {state.ok && state.email ? (
-        <p data-testid="invite-success" className="w-full text-sm text-emerald-700">
+        <p data-testid="invite-success" className="w-full text-sm text-emerald-300">
           Invitation sent to {state.email}.
         </p>
       ) : null}

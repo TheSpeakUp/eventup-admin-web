@@ -14,7 +14,7 @@ export default async function BroadcastPage() {
         <h1 className="text-2xl font-semibold">Broadcast</h1>
         <div
           data-testid="broadcast-denied"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           Broadcasting announcements requires the SUPERADMIN role.
         </div>

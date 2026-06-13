@@ -86,7 +86,7 @@ export default function RevalidationPanel() {
       {state.ok === false ? (
         <p
           data-testid="revalidation-error"
-          className="mt-3 text-sm text-red-700"
+          className="mt-3 text-sm text-red-300"
         >
           {state.error}
         </p>

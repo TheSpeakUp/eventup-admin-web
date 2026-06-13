@@ -29,7 +29,7 @@ export default async function PaymentDetailPage({
         </Link>
         <div
           data-testid="payment-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           {result.status === 403
             ? "Viewing payments requires an admin role."

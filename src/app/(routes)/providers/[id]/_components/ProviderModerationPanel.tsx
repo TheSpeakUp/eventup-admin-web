@@ -126,7 +126,7 @@ function ActionForm({
         </label>
       ) : null}
       {state.error ? (
-        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-700">
+        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

@@ -294,7 +294,7 @@ export default function ServiceFieldEditForm({
       {state.error ? (
         <p
           data-testid="service-field-edit-error"
-          className="text-sm text-red-700"
+          className="text-sm text-red-300"
         >
           {state.error}
         </p>
@@ -302,7 +302,7 @@ export default function ServiceFieldEditForm({
       {state.ok ? (
         <p
           data-testid="service-field-edit-success"
-          className="text-sm text-emerald-700"
+          className="text-sm text-emerald-300"
         >
           Saved.
         </p>

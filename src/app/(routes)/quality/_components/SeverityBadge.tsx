@@ -1,21 +1,21 @@
 // src/app/(routes)/quality/_components/SeverityBadge.tsx
-// Anomaly severity pill. high → red, medium → amber, low → zinc; unknown falls
-// back to zinc.
-const STYLES: Record<string, string> = {
-  high: "bg-red-100 text-red-800 ring-red-200",
-  medium: "bg-amber-100 text-amber-800 ring-amber-200",
-  low: "bg-zinc-100 text-zinc-700 ring-zinc-200",
+// Anomaly severity pill. high → red, medium → amber, low/unknown → neutral.
+import Badge, { type BadgeTone } from "@/app/_components/ui/Badge";
+
+const TONES: Record<string, BadgeTone> = {
+  high: "danger",
+  medium: "warning",
+  low: "neutral",
 };
 
 export default function SeverityBadge({ severity }: { severity: string }) {
-  const cls = STYLES[severity] ?? "bg-zinc-100 text-zinc-700 ring-zinc-200";
   return (
-    <span
+    <Badge
+      tone={TONES[severity] ?? "neutral"}
       data-testid="severity-badge"
       data-severity={severity}
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${cls}`}
     >
       {severity}
-    </span>
+    </Badge>
   );
 }

@@ -22,7 +22,7 @@ export default async function ProductDetailPage({
         <h1 className="text-2xl font-semibold">Promotion product</h1>
         <div
           data-testid="promotion-detail-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {res.status === 404
             ? `No promotion product with id ${id}.`
@@ -32,7 +32,7 @@ export default async function ProductDetailPage({
         </div>
         <Link
           href="/promotions"
-          className="mt-4 inline-block text-sm text-blue-700"
+          className="mt-4 inline-block text-sm text-primary-hover"
         >
           ← Back to promotions
         </Link>
@@ -72,7 +72,7 @@ export default async function ProductDetailPage({
       </dl>
       <Link
         href="/promotions"
-        className="mt-6 inline-block text-sm text-blue-700"
+        className="mt-6 inline-block text-sm text-primary-hover"
       >
         ← Back to promotions
       </Link>

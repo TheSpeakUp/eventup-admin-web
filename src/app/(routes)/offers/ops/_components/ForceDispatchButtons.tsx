@@ -98,7 +98,7 @@ function ConfirmButton({
         )}
       </form>
       {state.message ? (
-        <p data-testid={`${testid}-result`} className="text-xs text-emerald-700">
+        <p data-testid={`${testid}-result`} className="text-xs text-emerald-300">
           {state.message}
         </p>
       ) : null}

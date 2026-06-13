@@ -131,7 +131,7 @@ export function TranslationsEditor({
               type="button"
               data-testid={`field-remove-${i}`}
               onClick={() => setFields((r) => r.filter((_, idx) => idx !== i))}
-              className="rounded border px-2 py-1 text-red-700"
+              className="rounded border px-2 py-1 text-red-300"
             >
               Remove
             </button>
@@ -148,7 +148,7 @@ export function TranslationsEditor({
           Add locale
         </button>
         {dupField ? (
-          <p data-testid="field-dup-error" className="text-sm text-red-700">
+          <p data-testid="field-dup-error" className="text-sm text-red-300">
             Duplicate field locale: {dupField}
           </p>
         ) : null}
@@ -186,7 +186,7 @@ export function TranslationsEditor({
               type="button"
               data-testid={`enum-remove-${i}`}
               onClick={() => setEnums((r) => r.filter((_, idx) => idx !== i))}
-              className="rounded border px-2 py-1 text-red-700"
+              className="rounded border px-2 py-1 text-red-300"
             >
               Remove
             </button>
@@ -203,7 +203,7 @@ export function TranslationsEditor({
           Add enum translation
         </button>
         {dupEnum ? (
-          <p data-testid="enum-dup-error" className="text-sm text-red-700">
+          <p data-testid="enum-dup-error" className="text-sm text-red-300">
             Duplicate enum translation: {dupEnum}
           </p>
         ) : null}
@@ -219,7 +219,7 @@ export function TranslationsEditor({
           {pending ? "Saving…" : "Save translations"}
         </button>
         {state && !state.ok && state.error ? (
-          <p data-testid="translations-error" className="text-sm text-red-700">
+          <p data-testid="translations-error" className="text-sm text-red-300">
             {state.error}
           </p>
         ) : null}

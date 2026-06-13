@@ -106,7 +106,7 @@ export default function TariffForm({
         {pending ? "Saving…" : mode === "create" ? "Create tariff" : "Save"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="tariff-error" className="text-sm text-red-700">
+        <p data-testid="tariff-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

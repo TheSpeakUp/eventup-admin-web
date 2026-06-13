@@ -45,7 +45,7 @@ export default function BroadcastComposer() {
     return (
       <div
         data-testid="broadcast-sent"
-        className="rounded-md border border-emerald-200 bg-emerald-50 p-6 text-sm text-emerald-900"
+        className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-6 text-sm text-emerald-300"
       >
         Announcement queued for {state.recipients} recipient
         {state.recipients === 1 ? "" : "s"} (broadcast{" "}
@@ -121,7 +121,7 @@ export default function BroadcastComposer() {
         />
       </label>
       {state.error ? (
-        <p className="text-sm text-red-700" data-testid="broadcast-error">
+        <p className="text-sm text-red-300" data-testid="broadcast-error">
           {state.error}
         </p>
       ) : null}

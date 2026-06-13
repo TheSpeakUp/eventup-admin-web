@@ -129,7 +129,7 @@ export default function MonthlyDiscountForm({
         {pending ? "Saving…" : mode === "create" ? "Create discount" : "Save"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="monthly-discount-error" className="text-sm text-red-700">
+        <p data-testid="monthly-discount-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

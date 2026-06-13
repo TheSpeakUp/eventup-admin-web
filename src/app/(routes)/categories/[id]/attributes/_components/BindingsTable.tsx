@@ -1,4 +1,6 @@
 import Link from "next/link";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
 import type { CategoryAttributeBindingRead } from "@/lib/categories/types";
 
 export function BindingsTable({
@@ -10,48 +12,44 @@ export function BindingsTable({
 }) {
   if (rows.length === 0)
     return (
-      <p data-testid="bindings-empty" className="p-4 text-gray-500">
+      <EmptyState data-testid="bindings-empty">
         No attributes bound to this category yet.
-      </p>
+      </EmptyState>
     );
   return (
-    <table className="w-full text-sm" data-testid="bindings-table">
-      <thead>
-        <tr className="text-left text-gray-500">
-          <th className="py-2">Attribute</th>
-          <th>Group</th>
-          <th>Sort</th>
-          <th>In filters</th>
-          <th>In card</th>
-          <th>System</th>
-          <th />
+    <Table data-testid="bindings-table">
+      <Thead>
+        <tr>
+          <Th>Attribute</Th>
+          <Th>Group</Th>
+          <Th>Sort</Th>
+          <Th>In filters</Th>
+          <Th>In card</Th>
+          <Th>System</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
-          <tr
-            key={r.attribute_key}
-            className="border-t"
-            data-testid={`binding-row-${r.attribute_key}`}
-          >
-            <td className="py-2">{r.attribute_key}</td>
-            <td>{r.group_name ?? "—"}</td>
-            <td>{r.sort_order}</td>
-            <td>{r.is_visible_in_filters ? "yes" : "no"}</td>
-            <td>{r.is_visible_in_card ? "yes" : "no"}</td>
-            <td>{r.is_system ? "yes" : "no"}</td>
-            <td>
+          <Tr key={r.attribute_key} data-testid={`binding-row-${r.attribute_key}`}>
+            <Td>{r.attribute_key}</Td>
+            <Td>{r.group_name ?? "—"}</Td>
+            <Td>{r.sort_order}</Td>
+            <Td>{r.is_visible_in_filters ? "yes" : "no"}</Td>
+            <Td>{r.is_visible_in_card ? "yes" : "no"}</Td>
+            <Td>{r.is_system ? "yes" : "no"}</Td>
+            <Td>
               <Link
                 href={`/categories/${categoryId}/attributes/${encodeURIComponent(r.attribute_key)}`}
                 data-testid={`binding-edit-${r.attribute_key}`}
-                className="text-blue-700"
+                className="text-primary-hover hover:underline"
               >
                 Edit
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

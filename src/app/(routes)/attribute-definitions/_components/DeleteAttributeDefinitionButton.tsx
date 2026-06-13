@@ -24,14 +24,14 @@ export function DeleteAttributeDefinitionButton({ attrKey }: { attrKey: string }
         type="submit"
         disabled={pending}
         data-testid="attribute-definition-delete"
-        className="rounded border border-red-300 px-4 py-2 text-red-700"
+        className="rounded border border-red-300 px-4 py-2 text-red-300"
       >
         {pending ? "Deleting…" : "Delete attribute definition"}
       </button>
       {state && !state.ok && state.error ? (
         <p
           data-testid="attribute-definition-delete-error"
-          className="text-sm text-red-700"
+          className="text-sm text-red-300"
         >
           {state.error}
         </p>

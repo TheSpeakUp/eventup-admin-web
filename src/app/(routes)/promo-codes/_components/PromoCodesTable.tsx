@@ -67,7 +67,7 @@ export default function PromoCodesTable({ rows }: { rows: PromoCodeRead[] }) {
               <Link
                 href={`/promo-codes/${r.id}`}
                 data-testid={`promo-view-${r.id}`}
-                className="text-blue-700"
+                className="text-primary-hover"
               >
                 View
               </Link>

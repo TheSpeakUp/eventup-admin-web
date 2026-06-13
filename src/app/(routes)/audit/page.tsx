@@ -61,7 +61,7 @@ export default async function AuditPage({
         <h1 className="text-2xl font-semibold">Audit log</h1>
         <div
           data-testid="audit-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           {result.status === 403
             ? "Viewing the audit log requires the audit-read permission."

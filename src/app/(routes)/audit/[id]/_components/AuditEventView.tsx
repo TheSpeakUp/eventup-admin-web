@@ -149,10 +149,10 @@ export default function AuditEventView({
 
       {event.error_message ? (
         <div
-          className="rounded-md bg-red-50 p-3 text-sm text-red-900"
+          className="rounded-md bg-red-500/10 p-3 text-sm text-red-300"
           data-testid="audit-error-message"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-300">
             Error
           </p>
           <p className="mt-1">{event.error_message}</p>

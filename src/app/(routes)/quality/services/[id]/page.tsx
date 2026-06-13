@@ -25,7 +25,7 @@ export default async function ServiceMetricDetailPage({
         <h1 className="text-2xl font-semibold">Service quality metric</h1>
         <div
           data-testid="service-metric-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {res.status === 404
             ? `No service quality metric with id ${id}.`
@@ -35,7 +35,7 @@ export default async function ServiceMetricDetailPage({
         </div>
         <Link
           href="/quality?tab=services"
-          className="mt-4 inline-block text-sm text-blue-700"
+          className="mt-4 inline-block text-sm text-primary-hover"
         >
           ← Back to service metrics
         </Link>
@@ -154,7 +154,7 @@ export default async function ServiceMetricDetailPage({
 
       <Link
         href="/quality?tab=services"
-        className="mt-6 inline-block text-sm text-blue-700"
+        className="mt-6 inline-block text-sm text-primary-hover"
       >
         ← Back to service metrics
       </Link>

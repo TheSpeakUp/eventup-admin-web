@@ -35,7 +35,7 @@ export default function ReviewAnomalyButton({ id }: { id: number }) {
       {state && !state.ok && state.error ? (
         <p
           data-testid={`anomaly-review-${id}-error`}
-          className="ml-1 text-xs text-red-700"
+          className="ml-1 text-xs text-red-300"
         >
           {state.error}
         </p>

@@ -36,7 +36,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
     return (
       <main className="space-y-3 p-6">
         <h1 className="text-xl font-semibold">Offers — SLA queue</h1>
-        <p data-testid="offers-error" className="text-sm text-red-700">
+        <p data-testid="offers-error" className="text-sm text-red-300">
           Failed to load: {result.message}
         </p>
       </main>

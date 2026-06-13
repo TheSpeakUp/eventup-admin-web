@@ -129,10 +129,10 @@ export default function PaymentDetailView({
 
       {payment.failure_code || payment.failure_message ? (
         <div
-          className="rounded-md bg-red-50 p-3 text-sm text-red-900"
+          className="rounded-md bg-red-500/10 p-3 text-sm text-red-300"
           data-testid="payment-failure"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-300">
             Failure
           </p>
           {payment.failure_code ? (

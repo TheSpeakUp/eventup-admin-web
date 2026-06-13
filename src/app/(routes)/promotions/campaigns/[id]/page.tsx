@@ -21,7 +21,7 @@ export default async function CampaignDetailPage({
         <h1 className="text-2xl font-semibold">Promotion campaign</h1>
         <div
           data-testid="campaign-detail-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {res.status === 404
             ? `No promotion campaign with id ${id}.`
@@ -31,7 +31,7 @@ export default async function CampaignDetailPage({
         </div>
         <Link
           href="/promotions?tab=campaigns"
-          className="mt-4 inline-block text-sm text-blue-700"
+          className="mt-4 inline-block text-sm text-primary-hover"
         >
           ← Back to campaigns
         </Link>
@@ -93,7 +93,7 @@ export default async function CampaignDetailPage({
       </dl>
       <Link
         href="/promotions?tab=campaigns"
-        className="mt-6 inline-block text-sm text-blue-700"
+        className="mt-6 inline-block text-sm text-primary-hover"
       >
         ← Back to campaigns
       </Link>

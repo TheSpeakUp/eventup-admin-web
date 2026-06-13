@@ -50,7 +50,7 @@ export default async function RegistryPage({
         <h1 className="text-2xl font-semibold">Registry</h1>
         <div
           data-testid="registry-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           {result.status === 403
             ? "Viewing registry snapshots requires the marketplace-read permission."
