@@ -4,8 +4,12 @@ import type {
   ProviderStatus,
 } from "@/lib/providers/types";
 import { buildFixtureProviders } from "./providers-fixtures";
+import { globalSingleton } from "./global-store";
 
-const providers = new Map<number, ProviderDetail>();
+const providers = globalSingleton(
+  "__eventupProviders",
+  () => new Map<number, ProviderDetail>(),
+);
 
 function ensureSeed(): void {
   if (providers.size > 0) return;

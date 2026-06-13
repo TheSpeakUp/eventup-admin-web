@@ -3,9 +3,13 @@ import type { CategoryAttributeBindingRead } from "@/lib/categories/types";
 import { getAttributeDefinitionByKey } from "./attribute-definitions-store";
 import { getCategoryById } from "./categories-store";
 import { buildFixtureCategoryBindings } from "./category-bindings-fixtures";
+import { globalSingleton } from "./global-store";
 
 // Keyed by "{category_id}:{attribute_key}" — the backend's natural upsert key.
-const bindings = new Map<string, CategoryAttributeBindingRead>();
+const bindings = globalSingleton(
+  "__eventupCategoryBindings",
+  () => new Map<string, CategoryAttributeBindingRead>(),
+);
 let nextBindingId = 100;
 
 function bindingKey(categoryId: number, attributeKey: string): string {

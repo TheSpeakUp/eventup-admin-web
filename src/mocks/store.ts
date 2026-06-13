@@ -4,8 +4,12 @@ import type {
   ServiceStatus,
 } from "@/lib/services/types";
 import { buildFixtureServices } from "./fixtures";
+import { globalSingleton } from "./global-store";
 
-const services = new Map<number, ServiceDetail>();
+const services = globalSingleton(
+  "__eventupServices",
+  () => new Map<number, ServiceDetail>(),
+);
 
 function ensureSeed(): void {
   if (services.size > 0) return;

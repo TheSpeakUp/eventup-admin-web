@@ -1,5 +1,12 @@
 import { test, expect, type Page } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
+
+// Shared mock store is mutated by these specs; reset before each test so the
+// seeded state stays deterministic across order / reruns / retries.
+test.beforeEach(async ({ request }) => {
+  await resetMockStores(request);
+});
 
 async function openServiceDetail(page: Page, id: number): Promise<void> {
   await page.goto(`/services/${id}`);

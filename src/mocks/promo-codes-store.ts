@@ -5,8 +5,12 @@ import type {
   TargetingRuleTree,
 } from "@/lib/promo-codes/types";
 import { buildFixturePromoCodes } from "./promo-codes-fixtures";
+import { globalSingleton } from "./global-store";
 
-const promoCodes = new Map<number, PromoCodeRead>();
+const promoCodes = globalSingleton(
+  "__eventupPromoCodes",
+  () => new Map<number, PromoCodeRead>(),
+);
 let nextId = 100;
 
 function ensureSeed(): void {

@@ -1,13 +1,22 @@
 import { makeOfferDetailFixture } from "./offers-fixtures";
 import type { OfferDetailCard, OfferStatus } from "@/lib/offers/types";
+import { globalSingleton } from "./global-store";
 
-const OFFERS = new Map<number, OfferDetailCard>();
+const OFFERS = globalSingleton(
+  "__eventupOffers",
+  () => new Map<number, OfferDetailCard>(),
+);
 
 function seed(): void {
   if (OFFERS.size > 0) return;
   for (let i = 1; i <= 40; i++) {
     OFFERS.set(i, makeOfferDetailFixture(i));
   }
+}
+
+export function resetOffersStore(): void {
+  OFFERS.clear();
+  seed();
 }
 
 export function getOffer(id: number): OfferDetailCard | undefined {
