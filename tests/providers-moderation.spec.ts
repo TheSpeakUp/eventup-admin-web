@@ -69,6 +69,16 @@ test.describe("provider verification evidence (T4)", () => {
     await expect(page.getByTestId("provider-evidence-empty")).toBeVisible();
   });
 
+  test("evidence with a javascript: file_url is not rendered as a link (XSS guard)", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/9997`);
+    await openProviderDetail(page, 9997);
+    // The hostile URL must NOT become a clickable anchor…
+    await expect(page.getByTestId("provider-evidence-item")).toBeVisible();
+    await expect(page.getByTestId("provider-evidence-link")).toHaveCount(0);
+    // …it degrades to an inert "Invalid link" marker instead.
+    await expect(page.getByTestId("provider-evidence-link-invalid")).toBeVisible();
+  });
+
   test("verify without evidence is gated (400); override path verifies", async ({ page }) => {
     await loginAsMockAdmin(page, `/providers/9998`);
     await openProviderDetail(page, 9998);
