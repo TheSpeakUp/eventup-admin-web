@@ -10,6 +10,9 @@ test.describe("Self profile", () => {
     await loginAsMockAdmin(page, "/profile");
 
     await expect(page.getByTestId("profile-heading")).toHaveText("My profile");
+    await expect(page.getByTestId("profile-id")).toHaveText(
+      "11111111-1111-4111-8111-111111111111",
+    );
     await expect(page.getByTestId("profile-email")).toHaveText(
       "admin@example.com",
     );
