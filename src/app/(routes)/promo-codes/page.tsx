@@ -79,6 +79,11 @@ export default async function PromoCodesPage({
             testidPrefix="promo-status"
           />
           <form className="flex gap-2" data-testid="promo-codes-search">
+            {/* GET form — carry the active status segment so a code search
+                doesn't drop the current active/inactive filter. */}
+            {status ? (
+              <input type="hidden" name="status" value={status} />
+            ) : null}
             <input
               name="code"
               placeholder="Search by code"
