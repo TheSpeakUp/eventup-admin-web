@@ -17,7 +17,7 @@ const LABELS: Record<PromotionsTab, string> = {
 export default function PromotionsTabs({ active }: { active: PromotionsTab }) {
   return (
     <div
-      className="inline-flex flex-wrap gap-0.5 rounded border border-zinc-200 bg-white p-0.5 text-sm"
+      className="inline-flex flex-wrap gap-0.5 rounded border border-zinc-200 bg-surface-1 p-0.5 text-sm"
       data-testid="promotions-tabs"
     >
       {PROMOTIONS_TABS.map((tab) => (
@@ -28,7 +28,7 @@ export default function PromotionsTabs({ active }: { active: PromotionsTab }) {
           data-active={tab === active}
           className={`rounded px-3 py-1 ${
             tab === active
-              ? "bg-zinc-900 text-white"
+              ? "bg-primary text-white"
               : "text-zinc-600 hover:bg-zinc-100"
           }`}
         >

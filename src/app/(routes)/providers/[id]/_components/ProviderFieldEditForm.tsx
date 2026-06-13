@@ -26,7 +26,7 @@ export default function ProviderFieldEditForm({
     <form
       action={formAction}
       data-testid="provider-field-edit-form"
-      className="space-y-4 rounded-md border border-zinc-200 bg-white p-6"
+      className="space-y-4 rounded-md border border-zinc-200 bg-surface-1 p-6"
     >
       <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
         Edit fields
@@ -169,7 +169,7 @@ export default function ProviderFieldEditForm({
           type="submit"
           disabled={pending}
           data-testid="provider-field-edit-submit"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:bg-zinc-400"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
         >
           {pending ? "Saving…" : "Save fields"}
         </button>

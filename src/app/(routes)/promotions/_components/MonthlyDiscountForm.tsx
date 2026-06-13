@@ -25,7 +25,7 @@ export default function MonthlyDiscountForm({
     <form
       action={formAction}
       data-testid="monthly-discount-form"
-      className="space-y-3 rounded border border-zinc-200 bg-white p-4"
+      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
     >
       {mode === "edit" && d ? (
         <input type="hidden" name="id" value={d.id} />

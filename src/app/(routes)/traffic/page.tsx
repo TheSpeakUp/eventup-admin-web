@@ -96,7 +96,7 @@ export default async function TrafficPage({
         <SummaryCards summary={summary} />
       </div>
 
-      <section className="mt-6 rounded border border-zinc-200 bg-white p-4">
+      <section className="mt-6 rounded border border-zinc-200 bg-surface-1 p-4">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-700">
             Views &amp; clicks trend
@@ -118,7 +118,7 @@ export default async function TrafficPage({
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <div
-            className="inline-flex rounded border border-zinc-200 bg-white p-0.5 text-sm"
+            className="inline-flex rounded border border-zinc-200 bg-surface-1 p-0.5 text-sm"
             data-testid="traffic-type-switch"
           >
             {(["service", "offer"] as const).map((t) => (
@@ -129,7 +129,7 @@ export default async function TrafficPage({
                 data-active={t === type}
                 className={`rounded px-3 py-1 capitalize ${
                   t === type
-                    ? "bg-zinc-900 text-white"
+                    ? "bg-primary text-white"
                     : "text-zinc-600 hover:bg-zinc-100"
                 }`}
               >

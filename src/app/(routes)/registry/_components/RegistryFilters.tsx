@@ -51,7 +51,7 @@ export default function RegistryFilters({
       <button
         type="submit"
         data-testid="registry-filter-apply"
-        className="rounded bg-zinc-900 px-4 py-1.5 text-sm text-white"
+        className="rounded bg-primary px-4 py-1.5 text-sm text-white"
       >
         Apply
       </button>

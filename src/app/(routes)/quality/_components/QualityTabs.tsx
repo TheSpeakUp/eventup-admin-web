@@ -14,7 +14,7 @@ const LABELS: Record<QualityTab, string> = {
 export default function QualityTabs({ active }: { active: QualityTab }) {
   return (
     <div
-      className="inline-flex flex-wrap gap-0.5 rounded border border-zinc-200 bg-white p-0.5 text-sm"
+      className="inline-flex flex-wrap gap-0.5 rounded border border-zinc-200 bg-surface-1 p-0.5 text-sm"
       data-testid="quality-tabs"
     >
       {QUALITY_TABS.map((tab) => (
@@ -25,7 +25,7 @@ export default function QualityTabs({ active }: { active: QualityTab }) {
           data-active={tab === active}
           className={`rounded px-3 py-1 ${
             tab === active
-              ? "bg-zinc-900 text-white"
+              ? "bg-primary text-white"
               : "text-zinc-600 hover:bg-zinc-100"
           }`}
         >

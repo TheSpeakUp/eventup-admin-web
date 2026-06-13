@@ -60,7 +60,7 @@ export default async function AdminDetailPage({
         </div>
       </div>
 
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-md border border-zinc-200 bg-white p-4 text-sm">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-md border border-zinc-200 bg-surface-1 p-4 text-sm">
         <dt className="text-zinc-500">Created</dt>
         <dd className="text-zinc-800">{fmtDate(admin.created_at)}</dd>
         <dt className="text-zinc-500">Last login</dt>

@@ -19,7 +19,7 @@ export default function ZoneForm({
     <form
       action={formAction}
       data-testid="zone-form"
-      className="space-y-3 rounded border border-zinc-200 bg-white p-4"
+      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
     >
       {mode === "edit" && z ? (
         <input type="hidden" name="id" value={z.id} />

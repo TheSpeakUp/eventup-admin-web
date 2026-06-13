@@ -1,112 +1,145 @@
 "use client";
 
 import {
-  BarChart,
-  Bar,
+  Area,
+  AreaChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-import type { RevenueBucket } from "@/lib/dashboard/types";
+import type { RevenueBucket, Granularity } from "@/lib/dashboard/types";
+import { formatAxisDate, formatCompactMoney } from "@/lib/dashboard/format";
+import { formatMoneyMinor } from "@/lib/format";
 
-export default function RevenueChart({ buckets }: { buckets: RevenueBucket[] }) {
+// Lavender-led series palette (primary first), then distinguishable hues that
+// read on the dark canvas. Stacked area shows total revenue trend + the
+// resource-type composition without the chartjunk of a stacked bar.
+const SERIES_COLORS = [
+  "#5e6ad2",
+  "#5dcaa5",
+  "#ef9f27",
+  "#e24b4a",
+  "#85b7eb",
+  "#d4537e",
+];
+
+type ChartRow = { period: string } & Record<string, number | string>;
+
+export default function RevenueChart({
+  buckets,
+  granularity = "day",
+  currency,
+}: {
+  buckets: RevenueBucket[];
+  granularity?: Granularity;
+  currency?: string | null;
+}) {
   if (!buckets || buckets.length === 0) {
     return (
       <div
         data-testid="revenue-chart-empty"
-        className="flex items-center justify-center rounded border border-dashed border-zinc-200 p-8 text-sm text-zinc-500"
+        className="flex h-[260px] items-center justify-center rounded-lg border border-dashed border-hairline text-sm text-ink-subtle"
       >
         No revenue data for the selected range
       </div>
     );
   }
 
-  // Group buckets by period, then by resource_type
-  const periodMap: Map<
-    string,
-    Map<string, { gross: number; count: number }>
-  > = new Map();
+  const cur = currency ?? buckets[0]?.currency ?? "USD";
+  const rows = buckets.filter((b) => b.currency === cur);
 
-  buckets.forEach((b) => {
-    if (!periodMap.has(b.period)) {
-      periodMap.set(b.period, new Map());
-    }
-    const resourceMap = periodMap.get(b.period)!;
-    if (!resourceMap.has(b.resource_type)) {
-      resourceMap.set(b.resource_type, { gross: 0, count: 0 });
-    }
-    const entry = resourceMap.get(b.resource_type)!;
-    entry.gross += b.gross_minor;
-    entry.count += 1;
-  });
+  const resourceTypes = Array.from(
+    new Set(rows.map((b) => b.resource_type)),
+  );
 
-  // Build chart data: each period is one bar, with stacked sections per resource_type
-  // For display, convert minor to major (divide by 100, assuming 2 decimals)
-  const resourceTypes = new Set<string>();
-  buckets.forEach((b) => resourceTypes.add(b.resource_type));
-
-  const chartData = Array.from(periodMap.entries()).map(([period, resourceMap]) => {
-    const entry: Record<string, number | string> = { period };
-    resourceTypes.forEach((rt) => {
-      const data = resourceMap.get(rt);
-      // Convert minor to major (2 decimals)
-      entry[rt] = data ? Math.round(data.gross / 100) / 100 : 0;
-    });
-    return entry;
-  });
-
-  // Colors for resource types (cycle through a palette)
-  const colors = [
-    "#3b82f6", // blue-500
-    "#10b981", // emerald-500
-    "#f59e0b", // amber-500
-    "#ef4444", // red-500
-    "#8b5cf6", // violet-500
-    "#ec4899", // pink-500
-  ];
-
-  const colorMap: Record<string, string> = {};
-  Array.from(resourceTypes).forEach((rt, i) => {
-    colorMap[rt] = colors[i % colors.length];
-  });
+  const byPeriod = new Map<string, ChartRow>();
+  for (const b of rows) {
+    const row = byPeriod.get(b.period) ?? { period: b.period };
+    row[b.resource_type] =
+      ((row[b.resource_type] as number) ?? 0) + b.gross_minor / 100;
+    byPeriod.set(b.period, row);
+  }
+  const data = [...byPeriod.values()].sort((a, z) =>
+    String(a.period).localeCompare(String(z.period)),
+  );
 
   return (
-    <div data-testid="revenue-chart" className="rounded border border-zinc-200 bg-white p-4">
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+    <div
+      data-testid="revenue-chart"
+      className="rounded-lg border border-hairline bg-surface-1 p-4"
+    >
+      <ResponsiveContainer width="100%" height={260}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <defs>
+            {resourceTypes.map((rt, i) => (
+              <linearGradient key={rt} id={`rev-${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="0%"
+                  stopColor={SERIES_COLORS[i % SERIES_COLORS.length]}
+                  stopOpacity={0.3}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={SERIES_COLORS[i % SERIES_COLORS.length]}
+                  stopOpacity={0.02}
+                />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#23252a"
+            vertical={false}
+          />
           <XAxis
             dataKey="period"
-            tick={{ fontSize: 12, fill: "#71717a" }}
-            angle={-45}
-            textAnchor="end"
-            height={60}
+            tickFormatter={(v: string) => formatAxisDate(v, granularity)}
+            tick={{ fontSize: 11, fill: "#8a8f98" }}
+            tickLine={false}
+            axisLine={{ stroke: "#23252a" }}
+            minTickGap={24}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: "#71717a" }}
-            label={{ value: "Amount (major units)", angle: -90, position: "insideLeft" }}
+            tick={{ fontSize: 11, fill: "#8a8f98" }}
+            tickLine={false}
+            axisLine={false}
+            width={56}
+            tickFormatter={(v: number) =>
+              formatCompactMoney(Math.round(v * 100), cur)
+            }
           />
           <Tooltip
+            cursor={{ stroke: "#34343a" }}
             contentStyle={{
-              backgroundColor: "#fafafa",
-              border: "1px solid #e4e4e7",
-              borderRadius: "0.375rem",
+              backgroundColor: "#0f1011",
+              border: "1px solid #23252a",
+              borderRadius: "0.5rem",
+              color: "#f7f8f8",
             }}
+            labelStyle={{ color: "#f7f8f8" }}
+            itemStyle={{ color: "#d0d6e0" }}
+            labelFormatter={(v) => formatAxisDate(String(v), granularity)}
+            formatter={(value, name) => [
+              formatMoneyMinor(Math.round(Number(value) * 100), cur),
+              String(name),
+            ]}
           />
-          <Legend />
-          {Array.from(resourceTypes).map((rt) => (
-            <Bar
+          {resourceTypes.map((rt, i) => (
+            <Area
               key={rt}
+              type="monotone"
               dataKey={rt}
-              stackId="revenue"
-              fill={colorMap[rt]}
               name={rt}
+              stackId="rev"
+              stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
+              strokeWidth={2}
+              fill={`url(#rev-${i})`}
+              isAnimationActive={false}
             />
           ))}
-        </BarChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

@@ -58,7 +58,7 @@ export default function BroadcastComposer() {
   return (
     <form
       action={formAction}
-      className="max-w-2xl space-y-4 rounded-md border border-zinc-200 bg-white p-6"
+      className="max-w-2xl space-y-4 rounded-md border border-zinc-200 bg-surface-1 p-6"
       data-testid="broadcast-form"
     >
       <label className="block text-sm">
@@ -153,7 +153,7 @@ export default function BroadcastComposer() {
             type="button"
             data-testid="broadcast-review"
             onClick={() => setConfirming(true)}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800"
+            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover"
           >
             Review &amp; send
           </button>

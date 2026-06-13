@@ -55,7 +55,7 @@ export default function ListFilter({
       <button
         type="submit"
         data-testid={`${testid}-filter-apply`}
-        className="rounded bg-zinc-900 px-3 py-1 text-white"
+        className="rounded bg-primary px-3 py-1 text-white"
       >
         Apply
       </button>

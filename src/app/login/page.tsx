@@ -24,7 +24,7 @@ export default async function LoginPage({
   const next = resolveNext(params.next);
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
-      <div className="w-full max-w-sm rounded-xl bg-white border border-zinc-200 shadow-sm p-8">
+      <div className="w-full max-w-sm rounded-xl bg-surface-1 border border-zinc-200 shadow-sm p-8">
         <h1 className="text-xl font-semibold text-zinc-900">EventUp Admin</h1>
         <p className="mt-1 text-sm text-zinc-500">Sign in to moderate the marketplace.</p>
         <div className="mt-6">

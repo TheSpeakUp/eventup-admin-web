@@ -1,44 +1,48 @@
 import type { FunnelResponse } from "@/lib/dashboard/types";
 
+// Semantic status coloring: success green, terminal-failure red, expiry amber,
+// everything else neutral lavender. Keeps color meaningful, not decorative.
+function statusColor(status: string): string {
+  const k = status.toLowerCase();
+  if (["succeeded", "success", "completed"].includes(k)) return "bg-emerald-500";
+  if (["failed", "failure", "declined", "error"].includes(k)) return "bg-red-500";
+  if (["expired", "cancelled", "canceled"].includes(k)) return "bg-amber-500";
+  return "bg-primary";
+}
+
 export default function FunnelSection({ data }: { data: FunnelResponse }) {
   if (!data) {
-    return (
-      <div className="text-sm text-zinc-500">No funnel data available</div>
-    );
+    return <div className="text-sm text-ink-subtle">No funnel data available</div>;
   }
 
   const { status_counts, failure_reasons } = data;
+  const total = status_counts.reduce((s, x) => s + x.count, 0) || 1;
+  const sorted = [...status_counts].sort((a, b) => b.count - a.count);
+  const topFailure = [...failure_reasons].sort((a, b) => b.count - a.count)[0];
 
   return (
-    <div data-testid="funnel-section" className="space-y-6">
-      {/* Status Counts */}
-      <div className="rounded border border-zinc-200 bg-white p-4">
-        <h3 className="mb-4 text-sm font-semibold text-zinc-700">
-          Booking Status Distribution
-        </h3>
-        {status_counts && status_counts.length > 0 ? (
-          <div className="space-y-2">
-            {status_counts.map((item) => {
-              const maxCount = Math.max(
-                ...status_counts.map((s) => s.count),
-                1
-              );
-              const percentage = (item.count / maxCount) * 100;
-
+    <div data-testid="funnel-section" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="rounded-lg border border-hairline bg-surface-1 p-4">
+        <h3 className="mb-4 text-sm font-medium text-ink">Booking status distribution</h3>
+        {sorted.length > 0 ? (
+          <div className="space-y-3">
+            {sorted.map((item) => {
+              const pct = (item.count / total) * 100;
               return (
-                <div key={item.status} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-zinc-700">
-                      {item.status}
-                    </span>
-                    <span className="text-zinc-500">
-                      {item.count.toLocaleString()}
+                <div key={item.status}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="capitalize text-ink-muted">{item.status}</span>
+                    <span className="tabular-nums text-ink-subtle">
+                      <span className="font-medium text-ink">
+                        {item.count.toLocaleString()}
+                      </span>{" "}
+                      · {pct.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="h-2 rounded bg-zinc-200">
+                  <div className="h-2 overflow-hidden rounded-full bg-surface-3">
                     <div
-                      className="h-full rounded bg-blue-500"
-                      style={{ width: `${percentage}%` }}
+                      className={`h-full rounded-full ${statusColor(item.status)}`}
+                      style={{ width: `${Math.max(pct, 1.5)}%` }}
                     />
                   </div>
                 </div>
@@ -46,47 +50,40 @@ export default function FunnelSection({ data }: { data: FunnelResponse }) {
             })}
           </div>
         ) : (
-          <div className="text-xs text-zinc-400">No status data</div>
+          <div className="text-xs text-ink-subtle">No status data</div>
         )}
       </div>
 
-      {/* Failure Reasons */}
-      <div className="rounded border border-zinc-200 bg-white p-4">
-        <h3 className="mb-4 text-sm font-semibold text-zinc-700">
-          Failure Reasons
-        </h3>
-        {failure_reasons && failure_reasons.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="border-b border-zinc-200 bg-zinc-50">
-                <tr>
-                  <th className="px-3 py-2 text-left font-medium text-zinc-600">
-                    Code
-                  </th>
-                  <th className="px-3 py-2 text-right font-medium text-zinc-600">
-                    Count
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {failure_reasons.map((item) => (
-                  <tr
+      <div className="rounded-lg border border-hairline bg-surface-1 p-4">
+        <h3 className="mb-4 text-sm font-medium text-ink">Failure reasons</h3>
+        {failure_reasons.length > 0 ? (
+          <>
+            <div className="space-y-2">
+              {failure_reasons
+                .slice()
+                .sort((a, b) => b.count - a.count)
+                .map((item) => (
+                  <div
                     key={item.failure_code}
-                    className="border-b border-zinc-100 hover:bg-zinc-50"
+                    className="flex items-center justify-between border-b border-hairline/60 py-1.5 text-xs last:border-0"
                   >
-                    <td className="px-3 py-2 font-mono text-zinc-700">
-                      {item.failure_code}
-                    </td>
-                    <td className="px-3 py-2 text-right text-zinc-600">
+                    <span className="font-mono text-ink-muted">{item.failure_code}</span>
+                    <span className="tabular-nums font-medium text-ink">
                       {item.count.toLocaleString()}
-                    </td>
-                  </tr>
+                    </span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </div>
+            {topFailure ? (
+              <div className="mt-3 border-t border-hairline pt-3 text-xs text-ink-subtle">
+                Top failure:{" "}
+                <span className="font-mono text-ink">{topFailure.failure_code}</span> (
+                {topFailure.count})
+              </div>
+            ) : null}
+          </>
         ) : (
-          <div className="text-xs text-zinc-400">No failure reasons recorded</div>
+          <div className="text-xs text-ink-subtle">No failure reasons recorded</div>
         )}
       </div>
     </div>
