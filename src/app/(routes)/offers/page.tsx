@@ -3,8 +3,9 @@ import { isQueueStatus, type QueueStatus, type SlaSummaryQuery } from "@/lib/off
 import CountersCard from "./_components/CountersCard";
 import OffersFilters from "./_components/OffersFilters";
 import OffersTable from "./_components/OffersTable";
+import OffersGrid from "./_components/OffersGrid";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
-import { Alert, PageHeader, Panel } from "@/app/_components/ui";
+import { Alert, PageHeader, Panel, ViewToggle, parseView } from "@/app/_components/ui";
 import Link from "next/link";
 
 const DESCRIPTION = "Provider review-response SLA queue and escalations.";
@@ -33,6 +34,7 @@ function parseQuery(sp: SearchParams): SlaSummaryQuery {
 
 export default async function OffersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
+  const view = parseView(sp.view);
   const query = parseQuery(sp);
   const result = await getSlaSummary(query);
   if (!result.ok) {
@@ -78,10 +80,37 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       />
       <CountersCard counters={result.data.counters} />
       <Panel title="SLA queue" accent="primary" bodyClassName="p-0">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-hairline">
           <OffersFilters />
+          <ViewToggle
+            current={view}
+            basePath="/offers"
+            searchParams={{
+              service_id:
+                query.service_id !== undefined
+                  ? String(query.service_id)
+                  : undefined,
+              provider_id:
+                query.provider_id !== undefined
+                  ? String(query.provider_id)
+                  : undefined,
+              min_waiting_hours:
+                query.min_waiting_hours !== undefined
+                  ? String(query.min_waiting_hours)
+                  : undefined,
+            }}
+            multiParams={(query.queue_status ?? []).map((q) => [
+              "queue_status",
+              q,
+            ])}
+            testidPrefix="offers-view"
+          />
         </div>
-        <OffersTable items={sorted} />
+        {view === "grid" ? (
+          <OffersGrid items={sorted} />
+        ) : (
+          <OffersTable items={sorted} />
+        )}
       </Panel>
     </main>
   );

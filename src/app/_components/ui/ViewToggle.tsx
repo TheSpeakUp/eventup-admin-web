@@ -18,10 +18,15 @@ export default function ViewToggle({
   searchParams = {},
   resetParams = ["last_id", "offset"],
   testidPrefix = "view",
+  multiParams = [],
 }: {
   current: ListView;
   basePath: string;
   searchParams?: Record<string, string | undefined>;
+  // Repeated params (e.g. a multi-value `queue_status`) the scalar
+  // `searchParams` map can't express — appended as-is so the toggle preserves
+  // them across a view switch.
+  multiParams?: Array<[string, string]>;
   resetParams?: string[];
   testidPrefix?: string;
 }) {
@@ -29,6 +34,9 @@ export default function ViewToggle({
     const sp = new URLSearchParams();
     for (const [k, v] of Object.entries(searchParams)) {
       if (v && k !== "view") sp.set(k, v);
+    }
+    for (const [k, v] of multiParams) {
+      if (v && k !== "view") sp.append(k, v);
     }
     for (const p of resetParams) sp.delete(p);
     if (view === "grid") sp.set("view", "grid");
