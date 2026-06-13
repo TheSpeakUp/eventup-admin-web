@@ -115,7 +115,10 @@ export default async function PromoCodesPage({
           </div>
         </div>
         {view === "grid" ? (
+          // Re-key on the filter signature so a soft-nav filter change remounts
+          // the grid and reseeds the accumulator instead of stale-appending.
           <PromoCodesGrid
+            key={`${status ?? ""}|${sp.code ?? ""}`}
             initial={{
               items: rows,
               nextCursor: has_more ? String(PROMO_GRID_LIMIT) : null,

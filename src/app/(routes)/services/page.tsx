@@ -136,7 +136,11 @@ export default async function ServicesPage({
           </div>
         </div>
         {view === "grid" ? (
+          // Re-key on the filter signature so a soft-nav filter change (search /
+          // segment) remounts the grid and reseeds the accumulator instead of
+          // appending onto a stale first page.
           <ServicesGrid
+            key={`${search ?? ""}|${status ?? ""}|${providerId ?? ""}`}
             initial={{
               items,
               nextCursor:

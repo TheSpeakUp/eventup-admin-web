@@ -100,7 +100,10 @@ export default async function ProvidersPage({
           </div>
         </div>
         {view === "grid" ? (
+          // Re-key on the search so a soft-nav filter change remounts the grid
+          // and reseeds the accumulator instead of appending onto a stale page.
           <ProvidersGrid
+            key={search ?? ""}
             initial={{
               items,
               nextCursor: next_last_id != null ? String(next_last_id) : null,
