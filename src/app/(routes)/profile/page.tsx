@@ -1,4 +1,5 @@
 import { ActiveBadge, RoleBadge } from "../admins/_components/RoleBadge";
+import Badge from "@/app/_components/ui/Badge";
 import { getLoginHistory, getSelf } from "@/lib/self/api";
 import type { SelfMfaInfo } from "@/lib/self/types";
 import ChangePasswordForm from "./_components/ChangePasswordForm";
@@ -84,9 +85,9 @@ export default async function ProfilePage() {
             {/* Email is the login identity and the OTP delivery channel, so it
                 is not self-editable here — changing it needs a separate verified
                 flow that does not exist yet. */}
-            <span className="ml-2 rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+            <Badge tone="neutral" className="ml-2">
               Read-only
-            </span>
+            </Badge>
           </dd>
 
           <dt className="text-zinc-500">Role</dt>
@@ -103,12 +104,9 @@ export default async function ProfilePage() {
 
       <Card title="Two-factor authentication">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span
-            data-testid="mfa-method-badge"
-            className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 ring-1 ring-inset ring-blue-200"
-          >
+          <Badge tone="info" data-testid="mfa-method-badge">
             {MFA_METHOD_LABEL[self.mfa.method]}
-          </span>
+          </Badge>
           {self.mfa.enforced ? (
             <span data-testid="mfa-enforced" className="text-zinc-600">
               Required for sensitive actions.
