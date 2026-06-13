@@ -8,6 +8,18 @@ const EVIDENCE_LABELS: Record<ProviderEvidenceType, string> = {
   org_document: "Organization document",
 };
 
+// Evidence `file_url` is provider-influenced data flowing into an admin's
+// browser. React escapes text but NOT an `href` scheme, so render a link only
+// when the URL is http(s) — blocks `javascript:`/`data:` URI injection (XSS).
+function safeHttpUrl(raw: string): string | null {
+  try {
+    const u = new URL(raw);
+    return u.protocol === "http:" || u.protocol === "https:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ProviderDetailView({ provider }: { provider: ProviderDetail }) {
   return (
     <div className="space-y-5 rounded-md border border-zinc-200 bg-surface-1 p-6">
@@ -76,34 +88,47 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
           </p>
         ) : (
           <ul className="mt-2 space-y-2">
-            {provider.verification_evidence.map((ev) => (
-              <li
-                key={ev.id}
-                data-testid="provider-evidence-item"
-                className="flex items-center justify-between gap-3 rounded-md border border-zinc-200 px-3 py-2 text-sm"
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-zinc-800">
-                    {EVIDENCE_LABELS[ev.evidence_type] ?? ev.evidence_type}
-                  </p>
-                  {ev.caption ? (
-                    <p className="truncate text-xs text-zinc-500">{ev.caption}</p>
-                  ) : null}
-                  <p className="text-xs text-zinc-400">
-                    {formatDateTime(ev.created_at)}
-                  </p>
-                </div>
-                <a
-                  href={ev.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="provider-evidence-link"
-                  className="shrink-0 text-primary hover:underline"
+            {provider.verification_evidence.map((ev) => {
+              const href = safeHttpUrl(ev.file_url);
+              return (
+                <li
+                  key={ev.id}
+                  data-testid="provider-evidence-item"
+                  className="flex items-center justify-between gap-3 rounded-md border border-zinc-200 px-3 py-2 text-sm"
                 >
-                  View
-                </a>
-              </li>
-            ))}
+                  <div className="min-w-0">
+                    <p className="font-medium text-zinc-800">
+                      {EVIDENCE_LABELS[ev.evidence_type] ?? ev.evidence_type}
+                    </p>
+                    {ev.caption ? (
+                      <p className="truncate text-xs text-zinc-500">{ev.caption}</p>
+                    ) : null}
+                    <p className="text-xs text-zinc-400">
+                      {formatDateTime(ev.created_at)}
+                    </p>
+                  </div>
+                  {href ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="provider-evidence-link"
+                      className="shrink-0 text-primary hover:underline"
+                    >
+                      View
+                    </a>
+                  ) : (
+                    <span
+                      data-testid="provider-evidence-link-invalid"
+                      title={ev.file_url}
+                      className="shrink-0 text-xs text-zinc-400"
+                    >
+                      Invalid link
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

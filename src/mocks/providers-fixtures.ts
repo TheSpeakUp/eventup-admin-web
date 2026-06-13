@@ -37,6 +37,9 @@ export const CONFLICT_PROVIDER_ID = 9999;
 // T4 — pending provider with NO verification evidence on file. Verifying it
 // without `override` trips the evidence-missing 400; with override it succeeds.
 export const EVIDENCE_MISSING_PROVIDER_ID = 9998;
+// Security fixture — evidence whose `file_url` is a `javascript:` URI. The
+// detail view must NOT render it as a clickable anchor (XSS guard).
+export const HOSTILE_EVIDENCE_PROVIDER_ID = 9997;
 
 export function buildFixtureProviders(): ProviderDetail[] {
   const out: ProviderDetail[] = [];
@@ -79,6 +82,36 @@ export function buildFixtureProviders(): ProviderDetail[] {
     verification_message: null,
     block_reason: null,
     verification_evidence: [],
+    created_at: "2026-05-02T10:00:00.000Z",
+    updated_at: "2026-05-02T10:00:00.000Z",
+  });
+  out.push({
+    id: HOSTILE_EVIDENCE_PROVIDER_ID,
+    name: "Hostile-evidence fixture (javascript: URL)",
+    verification_status: "pending",
+    location_id: null,
+    location_name: null,
+    services_count: 0,
+    active_offers_count: 0,
+    description: "Evidence file_url is a javascript: URI — must not become a link.",
+    contact_email: "hostile@example.com",
+    phone: null,
+    website: null,
+    account_currency: "USD",
+    address: null,
+    logo_url: null,
+    verification_message: null,
+    block_reason: null,
+    verification_evidence: [
+      {
+        id: 999701,
+        evidence_type: "org_document",
+        // Deliberately hostile test data — exercises the safeHttpUrl guard.
+        file_url: "javascript:alert(document.cookie)",
+        caption: "Looks like a doc, is an XSS attempt",
+        created_at: "2026-05-02T09:00:00.000Z",
+      },
+    ],
     created_at: "2026-05-02T10:00:00.000Z",
     updated_at: "2026-05-02T10:00:00.000Z",
   });
