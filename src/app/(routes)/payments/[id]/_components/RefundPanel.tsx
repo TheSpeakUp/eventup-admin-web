@@ -65,10 +65,7 @@ export default function RefundPanel({
   const canRefund = refundableAmountMinor > 0;
 
   return (
-    <div
-      className="rounded-md border border-zinc-200 bg-surface-1 p-6"
-      data-testid="refund-panel"
-    >
+    <div data-testid="refund-panel">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">

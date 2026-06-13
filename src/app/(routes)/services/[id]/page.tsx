@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService } from "@/lib/services/api";
+import { Panel } from "@/app/_components/ui";
 import ServiceDetailView from "./_components/ServiceDetail";
 import ServiceFieldEditForm from "./_components/ServiceFieldEditForm";
 import ServiceModerationPanel from "./_components/ServiceModerationPanel";
@@ -16,7 +17,7 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
     if (result.status === 404) notFound();
     return (
       <div className="p-8">
-        <Link href="/services" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/services" className="text-sm text-ink-subtle hover:underline">
           ← Back to services
         </Link>
         <div
@@ -31,20 +32,25 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
 
   return (
     <div className="p-8 space-y-5">
-      <Link href="/services" className="text-sm text-zinc-500 hover:underline">
+      <Link href="/services" className="text-sm text-ink-subtle hover:underline">
         ← Back to services
       </Link>
       <div className="grid grid-cols-[1fr_280px] gap-6">
         <div className="space-y-5">
-          <ServiceDetailView service={result.data} />
-          <ServiceFieldEditForm service={result.data} />
+          <Panel title="Service profile" accent="primary">
+            <ServiceDetailView service={result.data} />
+          </Panel>
+          <Panel title="Edit fields" accent="info">
+            <ServiceFieldEditForm service={result.data} />
+          </Panel>
         </div>
-        <aside className="space-y-3">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
-          <ServiceModerationPanel
-            serviceId={result.data.id}
-            status={result.data.status}
-          />
+        <aside>
+          <Panel title="Moderation" accent="warning">
+            <ServiceModerationPanel
+              serviceId={result.data.id}
+              status={result.data.status}
+            />
+          </Panel>
         </aside>
       </div>
     </div>

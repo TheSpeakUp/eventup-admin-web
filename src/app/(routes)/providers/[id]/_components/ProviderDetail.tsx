@@ -22,7 +22,7 @@ function safeHttpUrl(raw: string): string | null {
 
 export default function ProviderDetailView({ provider }: { provider: ProviderDetail }) {
   return (
-    <div className="space-y-5 rounded-md border border-zinc-200 bg-surface-1 p-6">
+    <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold" data-testid="provider-detail-title">
