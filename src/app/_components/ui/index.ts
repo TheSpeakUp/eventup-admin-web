@@ -10,3 +10,6 @@ export { default as EmptyState } from "./EmptyState";
 export { default as PageHeader } from "./PageHeader";
 export { Table, Thead, Tbody, Tr, Th, Td } from "./Table";
 export { FormField, Input, Select, Textarea } from "./Field";
+export { default as Panel, type PanelAccent } from "./Panel";
+export { default as StatTile } from "./StatTile";
+export { default as Tabs, type TabItem } from "./Tabs";
