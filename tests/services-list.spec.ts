@@ -51,4 +51,26 @@ test.describe("services list", () => {
     await page.getByTestId("services-search").fill("zzz-nomatch-xyz");
     await expect(page.getByTestId("services-empty")).toBeVisible();
   });
+
+  test("grid view renders cards and accumulates via Load more", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, "/services?view=grid");
+
+    const grid = page.getByTestId("services-grid");
+    await expect(grid).toBeVisible();
+    // First grid page = GRID_LIMIT (12) of 26 fixtures.
+    const firstPage = await page
+      .locator("[data-testid^=services-card-]")
+      .count();
+    expect(firstPage).toBe(12);
+
+    // Load more appends the next page client-side (no full navigation).
+    await page.getByTestId("services-load-more").click();
+    await expect
+      .poll(async () =>
+        page.locator("[data-testid^=services-card-]").count(),
+      )
+      .toBeGreaterThan(firstPage);
+  });
 });

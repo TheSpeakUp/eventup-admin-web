@@ -6,6 +6,9 @@ import {
 } from "@/lib/services/types";
 import Pagination from "./_components/Pagination";
 import ServicesTable from "./_components/ServicesTable";
+import ServicesGrid from "./_components/ServicesGrid";
+import { loadMoreServices } from "./load-more-action";
+import { SERVICES_GRID_LIMIT } from "./grid-config";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import {
   Alert,
@@ -13,6 +16,8 @@ import {
   Panel,
   SearchInput,
   StatusSegments,
+  ViewToggle,
+  parseView,
   type SegmentOption,
 } from "@/app/_components/ui";
 
@@ -46,7 +51,10 @@ export default async function ServicesPage({
   const statusRaw = pickString(sp.status);
   const status: ServiceStatus | undefined =
     statusRaw && isServiceStatus(statusRaw) ? statusRaw : undefined;
-  const lastId = pickPositiveInt(pickString(sp.last_id));
+  const view = parseView(sp.view);
+  // The grid accumulates client-side from page one, so it ignores any URL
+  // cursor; the table is URL-cursor paginated.
+  const lastId = view === "grid" ? undefined : pickPositiveInt(pickString(sp.last_id));
   const providerId = pickPositiveInt(pickString(sp.provider_id));
 
   const result = await listServices({
@@ -54,7 +62,7 @@ export default async function ServicesPage({
     status,
     last_id: lastId,
     provider_id: providerId,
-    limit: LIMIT,
+    limit: view === "grid" ? SERVICES_GRID_LIMIT : LIMIT,
   });
 
   if (!result.ok) {
@@ -75,6 +83,12 @@ export default async function ServicesPage({
   const otherParams = {
     search,
     provider_id: providerId !== undefined ? String(providerId) : undefined,
+  };
+  // Status segments + search must keep the active view; the view toggle must
+  // keep the active status + filters.
+  const filterParams = {
+    ...otherParams,
+    view: view === "grid" ? "grid" : undefined,
   };
 
   return (
@@ -104,26 +118,52 @@ export default async function ServicesPage({
             options={STATUS_OPTIONS}
             current={status}
             basePath="/services"
-            searchParams={otherParams}
+            searchParams={filterParams}
             testidPrefix="services-status"
           />
-          <SearchInput
-            param="search"
-            testid="services-search"
-            placeholder="Search services…"
-          />
+          <div className="flex items-center gap-2">
+            <SearchInput
+              param="search"
+              testid="services-search"
+              placeholder="Search services…"
+            />
+            <ViewToggle
+              current={view}
+              basePath="/services"
+              searchParams={{ status, ...otherParams }}
+              testidPrefix="services-view"
+            />
+          </div>
         </div>
-        <ServicesTable rows={items} />
-        <div className="px-4 py-3 border-t border-hairline">
-          <Pagination
-            nextLastId={next_last_id}
-            hasMore={has_more}
-            count={count}
-            basePath="/services"
-            searchParams={{ status, ...otherParams }}
-            lastId={lastId}
+        {view === "grid" ? (
+          <ServicesGrid
+            initial={{
+              items,
+              nextCursor:
+                next_last_id != null ? String(next_last_id) : null,
+              hasMore: has_more,
+            }}
+            loadAction={loadMoreServices.bind(null, {
+              search,
+              status,
+              providerId,
+            })}
           />
-        </div>
+        ) : (
+          <>
+            <ServicesTable rows={items} />
+            <div className="px-4 py-3 border-t border-hairline">
+              <Pagination
+                nextLastId={next_last_id}
+                hasMore={has_more}
+                count={count}
+                basePath="/services"
+                searchParams={{ status, ...filterParams }}
+                lastId={lastId}
+              />
+            </div>
+          </>
+        )}
       </Panel>
     </div>
   );
