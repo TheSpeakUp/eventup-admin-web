@@ -171,6 +171,9 @@ const PROMO_CODES_BASE = buildApiUrl(
 const ANALYTICS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/analytics",
 );
+const DASHBOARD_BASE = buildApiUrl(
+  "/eventup-admin/v1/marketplace/dashboard",
+);
 const PROMOTIONS_BASE = buildApiUrl(
   "/eventup-admin/v1/marketplace/promotions",
 );
@@ -2431,5 +2434,162 @@ export const handlers = [
     if (!updated)
       return HttpResponse.json({ detail: "Not found" }, { status: 404 });
     return HttpResponse.json(updated);
+  }),
+
+  // ---- Operator Dashboard (F11) ----
+  http.get(`${DASHBOARD_BASE}/revenue`, ({ request }) => {
+    const url = new URL(request.url);
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    const granularity = url.searchParams.get("granularity") ?? "day";
+    const dateFrom = url.searchParams.get("date_from");
+    const dateTo = url.searchParams.get("date_to");
+    return HttpResponse.json({
+      granularity,
+      date_from: dateFrom,
+      date_to: dateTo,
+      buckets: [
+        {
+          period: "2026-06-01T00:00:00Z",
+          currency: "USD",
+          resource_type: "service",
+          gross_minor: 120000,
+          net_minor: 110000,
+          payment_count: 8,
+        },
+        {
+          period: "2026-06-01T00:00:00Z",
+          currency: "USD",
+          resource_type: "offer",
+          gross_minor: 45000,
+          net_minor: 42000,
+          payment_count: 3,
+        },
+        {
+          period: "2026-06-02T00:00:00Z",
+          currency: "USD",
+          resource_type: "service",
+          gross_minor: 95000,
+          net_minor: 87000,
+          payment_count: 6,
+        },
+        {
+          period: "2026-06-02T00:00:00Z",
+          currency: "USD",
+          resource_type: "offer",
+          gross_minor: 32000,
+          net_minor: 30000,
+          payment_count: 2,
+        },
+      ],
+    });
+  }),
+
+  http.get(`${DASHBOARD_BASE}/funnel`, ({ request }) => {
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    return HttpResponse.json({
+      status_counts: [
+        { status: "succeeded", count: 42 },
+        { status: "failed", count: 5 },
+      ],
+      failure_reasons: [
+        { failure_code: "card_declined", count: 3 },
+        { failure_code: "insufficient_funds", count: 2 },
+      ],
+    });
+  }),
+
+  http.get(`${DASHBOARD_BASE}/content-growth`, ({ request }) => {
+    const url = new URL(request.url);
+    const granularity = url.searchParams.get("granularity") ?? "day";
+    const dateFrom = url.searchParams.get("date_from");
+    const dateTo = url.searchParams.get("date_to");
+    return HttpResponse.json({
+      granularity,
+      date_from: dateFrom,
+      date_to: dateTo,
+      buckets: [
+        {
+          period: "2026-06-01T00:00:00Z",
+          new_providers: 2,
+          new_services: 5,
+          new_offers: 9,
+        },
+        {
+          period: "2026-06-02T00:00:00Z",
+          new_providers: 1,
+          new_services: 3,
+          new_offers: 4,
+        },
+      ],
+    });
+  }),
+
+  http.get(`${DASHBOARD_BASE}/tops`, ({ request }) => {
+    const url = new URL(request.url);
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
+    const limit = url.searchParams.get("limit") ?? "10";
+    return HttpResponse.json({
+      limit: Number(limit),
+      providers: [
+        {
+          provider_id: 1,
+          provider_name: "Acme",
+          currency: "USD",
+          gross_minor: 90000,
+          payment_count: 6,
+        },
+      ],
+      services: [
+        {
+          service_id: 10,
+          service_title: "Keynote",
+          provider_id: 1,
+          provider_name: "Acme",
+          currency: "USD",
+          gross_minor: 60000,
+          payment_count: 4,
+        },
+      ],
+      promo_discounts: [
+        {
+          currency: "USD",
+          discount_minor: 5000,
+          usage_count: 7,
+        },
+      ],
+    });
   }),
 ];
