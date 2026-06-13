@@ -7,8 +7,14 @@ const LOGIN_PATH = "/login";
 
 // Public routes reachable without a session. The invitation-accept page is
 // authenticated by its single-use token (in the path), not by a cookie.
+// `/api/e2e/` is the e2e-only reset namespace — it self-guards behind the
+// mock-backend flag and 404s in any real deployment, so it needs no session.
 function isPublicPath(pathname: string): boolean {
-  return pathname === LOGIN_PATH || pathname.startsWith("/invitations/");
+  return (
+    pathname === LOGIN_PATH ||
+    pathname.startsWith("/invitations/") ||
+    pathname.startsWith("/api/e2e/")
+  );
 }
 
 function isExpired(token: string): boolean {
