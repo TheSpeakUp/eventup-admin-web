@@ -19,11 +19,24 @@ import {
   buildFixtureProviderMetrics,
   buildFixtureServiceMetrics,
 } from "./quality-fixtures";
+import { globalSingleton } from "./global-store";
 
-const serviceMetrics = new Map<number, ServiceQualityMetricRead>();
-const providerMetrics = new Map<number, ProviderQualityMetricRead>();
-const formulaConfigs = new Map<number, FormulaConfigRead>();
-const anomalies = new Map<number, AnomalyEventRead>();
+const serviceMetrics = globalSingleton(
+  "__eventupQualityServiceMetrics",
+  () => new Map<number, ServiceQualityMetricRead>(),
+);
+const providerMetrics = globalSingleton(
+  "__eventupQualityProviderMetrics",
+  () => new Map<number, ProviderQualityMetricRead>(),
+);
+const formulaConfigs = globalSingleton(
+  "__eventupQualityFormulaConfigs",
+  () => new Map<number, FormulaConfigRead>(),
+);
+const anomalies = globalSingleton(
+  "__eventupQualityAnomalies",
+  () => new Map<number, AnomalyEventRead>(),
+);
 
 // Tracks the id of the config that was active immediately before the current
 // one — backs the rollback mutation.

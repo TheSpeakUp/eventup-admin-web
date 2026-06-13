@@ -8,6 +8,13 @@
 // mod@example.com = MODERATOR (non-super, write controls hidden).
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
+
+// Shared mock store is mutated by these specs; reset before each test so the
+// seeded state stays deterministic across order / reruns / retries.
+test.beforeEach(async ({ request }) => {
+  await resetMockStores(request);
+});
 
 test.describe("Quality / ranking (M4)", () => {
   test("each tab renders as SUPERADMIN", async ({ page }) => {

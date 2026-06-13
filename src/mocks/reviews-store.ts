@@ -95,10 +95,10 @@ export function setReplyStatus(
   return review;
 }
 
-// Restore the store to its seeded state. Wired into a test-only reset route
-// (src/app/api/e2e/reset-reviews) so the e2e suite can guarantee a clean
-// reviews store per test — the moderation specs mutate seeded rows (hide #1,
-// hide #3's reply) and must not leak that state across tests or runs.
+// Restore the store to its seeded state. Wired into the test-only reset route
+// (src/app/api/e2e/reset) so the e2e suite can guarantee a clean reviews store
+// per test — the moderation specs mutate seeded rows (hide #1, hide #3's reply)
+// and must not leak that state across tests or runs.
 export function resetReviewsStore(): void {
   globalStore.__eventupReviewsDb = seed();
 }

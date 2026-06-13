@@ -5,16 +5,23 @@ import type {
   AttributeDefinitionTranslationsPayload,
 } from "@/lib/attribute-definitions/types";
 import { buildFixtureAttributeDefinitions } from "./attribute-definitions-fixtures";
+import { globalSingleton } from "./global-store";
 
 // Keyed by `key` (the public PK). `id` is the internal cursor pivot.
-const defs = new Map<string, AttributeDefinitionRead>();
+const defs = globalSingleton(
+  "__eventupAttributeDefs",
+  () => new Map<string, AttributeDefinitionRead>(),
+);
 let nextId = 100;
 
 type TranslationSet = {
   field_translations: AttributeDefinitionTranslations["field_translations"];
   enum_value_translations: AttributeDefinitionTranslations["enum_value_translations"];
 };
-const translations = new Map<string, TranslationSet>();
+const translations = globalSingleton(
+  "__eventupAttributeTranslations",
+  () => new Map<string, TranslationSet>(),
+);
 
 function ensureTranslationSeed(): void {
   if (translations.size > 0) return;

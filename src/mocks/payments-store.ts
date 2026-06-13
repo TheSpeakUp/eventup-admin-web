@@ -5,8 +5,12 @@ import type {
 } from "@/lib/payments/types";
 import { buildFixturePayments } from "./payments-fixtures";
 import type { RefundRead } from "@/lib/payments/types";
+import { globalSingleton } from "./global-store";
 
-const payments = new Map<number, PaymentDetail>();
+const payments = globalSingleton(
+  "__eventupPayments",
+  () => new Map<number, PaymentDetail>(),
+);
 
 function ensureSeed(): void {
   if (payments.size > 0) return;

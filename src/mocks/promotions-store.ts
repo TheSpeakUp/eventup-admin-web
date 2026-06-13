@@ -30,14 +30,36 @@ import {
   buildFixtureZones,
   toOrderListItem,
 } from "./promotions-fixtures";
+import { globalSingleton } from "./global-store";
 
-const products = new Map<number, ProductRead>();
-const tariffs = new Map<number, TariffRead>();
-const discountRules = new Map<number, DiscountRuleRead>();
-const monthlyDiscounts = new Map<number, MonthlyDiscountRead>();
-const zones = new Map<number, ZoneRead>();
-const orders = new Map<number, OrderRead>();
-const campaigns = new Map<number, CampaignRead>();
+const products = globalSingleton(
+  "__eventupPromoProducts",
+  () => new Map<number, ProductRead>(),
+);
+const tariffs = globalSingleton(
+  "__eventupPromoTariffs",
+  () => new Map<number, TariffRead>(),
+);
+const discountRules = globalSingleton(
+  "__eventupPromoDiscountRules",
+  () => new Map<number, DiscountRuleRead>(),
+);
+const monthlyDiscounts = globalSingleton(
+  "__eventupPromoMonthlyDiscounts",
+  () => new Map<number, MonthlyDiscountRead>(),
+);
+const zones = globalSingleton(
+  "__eventupPromoZones",
+  () => new Map<number, ZoneRead>(),
+);
+const orders = globalSingleton(
+  "__eventupPromoOrders",
+  () => new Map<number, OrderRead>(),
+);
+const campaigns = globalSingleton(
+  "__eventupPromoCampaigns",
+  () => new Map<number, CampaignRead>(),
+);
 
 let nextProductId = 100;
 let nextTariffId = 100;

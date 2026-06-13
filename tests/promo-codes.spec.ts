@@ -1,6 +1,13 @@
 // tests/promo-codes.spec.ts
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
+
+// These specs create their own data in the shared mock store; reset before each
+// test so re-runs / retries do not accumulate stale rows across the e2e session.
+test.beforeEach(async ({ request }) => {
+  await resetMockStores(request);
+});
 
 // NOTE: the e2e run shares ONE in-memory MSW store across every spec file
 // (single `next start`, workers:1, no per-test reset). These tests therefore

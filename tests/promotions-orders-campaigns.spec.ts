@@ -6,6 +6,13 @@
 // once, and the already-canceled error path targets seeded campaign #2.
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
+
+// Shared mock store is mutated by these specs; reset before each test so the
+// seeded state stays deterministic across order / reruns / retries.
+test.beforeEach(async ({ request }) => {
+  await resetMockStores(request);
+});
 
 test.describe("Promotions orders + campaigns (M3b)", () => {
   test("orders tab lists seeded orders", async ({ page }) => {

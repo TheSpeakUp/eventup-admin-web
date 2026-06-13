@@ -7,8 +7,12 @@ import type {
   RollbackResponse,
 } from "@/lib/registry/types";
 import { buildFixtureRegistrySnapshots } from "./registry-fixtures";
+import { globalSingleton } from "./global-store";
 
-const snapshots = new Map<number, RegistrySnapshot>();
+const snapshots = globalSingleton(
+  "__eventupRegistrySnapshots",
+  () => new Map<number, RegistrySnapshot>(),
+);
 let nextId = 0;
 
 function ensureSeed(): void {

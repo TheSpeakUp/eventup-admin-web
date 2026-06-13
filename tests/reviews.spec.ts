@@ -4,18 +4,18 @@
 // instance across the whole e2e run, and these specs mutate seeded rows (hide
 // review #1, hide #3's reply). To stay deterministic regardless of order,
 // reruns, retries, or sibling specs, beforeEach resets the store back to its
-// seeded fixtures via the /api/e2e/reset-reviews test hook — so every test
-// starts from a known clean state. admin@example.com = SUPERADMIN (write
-// controls visible); mod@example.com = MODERATOR (non-super, write controls
-// hidden). Fixtures include 13 reviews across statuses (published/hidden/
-// removed), ratings (1-5), with some having provider replies.
+// seeded fixtures via the /api/e2e/reset test hook — so every test starts from
+// a known clean state. admin@example.com = SUPERADMIN (write controls visible);
+// mod@example.com = MODERATOR (non-super, write controls hidden). Fixtures
+// include 13 reviews across statuses (published/hidden/removed), ratings (1-5),
+// with some having provider replies.
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
 
 test.describe("Reviews moderation (Layer 4)", () => {
   test.beforeEach(async ({ request }) => {
-    const res = await request.post("/api/e2e/reset-reviews");
-    expect(res.ok()).toBeTruthy();
+    await resetMockStores(request);
   });
 
   test("reviews list renders with filters as SUPERADMIN", async ({ page }) => {

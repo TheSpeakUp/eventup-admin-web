@@ -4,6 +4,7 @@ import type {
   AdminReviewerScopeItem,
   AdminRole,
 } from "@/lib/admins/types";
+import { globalSingleton } from "./global-store";
 
 // RFC-4122-valid v4 UUIDs (version nibble 4, variant nibble 8) — the server
 // actions validate ids with Zod's strict .uuid(), which checks version/variant
@@ -13,8 +14,14 @@ const ADMIN_ID = "22222222-2222-4222-8222-222222222222";
 const MOD_ID = "33333333-3333-4333-8333-333333333333";
 const INVITE_ID = "44444444-4444-4444-8444-444444444444";
 
-const admins = new Map<string, AdminDetail>();
-const invitations = new Map<string, AdminInvitationItem>();
+const admins = globalSingleton(
+  "__eventupAdmins",
+  () => new Map<string, AdminDetail>(),
+);
+const invitations = globalSingleton(
+  "__eventupAdminInvitations",
+  () => new Map<string, AdminInvitationItem>(),
+);
 let seq = 1000;
 
 function nextId(): string {

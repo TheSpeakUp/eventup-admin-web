@@ -4,19 +4,27 @@ import type {
   CategoryRead,
 } from "@/lib/categories/types";
 import { buildFixtureCategories } from "./categories-fixtures";
+import { globalSingleton } from "./global-store";
 
-const categories = new Map<number, CategoryRead>();
+const categories = globalSingleton(
+  "__eventupCategories",
+  () => new Map<number, CategoryRead>(),
+);
 // Translations are write-only scaffolding: the category Read DTO omits them, so
 // nothing reads this map yet. Persisted on create/update so a future PR adding a
 // translations-read endpoint (+ its mock handler + getCategoryTranslations) has a
 // backing store to serve. Intentionally retained, not dead by accident.
-const translations = new Map<
-  number,
-  {
-    name_translations?: Record<string, string>;
-    description_translations?: Record<string, string>;
-  }
->();
+const translations = globalSingleton(
+  "__eventupCategoryTranslations",
+  () =>
+    new Map<
+      number,
+      {
+        name_translations?: Record<string, string>;
+        description_translations?: Record<string, string>;
+      }
+    >(),
+);
 let nextId = 100;
 
 function ensureSeed(): void {

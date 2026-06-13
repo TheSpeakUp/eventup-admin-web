@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
+import { resetMockStores } from "./helpers/reset";
+
+// These specs create their own data in the shared mock store; reset before each
+// test so re-runs / retries do not accumulate stale rows across the e2e session.
+test.beforeEach(async ({ request }) => {
+  await resetMockStores(request);
+});
 
 test.describe("Admin team list", () => {
   test("renders admins + invitations, sends an invite", async ({ page }) => {
