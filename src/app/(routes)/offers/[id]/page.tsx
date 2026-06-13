@@ -14,7 +14,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
     return (
       <main className="space-y-3 p-6">
         <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
-        <p data-testid="offer-error" className="text-sm text-red-700">{result.message}</p>
+        <p data-testid="offer-error" className="text-sm text-red-300">{result.message}</p>
       </main>
     );
   }
@@ -23,7 +23,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
     return (
       <main className="space-y-3 p-6">
         <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
-        <p className="text-sm text-red-700">Unknown offer status: {offer.status}</p>
+        <p className="text-sm text-red-300">Unknown offer status: {offer.status}</p>
       </main>
     );
   }

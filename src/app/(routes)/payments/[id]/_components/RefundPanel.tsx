@@ -190,13 +190,13 @@ export default function RefundPanel({
               />
             </label>
             {amountTooHigh ? (
-              <p className="text-sm text-red-700" data-testid="refund-amount-error">
+              <p className="text-sm text-red-300" data-testid="refund-amount-error">
                 Exceeds the refundable remaining{" "}
                 {formatMoneyMinor(refundableAmountMinor, currency)}.
               </p>
             ) : null}
             {state.error ? (
-              <p className="text-sm text-red-700" data-testid="refund-error">
+              <p className="text-sm text-red-300" data-testid="refund-error">
                 {state.error}
               </p>
             ) : null}

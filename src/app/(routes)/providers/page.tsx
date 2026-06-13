@@ -36,7 +36,7 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
         <h1 className="text-2xl font-semibold">Providers moderation</h1>
         <div
           data-testid="providers-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           Failed to load providers: {result.message}
         </div>

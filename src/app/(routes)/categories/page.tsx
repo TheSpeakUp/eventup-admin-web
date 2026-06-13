@@ -2,6 +2,10 @@
 import Link from "next/link";
 import { listCategories } from "@/lib/categories/api";
 import { isCategorySort } from "@/lib/categories/types";
+import Alert from "@/app/_components/ui/Alert";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import Button, { buttonClass } from "@/app/_components/ui/Button";
+import { Input, Select } from "@/app/_components/ui/Field";
 import { CategoriesTable } from "./_components/CategoriesTable";
 
 export default async function CategoriesPage({
@@ -16,15 +20,14 @@ export default async function CategoriesPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Categories</h1>
-        <div
-          data-testid="categories-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-        >
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Categories
+        </h1>
+        <Alert variant="danger" data-testid="categories-error" className="mt-4">
           {result.status === 403
             ? "Viewing categories requires an admin role."
             : `Failed to load categories: ${result.message}`}
-        </div>
+        </Alert>
       </div>
     );
   }
@@ -34,40 +37,38 @@ export default async function CategoriesPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Categories</h1>
-        <Link
-          href="/categories/new"
-          data-testid="category-new"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-        >
-          New category
-        </Link>
-      </div>
+      <PageHeader
+        title="Categories"
+        actions={
+          <Link
+            href="/categories/new"
+            data-testid="category-new"
+            className={buttonClass("primary")}
+          >
+            New category
+          </Link>
+        }
+      />
 
-      <form className="mt-4 flex gap-2" data-testid="categories-search">
-        <input
+      <form className="mt-5 flex gap-2" data-testid="categories-search">
+        <Input
           name="search"
           placeholder="Search name or slug"
           defaultValue={sp.search ?? ""}
-          className="rounded border px-2 py-1"
+          className="mt-0 max-w-xs"
         />
-        <select
-          name="sort"
-          defaultValue={sort}
-          className="rounded border px-2 py-1"
-        >
+        <Select name="sort" defaultValue={sort} className="mt-0 w-auto">
           <option value="sort_order_asc">Sort ↑</option>
           <option value="sort_order_desc">Sort ↓</option>
           <option value="name_asc">Name A–Z</option>
           <option value="name_desc">Name Z–A</option>
-        </select>
-        <button type="submit" className="rounded border px-3 py-1">
+        </Select>
+        <Button type="submit" variant="secondary">
           Apply
-        </button>
+        </Button>
       </form>
 
-      <div className="mt-4">
+      <div className="mt-5">
         <CategoriesTable rows={rows} parentNames={parentNames} />
       </div>
     </div>

@@ -24,7 +24,7 @@ export default async function AuditEventPage({
         </Link>
         <div
           data-testid="audit-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           {result.status === 403
             ? "Viewing the audit log requires the audit-read permission."

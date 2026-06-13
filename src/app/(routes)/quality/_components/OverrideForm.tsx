@@ -79,7 +79,7 @@ export default function OverrideForm({
         {pending ? "Saving…" : "Set override"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="override-error" className="text-sm text-red-700">
+        <p data-testid="override-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

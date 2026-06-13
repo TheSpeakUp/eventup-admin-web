@@ -25,7 +25,7 @@ export default async function AttributeDefinitionDetailPage({
         <h1 className="text-2xl font-semibold">Attribute definition</h1>
         <div
           data-testid="attribute-definition-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {`Failed to load attribute definition: ${defRes.message}`}
         </div>
@@ -63,7 +63,7 @@ export default async function AttributeDefinitionDetailPage({
         <Link
           href={`/attribute-definitions/${encodeURIComponent(definition.key)}/translations`}
           data-testid="manage-translations-link"
-          className="inline-block text-sm text-blue-700"
+          className="inline-block text-sm text-primary-hover"
         >
           Manage translations →
         </Link>

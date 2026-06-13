@@ -62,7 +62,7 @@ export function TranslationsEditor({
           />
           <button
             type="button"
-            className="text-sm text-red-700"
+            className="text-sm text-red-300"
             onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))}
           >
             Remove
@@ -72,7 +72,7 @@ export function TranslationsEditor({
       <button
         type="button"
         data-testid={`${name}-add`}
-        className="text-sm text-blue-700"
+        className="text-sm text-primary-hover"
         onClick={() => setRows((rs) => [...rs, { locale: "", value: "" }])}
       >
         + Add locale

@@ -29,7 +29,7 @@ export default function DeactivatePromoCodeButton({ id }: { id: number }) {
         {pending ? "…" : "Deactivate"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="promo-deactivate-error" className="text-xs text-red-700">
+        <p data-testid="promo-deactivate-error" className="text-xs text-red-300">
           {state.error}
         </p>
       ) : null}

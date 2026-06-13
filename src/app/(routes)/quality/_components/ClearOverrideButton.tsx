@@ -34,7 +34,7 @@ export default function ClearOverrideButton({
         {pending ? "Clearing…" : "Clear override"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="clear-override-error" className="mt-1 text-sm text-red-700">
+        <p data-testid="clear-override-error" className="mt-1 text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

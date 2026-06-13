@@ -3,7 +3,7 @@ import { getDlq } from "@/lib/offers/api";
 
 export default async function DlqSection({ excludeReplayed = true }: { excludeReplayed?: boolean }) {
   const result = await getDlq({ exclude_replayed_successes: excludeReplayed, limit: 50 });
-  if (!result.ok) return <p data-testid="dlq-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok) return <p data-testid="dlq-error" className="text-sm text-red-300">{result.message}</p>;
   const items = result.data.items;
   return (
     <section data-testid="dlq">

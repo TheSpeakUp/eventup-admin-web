@@ -71,7 +71,7 @@ export default function ReviewModerationButton({
       {state && !state.ok && state.error ? (
         <p
           data-testid={`review-moderate-${reviewId}-error`}
-          className="ml-1 text-xs text-red-700"
+          className="ml-1 text-xs text-red-300"
         >
           {state.error}
         </p>

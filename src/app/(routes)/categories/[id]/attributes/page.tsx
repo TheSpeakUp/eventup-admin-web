@@ -22,7 +22,7 @@ export default async function CategoryBindingsPage({
         <h1 className="text-2xl font-semibold">Category attributes</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {catRes.status === 403
             ? "Viewing category attributes requires an admin role."
@@ -37,7 +37,7 @@ export default async function CategoryBindingsPage({
         <h1 className="text-2xl font-semibold">Category attributes</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {bindingsRes.status === 403
             ? "Viewing category attributes requires an admin role."
@@ -65,7 +65,7 @@ export default async function CategoryBindingsPage({
           </h1>
           <Link
             href={`/categories/${numId}`}
-            className="text-sm text-blue-700"
+            className="text-sm text-primary-hover"
           >
             ← Back to category
           </Link>

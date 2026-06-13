@@ -38,7 +38,7 @@ export default function DeactivateButton({
         {pending ? "…" : "Deactivate"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid={`${testid}-error`} className="text-xs text-red-700">
+        <p data-testid={`${testid}-error`} className="text-xs text-red-300">
           {state.error}
         </p>
       ) : null}

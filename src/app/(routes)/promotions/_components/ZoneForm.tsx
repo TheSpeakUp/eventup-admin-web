@@ -72,7 +72,7 @@ export default function ZoneForm({
         {pending ? "Saving…" : mode === "create" ? "Create zone" : "Save"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="zone-error" className="text-sm text-red-700">
+        <p data-testid="zone-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

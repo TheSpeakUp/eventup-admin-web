@@ -47,7 +47,7 @@ export default function CampaignsTable({ rows }: { rows: CampaignRead[] }) {
               <Link
                 href={`/promotions/campaigns/${r.id}`}
                 data-testid={`campaign-view-${r.id}`}
-                className="text-blue-700"
+                className="text-primary-hover"
               >
                 View
               </Link>

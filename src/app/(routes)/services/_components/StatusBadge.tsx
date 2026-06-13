@@ -1,37 +1,19 @@
+import Badge, { type BadgeTone } from "@/app/_components/ui/Badge";
 import type { ServiceStatus } from "@/lib/services/types";
 
-const STYLES: Record<ServiceStatus, { label: string; cls: string }> = {
-  draft: {
-    label: "Draft",
-    cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
-  },
-  on_review: {
-    label: "On review",
-    cls: "bg-amber-100 text-amber-800 ring-amber-200",
-  },
-  published: {
-    label: "Published",
-    cls: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-  },
-  unpublished: {
-    label: "Unpublished",
-    cls: "bg-orange-100 text-orange-800 ring-orange-200",
-  },
-  archived: {
-    label: "Archived",
-    cls: "bg-red-100 text-red-800 ring-red-200",
-  },
+const STYLES: Record<ServiceStatus, { label: string; tone: BadgeTone }> = {
+  draft: { label: "Draft", tone: "neutral" },
+  on_review: { label: "On review", tone: "warning" },
+  published: { label: "Published", tone: "success" },
+  unpublished: { label: "Unpublished", tone: "orange" },
+  archived: { label: "Archived", tone: "danger" },
 };
 
 export default function StatusBadge({ status }: { status: ServiceStatus }) {
-  const { label, cls } = STYLES[status];
+  const { label, tone } = STYLES[status];
   return (
-    <span
-      data-testid="status-badge"
-      data-status={status}
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${cls}`}
-    >
+    <Badge tone={tone} data-testid="status-badge" data-status={status}>
       {label}
-    </span>
+    </Badge>
   );
 }

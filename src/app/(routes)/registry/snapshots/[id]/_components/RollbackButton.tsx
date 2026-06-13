@@ -34,7 +34,7 @@ export function RollbackButton({ snapshotId }: { snapshotId: number }) {
       {state && !state.ok && state.error ? (
         <p
           data-testid="snapshot-rollback-error"
-          className="mt-2 text-sm text-red-700"
+          className="mt-2 text-sm text-red-300"
         >
           {state.error}
         </p>

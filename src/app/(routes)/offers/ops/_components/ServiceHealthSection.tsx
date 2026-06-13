@@ -3,7 +3,7 @@ import { getServiceHealth } from "@/lib/offers/api";
 
 export default async function ServiceHealthSection() {
   const result = await getServiceHealth({ limit: 50 });
-  if (!result.ok) return <p data-testid="service-health-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok) return <p data-testid="service-health-error" className="text-sm text-red-300">{result.message}</p>;
   const items = result.data.items;
   return (
     <section data-testid="service-health">

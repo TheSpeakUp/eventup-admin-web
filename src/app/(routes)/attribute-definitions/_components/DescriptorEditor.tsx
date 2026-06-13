@@ -43,7 +43,7 @@ export function DescriptorEditor({
         placeholder='{ "type": "string", "searchable": true }'
       />
       {err ? (
-        <p data-testid="descriptor-error" className="text-sm text-red-700">
+        <p data-testid="descriptor-error" className="text-sm text-red-300">
           {err}
         </p>
       ) : null}

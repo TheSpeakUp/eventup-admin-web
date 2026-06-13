@@ -4,6 +4,7 @@ import {
   listAttributeDefinitions,
 } from "@/lib/attribute-definitions/api";
 import { getCategory, listCategoryBindings } from "@/lib/categories/api";
+import { buttonClass } from "@/app/_components/ui/Button";
 import { BindingForm } from "../_components/BindingForm";
 
 export default async function NewBindingPage({
@@ -28,7 +29,7 @@ export default async function NewBindingPage({
         <h1 className="text-2xl font-semibold">Add attribute</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {catRes.status === 403
             ? "Managing category attributes requires an admin role."
@@ -43,7 +44,7 @@ export default async function NewBindingPage({
         <h1 className="text-2xl font-semibold">Add attribute</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {bindingsRes.status === 403
             ? "Managing category attributes requires an admin role."
@@ -69,7 +70,7 @@ export default async function NewBindingPage({
           <h1 className="text-2xl font-semibold">Add attribute</h1>
           <div
             data-testid="bindings-error"
-            className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+            className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
           >
             {`Failed to load attribute definitions: ${defsRes.message}`}
           </div>
@@ -103,13 +104,13 @@ export default async function NewBindingPage({
           <button
             type="submit"
             data-testid="binding-picker-continue"
-            className="rounded bg-blue-600 px-4 py-2 text-white"
+            className={buttonClass("primary")}
           >
             Continue
           </button>
         </form>
         {options.length === 0 ? (
-          <p data-testid="binding-picker-empty" className="mt-4 text-gray-500">
+          <p data-testid="binding-picker-empty" className="mt-4 text-ink-subtle">
             No unbound active attribute definitions available.
           </p>
         ) : null}
@@ -132,7 +133,7 @@ export default async function NewBindingPage({
         <h1 className="text-2xl font-semibold">Add attribute</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {`Failed to load attribute definition: ${defRes.message}`}
         </div>

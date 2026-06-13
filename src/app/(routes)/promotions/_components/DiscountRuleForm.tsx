@@ -123,7 +123,7 @@ export default function DiscountRuleForm({
         {pending ? "Saving…" : mode === "create" ? "Create rule" : "Save"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="discount-rule-error" className="text-sm text-red-700">
+        <p data-testid="discount-rule-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

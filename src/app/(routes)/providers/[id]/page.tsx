@@ -21,7 +21,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
         </Link>
         <div
           data-testid="provider-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
         >
           Failed to load provider: {result.message}
         </div>

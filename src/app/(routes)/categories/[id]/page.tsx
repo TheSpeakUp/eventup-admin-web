@@ -26,7 +26,7 @@ export default async function CategoryDetailPage({
         <h1 className="text-2xl font-semibold">Category</h1>
         <div
           data-testid="category-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {`Failed to load category: ${catRes.message}`}
         </div>
@@ -54,7 +54,7 @@ export default async function CategoryDetailPage({
       <Link
         href={`/categories/${category.id}/attributes`}
         data-testid="category-attributes-link"
-        className="mt-1 inline-block text-sm text-blue-700"
+        className="mt-1 inline-block text-sm text-primary-hover"
       >
         Manage attributes →
       </Link>

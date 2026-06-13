@@ -3,7 +3,7 @@ import { getDispatchRuns } from "@/lib/offers/api";
 
 export default async function DispatchRunsSection() {
   const result = await getDispatchRuns({ limit: 50 });
-  if (!result.ok) return <p data-testid="dispatch-runs-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok) return <p data-testid="dispatch-runs-error" className="text-sm text-red-300">{result.message}</p>;
   const items = result.data.items;
   return (
     <section data-testid="dispatch-runs">

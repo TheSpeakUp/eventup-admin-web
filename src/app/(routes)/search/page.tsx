@@ -45,7 +45,7 @@ export default async function SearchPage({
             {results.providers.error ? (
               <div
                 data-testid="search-providers-error"
-                className="mt-2 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+                className="mt-2 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
               >
                 Failed to search providers: {results.providers.error}
               </div>
@@ -78,7 +78,7 @@ export default async function SearchPage({
             {results.services.error ? (
               <div
                 data-testid="search-services-error"
-                className="mt-2 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+                className="mt-2 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
               >
                 Failed to search services: {results.services.error}
               </div>
@@ -118,7 +118,7 @@ export default async function SearchPage({
             {results.offers.error ? (
               <div
                 data-testid="search-offers-error"
-                className="mt-2 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+                className="mt-2 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
               >
                 Failed to search offers: {results.offers.error}
               </div>

@@ -39,7 +39,7 @@ function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
     <div
       data-testid="promotions-error"
-      className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+      className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
     >
       {status === 403
         ? "Viewing promotions requires an admin role."

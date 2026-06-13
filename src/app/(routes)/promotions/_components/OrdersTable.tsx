@@ -46,7 +46,7 @@ export default function OrdersTable({ rows }: { rows: OrderListItem[] }) {
               <Link
                 href={`/promotions/orders/${r.id}`}
                 data-testid={`order-view-${r.id}`}
-                className="text-blue-700"
+                className="text-primary-hover"
               >
                 View
               </Link>

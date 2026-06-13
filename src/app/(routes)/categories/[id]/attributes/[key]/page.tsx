@@ -24,7 +24,7 @@ export default async function BindingDetailPage({
         <h1 className="text-2xl font-semibold">Category attribute</h1>
         <div
           data-testid="bindings-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
+          className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
         >
           {bindingsRes.status === 403
             ? "Managing category attributes requires an admin role."

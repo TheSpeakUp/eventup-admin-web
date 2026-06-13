@@ -106,7 +106,7 @@ export function AttributeDefinitionForm({
       {state && !state.ok && state.error ? (
         <p
           data-testid="attribute-definition-error"
-          className="text-sm text-red-700"
+          className="text-sm text-red-300"
         >
           {state.error}
         </p>

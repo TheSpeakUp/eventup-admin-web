@@ -31,7 +31,7 @@ export default function RollbackConfigButton() {
       {state && !state.ok && state.error ? (
         <p
           data-testid="formula-rollback-error"
-          className="mt-1 text-xs text-red-700"
+          className="mt-1 text-xs text-red-300"
         >
           {state.error}
         </p>

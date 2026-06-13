@@ -60,16 +60,16 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
         </div>
       ) : null}
       {provider.verification_message ? (
-        <div className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+        <div className="rounded-md bg-emerald-500/10 p-3 text-sm text-emerald-300">
+          <p className="text-xs font-medium uppercase tracking-wide text-emerald-300">
             Verification note
           </p>
           <p className="mt-1">{provider.verification_message}</p>
         </div>
       ) : null}
       {provider.block_reason ? (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+        <div className="rounded-md bg-red-500/10 p-3 text-sm text-red-300">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-300">
             Block reason
           </p>
           <p className="mt-1">{provider.block_reason}</p>

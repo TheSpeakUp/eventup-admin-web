@@ -33,7 +33,7 @@ export default function CancelCampaignButton({ id }: { id: number }) {
       {state && !state.ok && state.error ? (
         <p
           data-testid={`campaign-cancel-${id}-error`}
-          className="mt-1 text-xs text-red-700"
+          className="mt-1 text-xs text-red-300"
         >
           {state.error}
         </p>

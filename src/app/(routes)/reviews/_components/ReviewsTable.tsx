@@ -5,23 +5,22 @@
 // - moderation actions (hide/remove/restore) when canManage=true
 // - reply actions (hide/restore) when a reply exists and canManage=true
 
+import Badge, { type BadgeTone } from "@/app/_components/ui/Badge";
 import type { AdminReviewRead } from "@/lib/reviews/types";
 import ReviewModerationButton from "./ReviewModerationButton";
 import ReplyModerationButton from "./ReplyModerationButton";
 
+const STATUS_TONE: Record<string, BadgeTone> = {
+  published: "success",
+  hidden: "warning",
+  removed: "danger",
+};
+
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, { bg: string; text: string; ring: string }> = {
-    published: { bg: "bg-emerald-100", text: "text-emerald-800", ring: "ring-emerald-200" },
-    hidden: { bg: "bg-amber-100", text: "text-amber-800", ring: "ring-amber-200" },
-    removed: { bg: "bg-red-100", text: "text-red-800", ring: "ring-red-200" },
-  };
-  const color = colors[status] || colors.published;
   return (
-    <span
-      className={`inline-flex items-center rounded-full ${color.bg} px-2 py-0.5 text-xs font-medium ${color.text} ring-1 ring-inset ${color.ring}`}
-    >
+    <Badge tone={STATUS_TONE[status] ?? "success"}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
+    </Badge>
   );
 }
 

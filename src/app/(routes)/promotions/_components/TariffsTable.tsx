@@ -43,7 +43,7 @@ export default function TariffsTable({ rows }: { rows: TariffRead[] }) {
                   onClick={() =>
                     setEditing((cur) => (cur === r.id ? null : r.id))
                   }
-                  className="text-blue-700"
+                  className="text-primary-hover"
                 >
                   {editing === r.id ? "Close" : "Edit"}
                 </button>

@@ -100,7 +100,7 @@ export function BindingForm({
         {pending ? "Saving…" : submitLabel}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="binding-error" className="text-sm text-red-700">
+        <p data-testid="binding-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

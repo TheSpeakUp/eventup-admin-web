@@ -55,7 +55,7 @@ export function RegistrySnapshotsTable({
               <Link
                 href={`/registry/snapshots/${r.id}`}
                 data-testid="registry-row-view"
-                className="text-blue-700 hover:underline"
+                className="text-primary-hover hover:underline"
               >
                 View
               </Link>

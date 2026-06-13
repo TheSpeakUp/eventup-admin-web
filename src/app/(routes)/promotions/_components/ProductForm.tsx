@@ -124,7 +124,7 @@ export default function ProductForm({
         {pending ? "Saving…" : mode === "create" ? "Create product" : "Save"}
       </button>
       {state && !state.ok && state.error ? (
-        <p data-testid="product-error" className="text-sm text-red-700">
+        <p data-testid="product-error" className="text-sm text-red-300">
           {state.error}
         </p>
       ) : null}

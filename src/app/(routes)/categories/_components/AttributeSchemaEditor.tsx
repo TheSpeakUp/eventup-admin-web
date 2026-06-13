@@ -43,7 +43,7 @@ export function AttributeSchemaEditor({
         placeholder='{ "cuisine": { "type": "string", "searchable": true } }'
       />
       {err ? (
-        <p data-testid="attribute-schema-error" className="text-sm text-red-700">
+        <p data-testid="attribute-schema-error" className="text-sm text-red-300">
           {err}
         </p>
       ) : null}
