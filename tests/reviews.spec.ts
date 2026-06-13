@@ -24,7 +24,7 @@ test.describe("Reviews moderation (Layer 4)", () => {
     // #1 is seeded published with a reply; should be first in DESC id order.
     await expect(page.getByTestId("reviews-row-13")).toBeVisible();
     await expect(page.getByTestId("reviews-filter")).toBeVisible();
-    await expect(page.getByTestId("reviews-filter-status")).toBeVisible();
+    await expect(page.getByTestId("reviews-status-hidden")).toBeVisible();
     await expect(page.getByTestId("reviews-filter-rating")).toBeVisible();
   });
 
@@ -34,7 +34,7 @@ test.describe("Reviews moderation (Layer 4)", () => {
     await expect(page.getByTestId("reviews-row-1")).toBeVisible();
     await expect(page.getByTestId("reviews-row-6")).toHaveCount(0); // 6 is hidden
 
-    await page.getByTestId("reviews-filter-status").selectOption("hidden");
+    await page.getByTestId("reviews-status-hidden").click();
     await page.waitForURL("**/reviews?status=hidden");
     // Hidden reviews should show (fixtures: 6, 7, 13)
     await expect(page.getByTestId("reviews-row-6")).toBeVisible();

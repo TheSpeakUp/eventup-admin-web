@@ -29,8 +29,9 @@ test.describe("services list", () => {
     await page.waitForURL((url) => !url.search.includes("last_id"));
     await expect(page.getByTestId("services-count")).toHaveText("10 services on this page");
 
-    // Status filter narrows the row set.
-    await page.getByTestId("services-status-filter").selectOption("published");
+    // Status filter narrows the row set — a visible segmented control, not a
+    // hidden dropdown.
+    await page.getByTestId("services-status-published").click();
     await page.waitForURL(/status=published/);
     const publishedRows = await page.locator("tr[data-testid^=services-row-]").count();
     expect(publishedRows).toBeGreaterThan(0);
@@ -39,8 +40,8 @@ test.describe("services list", () => {
       await expect(b).toHaveAttribute("data-status", "published");
     }
 
-    // Clear filter, search by title.
-    await page.getByTestId("services-status-filter").selectOption("");
+    // Clear filter via the "All" segment, then search by title.
+    await page.getByTestId("services-status-all").click();
     await page.getByTestId("services-search").fill("Catering");
     await page.waitForURL(/search=Catering/);
     const matched = await page.locator("tr[data-testid^=services-row-]").count();
@@ -49,5 +50,27 @@ test.describe("services list", () => {
     // Empty state for a query with no matches.
     await page.getByTestId("services-search").fill("zzz-nomatch-xyz");
     await expect(page.getByTestId("services-empty")).toBeVisible();
+  });
+
+  test("grid view renders cards and accumulates via Load more", async ({
+    page,
+  }) => {
+    await loginAsMockAdmin(page, "/services?view=grid");
+
+    const grid = page.getByTestId("services-grid");
+    await expect(grid).toBeVisible();
+    // First grid page = GRID_LIMIT (12) of 26 fixtures.
+    const firstPage = await page
+      .locator("[data-testid^=services-card-]")
+      .count();
+    expect(firstPage).toBe(12);
+
+    // Load more appends the next page client-side (no full navigation).
+    await page.getByTestId("services-load-more").click();
+    await expect
+      .poll(async () =>
+        page.locator("[data-testid^=services-card-]").count(),
+      )
+      .toBeGreaterThan(firstPage);
   });
 });

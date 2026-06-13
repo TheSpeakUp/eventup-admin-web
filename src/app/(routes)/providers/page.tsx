@@ -1,10 +1,18 @@
 import { listProviders } from "@/lib/providers/api";
 import Pagination from "./_components/Pagination";
-import ProvidersFilters from "./_components/ProvidersFilters";
 import ProvidersTable from "./_components/ProvidersTable";
+import ProvidersGrid from "./_components/ProvidersGrid";
+import { loadMoreProviders } from "./load-more-action";
+import { PROVIDERS_GRID_LIMIT } from "./grid-config";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
-import PageHeader from "@/app/_components/ui/PageHeader";
-import { Panel } from "@/app/_components/ui";
+import {
+  Alert,
+  PageHeader,
+  Panel,
+  SearchInput,
+  ViewToggle,
+  parseView,
+} from "@/app/_components/ui";
 
 const LIMIT = 10;
 
@@ -21,29 +29,35 @@ function pickPositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(n) && n > 0 ? n : undefined;
 }
 
-export default async function ProvidersPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function ProvidersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const sp = await searchParams;
   const search = pickString(sp.search)?.trim() || undefined;
-  const lastId = pickPositiveInt(pickString(sp.last_id));
+  const view = parseView(sp.view);
+  // The grid accumulates client-side from page one, so it ignores any URL
+  // cursor; the table is URL-cursor paginated.
+  const lastId =
+    view === "grid" ? undefined : pickPositiveInt(pickString(sp.last_id));
 
   const result = await listProviders({
     search,
     last_id: lastId,
-    limit: LIMIT,
+    limit: view === "grid" ? PROVIDERS_GRID_LIMIT : LIMIT,
   });
 
   if (!result.ok) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Providers moderation
-        </h1>
-        <div
-          data-testid="providers-error"
-          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
-        >
+      <div className="p-8 space-y-5">
+        <PageHeader
+          title="Providers moderation"
+          description="Moderate provider profiles and verification status."
+        />
+        <Alert variant="danger" data-testid="providers-error">
           Failed to load providers: {result.message}
-        </div>
+        </Alert>
       </div>
     );
   }
@@ -52,34 +66,66 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader title="Providers moderation" />
+      <PageHeader
+        title="Providers moderation"
+        description="Moderate provider profiles and verification status."
+        actions={<ExportCsvButton surface="providers" params={{ search }} />}
+      />
       <Panel
         title="All providers"
         accent="primary"
         bodyClassName="p-0"
         action={
-          <div className="flex items-center gap-3">
-            <ExportCsvButton surface="providers" params={{ search }} />
-            <span className="text-xs text-zinc-500" data-testid="providers-count">
-              {count} provider{count === 1 ? "" : "s"} on this page
-            </span>
-          </div>
+          <span
+            className="text-xs text-ink-subtle"
+            data-testid="providers-count"
+          >
+            {count} provider{count === 1 ? "" : "s"} on this page
+          </span>
         }
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
-          <ProvidersFilters />
+        <div className="flex flex-wrap items-center justify-end gap-3 border-b border-hairline px-4 py-3">
+          <div className="flex items-center gap-2">
+            <SearchInput
+              param="search"
+              testid="providers-search"
+              placeholder="Search providers…"
+            />
+            <ViewToggle
+              current={view}
+              basePath="/providers"
+              searchParams={{ search }}
+              testidPrefix="providers-view"
+            />
+          </div>
         </div>
-        <ProvidersTable rows={items} />
-        <div className="px-4 py-3 border-t border-hairline">
-          <Pagination
-            nextLastId={next_last_id}
-            hasMore={has_more}
-            count={count}
-            basePath="/providers"
-            searchParams={{ search }}
-            lastId={lastId}
+        {view === "grid" ? (
+          // Re-key on the search so a soft-nav filter change remounts the grid
+          // and reseeds the accumulator instead of appending onto a stale page.
+          <ProvidersGrid
+            key={search ?? ""}
+            initial={{
+              items,
+              nextCursor: next_last_id != null ? String(next_last_id) : null,
+              hasMore: has_more,
+            }}
+            loadAction={loadMoreProviders.bind(null, { search })}
           />
-        </div>
+        ) : (
+          <>
+            <ProvidersTable rows={items} />
+            <div className="px-4 py-3 border-t border-hairline">
+              <Pagination
+                nextLastId={next_last_id}
+                hasMore={has_more}
+                count={count}
+                basePath="/providers"
+                searchParams={{ search }}
+                lastId={lastId}
+              />
+            </div>
+          </>
+        )}
       </Panel>
     </div>
   );
