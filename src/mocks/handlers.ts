@@ -2548,6 +2548,18 @@ export const handlers = [
 
   http.get(`${DASHBOARD_BASE}/tops`, ({ request }) => {
     const url = new URL(request.url);
+    const role = operatorRole(request);
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return HttpResponse.json(
+        {
+          error: {
+            message: "forbidden",
+            meta: { original_detail: "Requires ADMIN role" },
+          },
+        },
+        { status: 403 },
+      );
+    }
     const limit = url.searchParams.get("limit") ?? "10";
     return HttpResponse.json({
       limit: Number(limit),

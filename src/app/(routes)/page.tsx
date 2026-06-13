@@ -78,7 +78,7 @@ export default async function DashboardPage({
     canPayments ? getDashboardRevenue(window) : Promise.resolve(null),
     canPayments ? getDashboardFunnel(window) : Promise.resolve(null),
     canGrowth ? getDashboardContentGrowth(window) : Promise.resolve(null),
-    canGrowth ? getDashboardTops(window, 10) : Promise.resolve(null),
+    canPayments ? getDashboardTops(window, 10) : Promise.resolve(null),
   ]);
 
   return (
@@ -153,7 +153,7 @@ export default async function DashboardPage({
       )}
 
       {/* Tops Section */}
-      {canGrowth && (
+      {canPayments && (
         <section className="mt-8" data-testid="dashboard-tops-section">
           <h2 className="mb-4 text-sm font-semibold text-zinc-700">
             Top Performers

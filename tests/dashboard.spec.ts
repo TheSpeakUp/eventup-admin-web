@@ -40,9 +40,10 @@ test.describe("operator dashboard (F11)", () => {
     // Verify dashboard page loads
     await expect(page.getByTestId("dashboard-page")).toBeVisible();
 
-    // MODERATOR can see growth and tops
+    // MODERATOR can see growth (content-growth is MODERATOR+)
     await expect(page.getByTestId("dashboard-growth-section")).toBeVisible();
-    await expect(page.getByTestId("dashboard-tops-section")).toBeVisible();
+    // MODERATOR must NOT see tops (revenue data — ADMIN+ only)
+    await expect(page.getByTestId("dashboard-tops-section")).not.toBeVisible();
 
     // MODERATOR cannot see revenue and funnel (payment sections)
     await expect(page.getByTestId("dashboard-revenue-section")).not.toBeVisible();
