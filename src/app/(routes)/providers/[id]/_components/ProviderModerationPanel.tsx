@@ -15,6 +15,8 @@ import {
   verifyProviderAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
+import Button from "@/app/_components/ui/Button";
+import { Textarea } from "@/app/_components/ui/FormField";
 
 type Kind = ProviderActionKind;
 
@@ -92,7 +94,7 @@ function ActionForm({
     <form action={formAction} className="space-y-3" data-testid={`moderation-form-${kind}`}>
       <input type="hidden" name="providerId" value={providerId} />
       {cfg.needsReason && cfg.reasonField ? (
-        <textarea
+        <Textarea
           name={cfg.reasonField}
           required={!isMessage}
           minLength={isMessage ? 0 : 10}
@@ -101,23 +103,22 @@ function ActionForm({
           placeholder={
             isMessage ? "Verification note (optional)…" : "Reason (min 10 chars)…"
           }
-          className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
       ) : null}
       {state.error ? (
-        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-700">
+        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}
       <div className="flex justify-end gap-2">
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={pending}
           data-testid={`moderation-submit-${kind}`}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
         >
           {pending ? "Submitting…" : cfg.confirmLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -200,12 +201,12 @@ export default function ProviderModerationPanel({
         ref={dialogRef}
         data-testid="moderation-dialog"
         onClose={() => setOpen(null)}
-        className="rounded-md border border-zinc-200 p-0 backdrop:bg-black/40"
+        className="rounded-lg border border-hairline bg-surface-1 p-0 backdrop:bg-black/40"
       >
         {open && cfg ? (
           <div className="w-[420px] p-5">
-            <h2 className="text-lg font-semibold">{cfg.title}</h2>
-            <p className="mt-1 text-sm text-zinc-600">{cfg.body}</p>
+            <h2 className="text-lg font-semibold text-ink">{cfg.title}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{cfg.body}</p>
             <div className="mt-4">
               <ActionForm
                 key={open}
@@ -215,14 +216,15 @@ export default function ProviderModerationPanel({
               />
             </div>
             <div className="mt-3 flex justify-end">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setOpen(null)}
                 data-testid="moderation-cancel"
-                className="text-xs text-zinc-500 hover:text-zinc-700"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStepUpForm } from "@/app/_components/step-up/useStepUpForm";
 import ErrorToast from "@/app/_components/ErrorToast";
+import Button from "@/app/_components/ui/Button";
 import {
   forceOfferDispatchAction,
   forceProviderDispatchAction,
@@ -51,12 +52,7 @@ function ConfirmButton({
     applyOpsSettled(state, confirmed, setToast, setConfirmed);
   }, [state, confirmed]);
 
-  const className =
-    variant === "danger"
-      ? "rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:bg-zinc-400"
-      : variant === "ghost"
-      ? "rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:text-zinc-400"
-      : "rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400";
+  const buttonVariant = variant === "ghost" ? "secondary" : variant;
 
   return (
     <div className="space-y-1">
@@ -65,40 +61,40 @@ function ConfirmButton({
           <input key={name} type="hidden" name={name} value={value} />
         ))}
         {!confirmed ? (
-          <button
+          <Button
+            variant={buttonVariant}
             type="button"
             data-testid={`${testid}-open`}
             onClick={() => setConfirmed(true)}
-            className={className}
           >
             {label}
-          </button>
+          </Button>
         ) : (
-          <div className="flex flex-col gap-1 rounded-md border border-amber-300 bg-amber-50 p-2">
-            <p className="text-xs text-amber-900">{description}</p>
+          <div className="flex flex-col gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 p-2">
+            <p className="text-xs text-amber-300">{description}</p>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant={buttonVariant}
                 type="submit"
                 disabled={pending}
                 data-testid={`${testid}-confirm`}
-                className={className}
               >
                 {pending ? "Running…" : `Confirm: ${label}`}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
                 type="button"
                 data-testid={`${testid}-cancel`}
                 onClick={() => setConfirmed(false)}
-                className="rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </form>
       {state.message ? (
-        <p data-testid={`${testid}-result`} className="text-xs text-emerald-700">
+        <p data-testid={`${testid}-result`} className="text-xs text-emerald-400">
           {state.message}
         </p>
       ) : null}
@@ -109,8 +105,8 @@ function ConfirmButton({
 
 export default function ForceDispatchButtons() {
   return (
-    <section data-testid="force-dispatch" className="space-y-3 rounded-md border border-zinc-200 bg-surface-1 p-3">
-      <h2 className="text-sm font-semibold">Force dispatch</h2>
+    <section data-testid="force-dispatch" className="space-y-3 rounded-lg border border-hairline bg-surface-1 p-3">
+      <h2 className="text-sm font-semibold text-ink">Force dispatch</h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         <ConfirmButton
           testid="force-offer-dispatch"

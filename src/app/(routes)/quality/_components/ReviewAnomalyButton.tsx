@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { reviewAnomalyAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
+import { Input } from "@/app/_components/ui/FormField";
 
 // Review (resolve) an anomaly with an optional free-form note. On a backend
 // rejection (e.g. already reviewed) the structured error renders inline.
@@ -18,24 +20,25 @@ export default function ReviewAnomalyButton({ id }: { id: number }) {
       className="flex items-center gap-1"
     >
       <input type="hidden" name="anomaly_id" value={id} />
-      <input
+      <Input
         name="note"
         data-testid={`anomaly-review-${id}-note`}
         placeholder="Note (optional)"
-        className="w-40 rounded border border-zinc-200 px-2 py-0.5 text-xs"
+        className="w-40"
       />
-      <button
+      <Button
         type="submit"
+        variant="secondary"
+        size="sm"
         disabled={pending}
         data-testid={`anomaly-review-${id}`}
-        className="rounded border border-blue-300 px-2 py-0.5 text-xs text-blue-800 disabled:opacity-50"
       >
         {pending ? "…" : "Review"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
         <p
           data-testid={`anomaly-review-${id}-error`}
-          className="ml-1 text-xs text-red-700"
+          className="ml-1 text-xs text-red-400"
         >
           {state.error}
         </p>

@@ -1,6 +1,7 @@
 import { formatDateTime, formatMoneyMinor } from "@/lib/format";
 import type { PaymentDetail } from "@/lib/payments/types";
 import PaymentStatusBadge from "../../_components/PaymentStatusBadge";
+import Alert from "@/app/_components/ui/Alert";
 
 function Field({
   label,
@@ -13,8 +14,8 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-zinc-500">{label}</dt>
-      <dd className="text-zinc-900" data-testid={testid}>
+      <dt className="text-ink-subtle">{label}</dt>
+      <dd className="text-ink" data-testid={testid}>
         {children}
       </dd>
     </div>
@@ -27,7 +28,7 @@ export default function PaymentDetailView({
   payment: PaymentDetail;
 }) {
   return (
-    <div className="space-y-5 rounded-md border border-zinc-200 bg-surface-1 p-6">
+    <div className="space-y-5 rounded-lg border border-hairline bg-surface-1 p-6">
       <div className="flex items-start justify-between">
         <div>
           <h1
@@ -36,7 +37,7 @@ export default function PaymentDetailView({
           >
             Payment #{payment.id}
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ink-subtle">
             {payment.service_title ??
               payment.provider_name ??
               `${payment.resource_type} #${payment.resource_id}`}
@@ -86,8 +87,8 @@ export default function PaymentDetailView({
         </Field>
       </dl>
 
-      <div className="border-t border-zinc-100 pt-4">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+      <div className="border-t border-hairline pt-4">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-ink-subtle">
           Stripe references
         </h2>
         <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -116,7 +117,7 @@ export default function PaymentDetailView({
                 href={payment.receipt_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="break-all text-blue-600 hover:underline"
+                className="break-all text-primary-hover hover:underline"
               >
                 {payment.receipt_url}
               </a>
@@ -128,19 +129,18 @@ export default function PaymentDetailView({
       </div>
 
       {payment.failure_code || payment.failure_message ? (
-        <div
-          className="rounded-md bg-red-50 p-3 text-sm text-red-900"
-          data-testid="payment-failure"
-        >
-          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
-            Failure
-          </p>
-          {payment.failure_code ? (
-            <p className="mt-1 font-mono text-xs">{payment.failure_code}</p>
-          ) : null}
-          {payment.failure_message ? (
-            <p className="mt-1">{payment.failure_message}</p>
-          ) : null}
+        <div data-testid="payment-failure">
+          <Alert tone="danger">
+            <p className="text-xs font-medium uppercase tracking-wide">
+              Failure
+            </p>
+            {payment.failure_code ? (
+              <p className="mt-1 font-mono text-xs">{payment.failure_code}</p>
+            ) : null}
+            {payment.failure_message ? (
+              <p className="mt-1">{payment.failure_message}</p>
+            ) : null}
+          </Alert>
         </div>
       ) : null}
     </div>

@@ -7,6 +7,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ReviewStatus } from "@/lib/reviews/types";
+import { Input, Select } from "@/app/_components/ui/FormField";
 
 export default function ReviewsFilter({
   status,
@@ -74,33 +75,33 @@ export default function ReviewsFilter({
   return (
     <div
       data-testid="reviews-filter"
-      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
+      className="space-y-3 rounded-lg border border-hairline bg-surface-1 p-4"
     >
       <div className="flex flex-wrap gap-4">
         <div>
-          <label className="block text-xs font-medium text-zinc-600">Status</label>
-          <select
+          <label className="block text-xs font-medium text-ink-muted">Status</label>
+          <Select
             value={currentStatus}
             onChange={(e) => handleStatusChange(e.target.value as ReviewStatus | "all")}
             disabled={pending}
             data-testid="reviews-filter-status"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
+            className="mt-1 w-auto"
           >
             <option value="all">All</option>
             <option value="published">Published</option>
             <option value="hidden">Hidden</option>
             <option value="removed">Removed</option>
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600">Rating</label>
-          <select
+          <label className="block text-xs font-medium text-ink-muted">Rating</label>
+          <Select
             value={currentRating}
             onChange={(e) => handleRatingChange(e.target.value)}
             disabled={pending}
             data-testid="reviews-filter-rating"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
+            className="mt-1 w-auto"
           >
             <option value="all">All</option>
             <option value="1">1 star</option>
@@ -108,32 +109,32 @@ export default function ReviewsFilter({
             <option value="3">3 stars</option>
             <option value="4">4 stars</option>
             <option value="5">5 stars</option>
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600">Provider ID</label>
-          <input
+          <label className="block text-xs font-medium text-ink-muted">Provider ID</label>
+          <Input
             type="text"
             value={provider_id ?? ""}
             onChange={handleProviderIdChange}
             disabled={pending}
             placeholder="Filter by provider"
             data-testid="reviews-filter-provider-id"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
+            className="mt-1 w-auto"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600">Search</label>
-          <input
+          <label className="block text-xs font-medium text-ink-muted">Search</label>
+          <Input
             type="text"
             value={q ?? ""}
             onChange={handleSearchChange}
             disabled={pending}
             placeholder="Search review body"
             data-testid="reviews-filter-search"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
+            className="mt-1 w-auto"
           />
         </div>
       </div>

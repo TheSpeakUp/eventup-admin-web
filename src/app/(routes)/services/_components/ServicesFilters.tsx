@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SERVICE_STATUSES, type ServiceStatus } from "@/lib/services/types";
+import { Input, Select } from "@/app/_components/ui/FormField";
 
 const DEBOUNCE_MS = 300;
 
@@ -49,19 +50,19 @@ export default function ServicesFilters() {
       data-testid="services-filters"
       data-pending={pending ? "true" : "false"}
     >
-      <input
+      <Input
         type="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search services…"
         data-testid="services-search"
-        className="h-9 w-64 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="w-64"
       />
-      <select
+      <Select
         value={status}
         onChange={(e) => onStatusChange(e.target.value)}
         data-testid="services-status-filter"
-        className="h-9 rounded-md border border-zinc-300 bg-surface-1 px-2 text-sm focus:border-zinc-500 focus:outline-none"
+        className="w-auto"
       >
         <option value="">All statuses</option>
         {SERVICE_STATUSES.map((s) => {
@@ -72,7 +73,7 @@ export default function ServicesFilters() {
             </option>
           );
         })}
-      </select>
+      </Select>
     </div>
   );
 }

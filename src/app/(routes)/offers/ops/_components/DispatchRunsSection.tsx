@@ -1,44 +1,51 @@
 import { formatDateTime } from "@/lib/format";
 import { getDispatchRuns } from "@/lib/offers/api";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import Alert from "@/app/_components/ui/Alert";
 
 export default async function DispatchRunsSection() {
   const result = await getDispatchRuns({ limit: 50 });
-  if (!result.ok) return <p data-testid="dispatch-runs-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok)
+    return (
+      <div data-testid="dispatch-runs-error">
+        <Alert tone="danger">{result.message}</Alert>
+      </div>
+    );
   const items = result.data.items;
   return (
     <section data-testid="dispatch-runs">
       <header className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Dispatch runs ({result.data.total})</h2>
+        <h2 className="text-sm font-semibold text-ink">Dispatch runs ({result.data.total})</h2>
       </header>
-      <table className="w-full table-auto text-sm">
-        <thead className="text-left text-xs uppercase text-zinc-500">
-          <tr>
-            <th className="px-2 py-1">Created at</th>
-            <th className="px-2 py-1">Scope</th>
-            <th className="px-2 py-1">Status</th>
-            <th className="px-2 py-1">Actor</th>
-            <th className="px-2 py-1">Idempotency key</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <THead>
+          <Tr>
+            <Th>Created at</Th>
+            <Th>Scope</Th>
+            <Th>Status</Th>
+            <Th>Actor</Th>
+            <Th>Idempotency key</Th>
+          </Tr>
+        </THead>
+        <TBody>
           {items.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="px-2 py-3 text-center text-zinc-500" data-testid="dispatch-runs-empty">
+            <Tr>
+              <Td colSpan={5} align="center" className="py-3 text-ink-subtle" data-testid="dispatch-runs-empty">
                 No dispatch runs.
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ) : null}
           {items.map((it) => (
-            <tr key={it.id} data-testid={`dispatch-runs-row-${it.id}`} className="border-t border-zinc-100">
-              <td className="px-2 py-1">{formatDateTime(it.created_at)}</td>
-              <td className="px-2 py-1">{it.dispatch_scope}</td>
-              <td className="px-2 py-1">{it.status}</td>
-              <td className="px-2 py-1">{it.actor_email ?? "—"}</td>
-              <td className="px-2 py-1 font-mono text-xs">{it.idempotency_key ?? "—"}</td>
-            </tr>
+            <Tr key={it.id} data-testid={`dispatch-runs-row-${it.id}`}>
+              <Td>{formatDateTime(it.created_at)}</Td>
+              <Td>{it.dispatch_scope}</Td>
+              <Td>{it.status}</Td>
+              <Td>{it.actor_email ?? "—"}</Td>
+              <Td className="font-mono text-xs">{it.idempotency_key ?? "—"}</Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </section>
   );
 }

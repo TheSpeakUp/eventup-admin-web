@@ -2,6 +2,10 @@
 import Link from "next/link";
 import { listCategories } from "@/lib/categories/api";
 import { isCategorySort } from "@/lib/categories/types";
+import Alert from "@/app/_components/ui/Alert";
+import Button from "@/app/_components/ui/Button";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import { FormField, Input, Select } from "@/app/_components/ui/FormField";
 import { CategoriesTable } from "./_components/CategoriesTable";
 
 export default async function CategoriesPage({
@@ -16,14 +20,13 @@ export default async function CategoriesPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Categories</h1>
-        <div
-          data-testid="categories-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-        >
-          {result.status === 403
-            ? "Viewing categories requires an admin role."
-            : `Failed to load categories: ${result.message}`}
+        <PageHeader title="Categories" />
+        <div data-testid="categories-error" className="mt-4">
+          <Alert tone="danger">
+            {result.status === 403
+              ? "Viewing categories requires an admin role."
+              : `Failed to load categories: ${result.message}`}
+          </Alert>
         </div>
       </div>
     );
@@ -34,37 +37,39 @@ export default async function CategoriesPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Categories</h1>
-        <Link
-          href="/categories/new"
-          data-testid="category-new"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-        >
-          New category
-        </Link>
-      </div>
+      <PageHeader
+        title="Categories"
+        actions={
+          <Link
+            href="/categories/new"
+            data-testid="category-new"
+            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus"
+          >
+            New category
+          </Link>
+        }
+      />
 
-      <form className="mt-4 flex gap-2" data-testid="categories-search">
-        <input
-          name="search"
-          placeholder="Search name or slug"
-          defaultValue={sp.search ?? ""}
-          className="rounded border px-2 py-1"
-        />
-        <select
-          name="sort"
-          defaultValue={sort}
-          className="rounded border px-2 py-1"
-        >
-          <option value="sort_order_asc">Sort ↑</option>
-          <option value="sort_order_desc">Sort ↓</option>
-          <option value="name_asc">Name A–Z</option>
-          <option value="name_desc">Name Z–A</option>
-        </select>
-        <button type="submit" className="rounded border px-3 py-1">
+      <form className="mt-4 flex flex-wrap items-end gap-2" data-testid="categories-search">
+        <FormField label="Search" htmlFor="categories-search-input">
+          <Input
+            id="categories-search-input"
+            name="search"
+            placeholder="Search name or slug"
+            defaultValue={sp.search ?? ""}
+          />
+        </FormField>
+        <FormField label="Sort" htmlFor="categories-sort">
+          <Select id="categories-sort" name="sort" defaultValue={sort}>
+            <option value="sort_order_asc">Sort ↑</option>
+            <option value="sort_order_desc">Sort ↓</option>
+            <option value="name_asc">Name A–Z</option>
+            <option value="name_desc">Name Z–A</option>
+          </Select>
+        </FormField>
+        <Button type="submit" variant="secondary">
           Apply
-        </button>
+        </Button>
       </form>
 
       <div className="mt-4">

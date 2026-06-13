@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { deleteCategoryAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
 
 export function DeleteCategoryButton({ id }: { id: number }) {
   const [state, formAction, pending] = useActionState(
@@ -20,16 +21,16 @@ export function DeleteCategoryButton({ id }: { id: number }) {
       }}
     >
       <input type="hidden" name="id" value={id} />
-      <button
+      <Button
         type="submit"
+        variant="danger"
         disabled={pending}
         data-testid="category-delete"
-        className="rounded border border-red-300 px-4 py-2 text-red-700"
       >
         {pending ? "Deleting…" : "Delete category"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
-        <p data-testid="category-delete-error" className="text-sm text-red-700">
+        <p data-testid="category-delete-error" className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}

@@ -4,6 +4,7 @@ import { getProvider } from "@/lib/providers/api";
 import ProviderDetailView from "./_components/ProviderDetail";
 import ProviderFieldEditForm from "./_components/ProviderFieldEditForm";
 import ProviderModerationPanel from "./_components/ProviderModerationPanel";
+import Alert from "@/app/_components/ui/Alert";
 
 type Params = Promise<{ id: string }>;
 
@@ -16,14 +17,13 @@ export default async function ProviderDetailPage({ params }: { params: Params })
     if (result.status === 404) notFound();
     return (
       <div className="p-8">
-        <Link href="/providers" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/providers" className="text-sm text-ink-subtle hover:underline">
           ← Back to providers
         </Link>
-        <div
-          data-testid="provider-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Failed to load provider: {result.message}
+        <div data-testid="provider-detail-error" className="mt-4">
+          <Alert tone="danger">
+            Failed to load provider: {result.message}
+          </Alert>
         </div>
       </div>
     );
@@ -31,7 +31,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
 
   return (
     <div className="p-8 space-y-5">
-      <Link href="/providers" className="text-sm text-zinc-500 hover:underline">
+      <Link href="/providers" className="text-sm text-ink-subtle hover:underline">
         ← Back to providers
       </Link>
       <div className="grid grid-cols-[1fr_280px] gap-6">
@@ -40,7 +40,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
           <ProviderFieldEditForm provider={result.data} />
         </div>
         <aside className="space-y-3">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Moderation</h2>
+          <h2 className="text-sm font-medium uppercase tracking-wide text-ink-subtle">Moderation</h2>
           <ProviderModerationPanel
             providerId={result.data.id}
             status={result.data.verification_status}

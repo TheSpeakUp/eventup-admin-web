@@ -5,6 +5,8 @@ import {
   targetingSummary,
   type PromoCodeRead,
 } from "@/lib/promo-codes/types";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
 import PromoStatusBadge from "./PromoStatusBadge";
 
 function discountLabel(r: PromoCodeRead): string {
@@ -29,52 +31,50 @@ function usageLabel(r: PromoCodeRead): string {
 export default function PromoCodesTable({ rows }: { rows: PromoCodeRead[] }) {
   if (rows.length === 0)
     return (
-      <p data-testid="promo-codes-empty" className="p-4 text-zinc-500">
+      <EmptyState testid="promo-codes-empty">
         No promo codes match these filters.
-      </p>
+      </EmptyState>
     );
   return (
-    <table className="w-full text-sm" data-testid="promo-codes-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Code</th>
-          <th>Discount</th>
-          <th>Validity</th>
-          <th>Usage</th>
-          <th>Targeting</th>
-          <th>Status</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
+    <div data-testid="promo-codes-table">
+    <Table>
+      <THead>
+        <Tr>
+          <Th>Code</Th>
+          <Th>Discount</Th>
+          <Th>Validity</Th>
+          <Th>Usage</Th>
+          <Th>Targeting</Th>
+          <Th>Status</Th>
+          <Th />
+        </Tr>
+      </THead>
+      <TBody>
         {rows.map((r) => (
-          <tr
-            key={r.id}
-            className="border-t border-zinc-200"
-            data-testid={`promo-row-${r.id}`}
-          >
-            <td className="py-2 font-medium">{r.code}</td>
-            <td>{discountLabel(r)}</td>
-            <td className="text-zinc-600">{validityLabel(r)}</td>
-            <td>{usageLabel(r)}</td>
-            <td data-testid={`promo-targeting-${r.id}`} className="text-zinc-600">
+          <Tr key={r.id} data-testid={`promo-row-${r.id}`}>
+            <Td className="font-medium">{r.code}</Td>
+            <Td>{discountLabel(r)}</Td>
+            <Td className="text-ink-subtle">{validityLabel(r)}</Td>
+            <Td>{usageLabel(r)}</Td>
+            <Td data-testid={`promo-targeting-${r.id}`} className="text-ink-subtle">
               {targetingSummary(r.targeting_rules)}
-            </td>
-            <td>
+            </Td>
+            <Td>
               <PromoStatusBadge isActive={r.is_active} />
-            </td>
-            <td>
+            </Td>
+            <Td>
               <Link
                 href={`/promo-codes/${r.id}`}
                 data-testid={`promo-view-${r.id}`}
-                className="text-blue-700"
+                className="text-primary-hover hover:underline"
               >
                 View
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </TBody>
+    </Table>
+    </div>
   );
 }

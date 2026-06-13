@@ -1,51 +1,58 @@
 import { formatDateTime } from "@/lib/format";
 import { getProviderHealth } from "@/lib/offers/api";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import Alert from "@/app/_components/ui/Alert";
 
 export default async function ProviderHealthSection() {
   const result = await getProviderHealth({ limit: 50 });
-  if (!result.ok) return <p data-testid="provider-health-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok)
+    return (
+      <div data-testid="provider-health-error">
+        <Alert tone="danger">{result.message}</Alert>
+      </div>
+    );
   const items = result.data.items;
   return (
     <section data-testid="provider-health">
       <header className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Provider health</h2>
-        <span className="text-xs text-zinc-500">Updated {formatDateTime(result.data.generated_at)}</span>
+        <h2 className="text-sm font-semibold text-ink">Provider health</h2>
+        <span className="text-xs text-ink-subtle">Updated {formatDateTime(result.data.generated_at)}</span>
       </header>
-      <table className="w-full table-auto text-sm">
-        <thead className="text-left text-xs uppercase text-zinc-500">
-          <tr>
-            <th className="px-2 py-1">Provider</th>
-            <th className="px-2 py-1">Services</th>
-            <th className="px-2 py-1">On review</th>
-            <th className="px-2 py-1">In SLA</th>
-            <th className="px-2 py-1">Warning</th>
-            <th className="px-2 py-1">Overdue</th>
-            <th className="px-2 py-1">Overdue %</th>
-            <th className="px-2 py-1">Escalation</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <THead>
+          <Tr>
+            <Th>Provider</Th>
+            <Th>Services</Th>
+            <Th>On review</Th>
+            <Th>In SLA</Th>
+            <Th>Warning</Th>
+            <Th>Overdue</Th>
+            <Th>Overdue %</Th>
+            <Th>Escalation</Th>
+          </Tr>
+        </THead>
+        <TBody>
           {items.length === 0 ? (
-            <tr>
-              <td colSpan={8} className="px-2 py-3 text-center text-zinc-500" data-testid="provider-health-empty">
+            <Tr>
+              <Td colSpan={8} align="center" className="py-3 text-ink-subtle" data-testid="provider-health-empty">
                 No provider health data.
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ) : null}
           {items.map((it) => (
-            <tr key={it.provider_id} data-testid={`provider-health-row-${it.provider_id}`} className="border-t border-zinc-100">
-              <td className="px-2 py-1">{it.provider_name ?? `#${it.provider_id}`}</td>
-              <td className="px-2 py-1">{it.services_total}</td>
-              <td className="px-2 py-1">{it.total_on_review}</td>
-              <td className="px-2 py-1">{it.in_sla}</td>
-              <td className="px-2 py-1">{it.warning}</td>
-              <td className="px-2 py-1">{it.overdue_response}</td>
-              <td className="px-2 py-1">{(it.overdue_share * 100).toFixed(0)}%</td>
-              <td className="px-2 py-1">{it.escalation_recommended ? "yes" : "no"}</td>
-            </tr>
+            <Tr key={it.provider_id} data-testid={`provider-health-row-${it.provider_id}`}>
+              <Td>{it.provider_name ?? `#${it.provider_id}`}</Td>
+              <Td>{it.services_total}</Td>
+              <Td>{it.total_on_review}</Td>
+              <Td>{it.in_sla}</Td>
+              <Td>{it.warning}</Td>
+              <Td>{it.overdue_response}</Td>
+              <Td>{(it.overdue_share * 100).toFixed(0)}%</Td>
+              <Td>{it.escalation_recommended ? "yes" : "no"}</Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </section>
   );
 }

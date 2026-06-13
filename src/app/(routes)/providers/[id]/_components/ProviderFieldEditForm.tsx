@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import type { ProviderDetail } from "@/lib/providers/types";
 import { editProviderFieldsAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
+import { FormField, Input, Textarea } from "@/app/_components/ui/FormField";
 
 /**
  * Inline DATA-field edit form (M7). Pre-filled from the current provider record.
@@ -26,9 +28,9 @@ export default function ProviderFieldEditForm({
     <form
       action={formAction}
       data-testid="provider-field-edit-form"
-      className="space-y-4 rounded-md border border-zinc-200 bg-surface-1 p-6"
+      className="space-y-4 rounded-lg border border-hairline bg-surface-1 p-6"
     >
-      <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+      <h2 className="text-sm font-medium uppercase tracking-wide text-ink-subtle">
         Edit fields
       </h2>
 
@@ -67,90 +69,94 @@ export default function ProviderFieldEditForm({
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">
-            Name <span className="text-red-500">*</span>
-          </span>
-          <input
+        <FormField
+          htmlFor="provider-field-name"
+          label={
+            <>
+              Name <span className="text-red-400">*</span>
+            </>
+          }
+        >
+          <Input
+            id="provider-field-name"
             name="name"
             defaultValue={provider.name}
             required
             data-testid="provider-field-name"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">
-            Account currency <span className="text-red-500">*</span>
-          </span>
-          <input
+        </FormField>
+        <FormField
+          htmlFor="provider-field-account_currency"
+          label={
+            <>
+              Account currency <span className="text-red-400">*</span>
+            </>
+          }
+        >
+          <Input
+            id="provider-field-account_currency"
             name="account_currency"
             defaultValue={provider.account_currency}
             required
             data-testid="provider-field-account_currency"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm uppercase focus:border-zinc-500 focus:outline-none"
+            className="uppercase"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Website</span>
-          <input
+        </FormField>
+        <FormField htmlFor="provider-field-website" label="Website">
+          <Input
+            id="provider-field-website"
             name="website"
             defaultValue={provider.website ?? ""}
             data-testid="provider-field-website"
             placeholder="Empty clears the value"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Location id</span>
-          <input
+        </FormField>
+        <FormField htmlFor="provider-field-location_id" label="Location id">
+          <Input
+            id="provider-field-location_id"
             name="location_id"
             type="number"
             min={1}
             defaultValue={provider.location_id ?? ""}
             data-testid="provider-field-location_id"
             placeholder="Empty clears the value"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Address</span>
-          <input
+        </FormField>
+        <FormField htmlFor="provider-field-address" label="Address">
+          <Input
+            id="provider-field-address"
             name="address"
             defaultValue={provider.address ?? ""}
             data-testid="provider-field-address"
             placeholder="Empty clears the value"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Logo URL</span>
-          <input
+        </FormField>
+        <FormField htmlFor="provider-field-logo_url" label="Logo URL">
+          <Input
+            id="provider-field-logo_url"
             name="logo_url"
             defaultValue={provider.logo_url ?? ""}
             data-testid="provider-field-logo_url"
             placeholder="Empty clears the value"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
           />
-        </label>
+        </FormField>
       </div>
 
-      <label className="block">
-        <span className="text-sm font-medium text-zinc-700">Description</span>
-        <textarea
+      <FormField htmlFor="provider-field-description" label="Description">
+        <Textarea
+          id="provider-field-description"
           name="description"
           rows={3}
           defaultValue={provider.description ?? ""}
           data-testid="provider-field-description"
           placeholder="Empty clears the value"
-          className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none"
         />
-      </label>
+      </FormField>
 
       {state.error ? (
         <p
           data-testid="provider-field-edit-error"
-          className="text-sm text-red-700"
+          className="text-sm text-red-400"
         >
           {state.error}
         </p>
@@ -158,21 +164,21 @@ export default function ProviderFieldEditForm({
       {state.ok ? (
         <p
           data-testid="provider-field-edit-success"
-          className="text-sm text-emerald-700"
+          className="text-sm text-emerald-400"
         >
           Saved.
         </p>
       ) : null}
 
       <div className="flex justify-end">
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={pending}
           data-testid="provider-field-edit-submit"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
         >
           {pending ? "Saving…" : "Save fields"}
-        </button>
+        </Button>
       </div>
     </form>
   );

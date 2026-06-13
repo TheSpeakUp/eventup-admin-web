@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { moderateReplyAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
 import type { ReplyStatus } from "@/lib/reviews/types";
+import Button from "@/app/_components/ui/Button";
 
 export default function ReplyModerationButton({
   reviewId,
@@ -31,18 +32,19 @@ export default function ReplyModerationButton({
     >
       <input type="hidden" name="review_id" value={reviewId} />
       <input type="hidden" name="action" value={action} />
-      <button
+      <Button
         type="submit"
+        variant="secondary"
+        size="sm"
         disabled={pending}
         data-testid={`reply-moderate-${reviewId}`}
-        className="rounded border border-green-300 px-2 py-0.5 text-xs text-green-800 disabled:opacity-50"
       >
         {pending ? "…" : action === "hide" ? "Hide reply" : "Restore reply"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
         <p
           data-testid={`reply-moderate-${reviewId}-error`}
-          className="ml-1 text-xs text-red-700"
+          className="ml-1 text-xs text-red-400"
         >
           {state.error}
         </p>

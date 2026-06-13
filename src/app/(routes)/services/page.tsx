@@ -4,6 +4,8 @@ import Pagination from "./_components/Pagination";
 import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import Alert from "@/app/_components/ui/Alert";
 
 const LIMIT = 10;
 
@@ -39,13 +41,10 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
 
   if (!result.ok) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-semibold">Services moderation</h1>
-        <div
-          data-testid="services-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Failed to load services: {result.message}
+      <div className="p-8 space-y-6">
+        <PageHeader title="Services moderation" />
+        <div data-testid="services-error">
+          <Alert tone="danger">Failed to load services: {result.message}</Alert>
         </div>
       </div>
     );
@@ -55,20 +54,24 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Services moderation</h1>
-        <ExportCsvButton
-          surface="services"
-          params={{
-            search,
-            status,
-            provider_id: providerId !== undefined ? String(providerId) : undefined,
-          }}
-        />
-        <span className="text-xs text-zinc-500" data-testid="services-count">
-          {count} service{count === 1 ? "" : "s"} on this page
-        </span>
-      </div>
+      <PageHeader
+        title="Services moderation"
+        meta={
+          <span data-testid="services-count">
+            {count} service{count === 1 ? "" : "s"} on this page
+          </span>
+        }
+        actions={
+          <ExportCsvButton
+            surface="services"
+            params={{
+              search,
+              status,
+              provider_id: providerId !== undefined ? String(providerId) : undefined,
+            }}
+          />
+        }
+      />
       <ServicesFilters />
       <ServicesTable rows={items} />
       <Pagination

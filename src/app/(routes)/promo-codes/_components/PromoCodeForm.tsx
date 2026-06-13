@@ -7,6 +7,8 @@ import {
   extractTargetingIds,
   type PromoCodeRead,
 } from "@/lib/promo-codes/types";
+import Button from "@/app/_components/ui/Button";
+import { FormField, Input, Select } from "@/app/_components/ui/FormField";
 
 // datetime-local needs "YYYY-MM-DDTHH:MM"; backend timestamps may carry seconds
 // / microseconds, so trim to minutes. Blank for null.
@@ -37,96 +39,86 @@ export default function PromoCodeForm({
       {/* --- Immutable identity + discount (create only) --- */}
       {mode === "create" ? (
         <>
-          <label className="block">
-            <span className="text-sm font-medium">Code</span>
-            <input
+          <FormField label="Code" htmlFor="promo-code">
+            <Input
+              id="promo-code"
               name="code"
               data-testid="promo-code"
               required
               minLength={3}
               maxLength={50}
-              className="mt-1 w-full rounded border px-2 py-1"
             />
-          </label>
+          </FormField>
 
           <div className="grid grid-cols-3 gap-2">
-            <label className="block">
-              <span className="text-sm font-medium">Discount type</span>
-              <select
+            <FormField label="Discount type" htmlFor="promo-discount-type">
+              <Select
+                id="promo-discount-type"
                 name="discount_type"
                 data-testid="promo-discount-type"
                 defaultValue="percent"
-                className="mt-1 w-full rounded border px-2 py-1"
               >
                 <option value="percent">percent</option>
                 <option value="fixed_amount">fixed_amount</option>
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">Discount value</span>
-              <input
+              </Select>
+            </FormField>
+            <FormField label="Discount value" htmlFor="promo-discount-value">
+              <Input
+                id="promo-discount-value"
                 name="discount_value"
                 data-testid="promo-discount-value"
                 required
                 placeholder="10"
-                className="mt-1 w-full rounded border px-2 py-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">Currency</span>
-              <input
+            </FormField>
+            <FormField label="Currency" htmlFor="promo-currency">
+              <Input
+                id="promo-currency"
                 name="currency"
                 data-testid="promo-currency"
                 placeholder="USD (fixed only)"
-                className="mt-1 w-full rounded border px-2 py-1"
               />
-            </label>
+            </FormField>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <label className="block">
-              <span className="text-sm font-medium">
-                Min order (minor units)
-              </span>
-              <input
+            <FormField label="Min order (minor units)" htmlFor="promo-min-order">
+              <Input
+                id="promo-min-order"
                 name="min_order_amount_minor"
                 data-testid="promo-min-order"
                 type="number"
-                className="mt-1 w-full rounded border px-2 py-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">Allowed item types</span>
-              <input
+            </FormField>
+            <FormField label="Allowed item types" htmlFor="promo-item-types">
+              <Input
+                id="promo-item-types"
                 name="allowed_item_types"
                 data-testid="promo-item-types"
                 placeholder="service, space (comma-separated)"
-                className="mt-1 w-full rounded border px-2 py-1"
               />
-            </label>
+            </FormField>
           </div>
 
-          <label className="block">
-            <span className="text-sm font-medium">Valid from</span>
-            <input
+          <FormField label="Valid from" htmlFor="promo-valid-from">
+            <Input
+              id="promo-valid-from"
               name="valid_from"
               data-testid="promo-valid-from"
               type="datetime-local"
-              className="mt-1 w-full rounded border px-2 py-1"
             />
-          </label>
+          </FormField>
 
-          <label className="block">
-            <span className="text-sm font-medium">Stripe coupon id</span>
-            <input
+          <FormField label="Stripe coupon id" htmlFor="promo-stripe-coupon">
+            <Input
+              id="promo-stripe-coupon"
               name="stripe_coupon_id"
               data-testid="promo-stripe-coupon"
-              className="mt-1 w-full rounded border px-2 py-1"
             />
-          </label>
+          </FormField>
         </>
       ) : (
-        <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+        <div className="rounded-lg border border-hairline bg-surface-2 p-3 text-sm text-ink-subtle">
           <div>
             <span className="font-medium">Code:</span> {p?.code}
           </div>
@@ -135,7 +127,7 @@ export default function PromoCodeForm({
             {p?.discount_type === "percent" ? "%" : ` ${p?.currency ?? ""}`} (
             {p?.discount_type})
           </div>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-ink-tertiary">
             Code and discount are immutable after creation.
           </p>
         </div>
@@ -143,26 +135,24 @@ export default function PromoCodeForm({
 
       {/* --- Mutable fields (create + edit) --- */}
       <div className="grid grid-cols-2 gap-2">
-        <label className="block">
-          <span className="text-sm font-medium">Valid until</span>
-          <input
+        <FormField label="Valid until" htmlFor="promo-valid-until">
+          <Input
+            id="promo-valid-until"
             name="valid_until"
             data-testid="promo-valid-until"
             type="datetime-local"
             defaultValue={toLocalInput(p?.valid_until)}
-            className="mt-1 w-full rounded border px-2 py-1"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium">Max uses</span>
-          <input
+        </FormField>
+        <FormField label="Max uses" htmlFor="promo-max-uses">
+          <Input
+            id="promo-max-uses"
             name="max_uses"
             data-testid="promo-max-uses"
             type="number"
             defaultValue={p?.max_uses ?? ""}
-            className="mt-1 w-full rounded border px-2 py-1"
           />
-        </label>
+        </FormField>
       </div>
 
       <label className="flex items-center gap-2">
@@ -172,56 +162,48 @@ export default function PromoCodeForm({
           data-testid="promo-is-active"
           defaultChecked={p?.is_active ?? true}
         />
-        <span className="text-sm font-medium">Active</span>
+        <span className="text-sm font-medium text-ink-muted">Active</span>
       </label>
 
       {/* --- Targeting (provider / category / location id lists) --- */}
-      <fieldset className="space-y-2 rounded border border-zinc-200 p-3">
-        <legend className="text-sm font-medium">
+      <fieldset className="space-y-2 rounded-lg border border-hairline p-3">
+        <legend className="text-sm font-medium text-ink-muted">
           Targeting (leave blank to apply to everyone)
         </legend>
-        <label className="block">
-          <span className="text-sm">Provider ids</span>
-          <input
+        <FormField label="Provider ids" htmlFor="promo-target-providers">
+          <Input
+            id="promo-target-providers"
             name="target_provider_ids"
             data-testid="promo-target-providers"
             placeholder="e.g. 11, 12, 13"
             defaultValue={targeting.provider.join(", ")}
-            className="mt-1 w-full rounded border px-2 py-1"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm">Category ids</span>
-          <input
+        </FormField>
+        <FormField label="Category ids" htmlFor="promo-target-categories">
+          <Input
+            id="promo-target-categories"
             name="target_category_ids"
             data-testid="promo-target-categories"
             placeholder="e.g. 5, 6"
             defaultValue={targeting.category.join(", ")}
-            className="mt-1 w-full rounded border px-2 py-1"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm">Location ids</span>
-          <input
+        </FormField>
+        <FormField label="Location ids" htmlFor="promo-target-locations">
+          <Input
+            id="promo-target-locations"
             name="target_location_ids"
             data-testid="promo-target-locations"
             placeholder="e.g. 42"
             defaultValue={targeting.location.join(", ")}
-            className="mt-1 w-full rounded border px-2 py-1"
           />
-        </label>
+        </FormField>
       </fieldset>
 
-      <button
-        type="submit"
-        disabled={pending}
-        data-testid="promo-submit"
-        className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending} data-testid="promo-submit">
         {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
-        <p data-testid="promo-error" className="text-sm text-red-700">
+        <p data-testid="promo-error" className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}

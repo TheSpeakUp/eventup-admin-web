@@ -3,6 +3,8 @@ import Pagination from "./_components/Pagination";
 import ProvidersFilters from "./_components/ProvidersFilters";
 import ProvidersTable from "./_components/ProvidersTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import Alert from "@/app/_components/ui/Alert";
 
 const LIMIT = 10;
 
@@ -34,11 +36,10 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
     return (
       <div className="p-8">
         <h1 className="text-2xl font-semibold">Providers moderation</h1>
-        <div
-          data-testid="providers-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Failed to load providers: {result.message}
+        <div data-testid="providers-error" className="mt-6">
+          <Alert tone="danger">
+            Failed to load providers: {result.message}
+          </Alert>
         </div>
       </div>
     );
@@ -48,13 +49,20 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Providers moderation</h1>
-        <ExportCsvButton surface="providers" params={{ search }} />
-        <span className="text-xs text-zinc-500" data-testid="providers-count">
-          {count} provider{count === 1 ? "" : "s"} on this page
-        </span>
-      </div>
+      <PageHeader
+        title="Providers moderation"
+        actions={
+          <>
+            <ExportCsvButton surface="providers" params={{ search }} />
+            <span
+              className="text-xs text-ink-subtle"
+              data-testid="providers-count"
+            >
+              {count} provider{count === 1 ? "" : "s"} on this page
+            </span>
+          </>
+        }
+      />
       <ProvidersFilters />
       <ProvidersTable rows={items} />
       <Pagination

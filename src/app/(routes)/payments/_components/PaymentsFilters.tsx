@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PAYMENT_STATUSES } from "@/lib/payments/types";
+import { Input, Select } from "@/app/_components/ui/FormField";
 
 const DEBOUNCE_MS = 300;
 
@@ -56,15 +57,15 @@ export default function PaymentsFilters() {
       data-testid="payments-filters"
       data-pending={pending ? "true" : "false"}
     >
-      <input
+      <Input
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search provider or service…"
         data-testid="payments-search"
-        className="h-9 w-64 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="w-64"
       />
-      <select
+      <Select
         value={status}
         data-testid="payments-status-filter"
         onChange={(e) =>
@@ -73,7 +74,7 @@ export default function PaymentsFilters() {
             else next.delete("status");
           })
         }
-        className="h-9 rounded-md border border-zinc-300 px-2 text-sm focus:border-zinc-500 focus:outline-none"
+        className="w-auto"
       >
         <option value="">All statuses</option>
         {PAYMENT_STATUSES.map((s) => (
@@ -81,8 +82,8 @@ export default function PaymentsFilters() {
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </option>
         ))}
-      </select>
-      <select
+      </Select>
+      <Select
         value={currency}
         data-testid="payments-currency-filter"
         onChange={(e) =>
@@ -91,7 +92,7 @@ export default function PaymentsFilters() {
             else next.delete("currency");
           })
         }
-        className="h-9 rounded-md border border-zinc-300 px-2 text-sm focus:border-zinc-500 focus:outline-none"
+        className="w-auto"
       >
         <option value="">All currencies</option>
         {CURRENCIES.map((c) => (
@@ -99,7 +100,7 @@ export default function PaymentsFilters() {
             {c}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

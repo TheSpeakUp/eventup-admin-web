@@ -1,5 +1,6 @@
 // src/app/(routes)/categories/new/page.tsx
 import { listCategories } from "@/lib/categories/api";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import { CategoryForm } from "../_components/CategoryForm";
 
 export default async function NewCategoryPage() {
@@ -9,7 +10,7 @@ export default async function NewCategoryPage() {
     : [];
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold">New category</h1>
+      <PageHeader title="New category" />
       <div className="mt-4 max-w-2xl">
         <CategoryForm mode="create" parentOptions={parentOptions} />
       </div>

@@ -1,44 +1,51 @@
 import { formatDateTime } from "@/lib/format";
 import { getDlq } from "@/lib/offers/api";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import Alert from "@/app/_components/ui/Alert";
 
 export default async function DlqSection({ excludeReplayed = true }: { excludeReplayed?: boolean }) {
   const result = await getDlq({ exclude_replayed_successes: excludeReplayed, limit: 50 });
-  if (!result.ok) return <p data-testid="dlq-error" className="text-sm text-red-700">{result.message}</p>;
+  if (!result.ok)
+    return (
+      <div data-testid="dlq-error">
+        <Alert tone="danger">{result.message}</Alert>
+      </div>
+    );
   const items = result.data.items;
   return (
     <section data-testid="dlq">
       <header className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">DLQ ({result.data.total})</h2>
+        <h2 className="text-sm font-semibold text-ink">DLQ ({result.data.total})</h2>
       </header>
-      <table className="w-full table-auto text-sm">
-        <thead className="text-left text-xs uppercase text-zinc-500">
-          <tr>
-            <th className="px-2 py-1">Key</th>
-            <th className="px-2 py-1">Channel</th>
-            <th className="px-2 py-1">Provider</th>
-            <th className="px-2 py-1">Created at</th>
-            <th className="px-2 py-1">Outcome</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <THead>
+          <Tr>
+            <Th>Key</Th>
+            <Th>Channel</Th>
+            <Th>Provider</Th>
+            <Th>Created at</Th>
+            <Th>Outcome</Th>
+          </Tr>
+        </THead>
+        <TBody>
           {items.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="px-2 py-3 text-center text-zinc-500" data-testid="dlq-empty">
+            <Tr>
+              <Td colSpan={5} align="center" className="py-3 text-ink-subtle" data-testid="dlq-empty">
                 No DLQ entries.
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ) : null}
           {items.map((it) => (
-            <tr key={it.dlq_key} data-testid={`dlq-row-${it.dlq_key}`} className="border-t border-zinc-100">
-              <td className="px-2 py-1 font-mono text-xs">{it.dlq_key}</td>
-              <td className="px-2 py-1">{it.channel}</td>
-              <td className="px-2 py-1">#{it.provider_id}</td>
-              <td className="px-2 py-1">{formatDateTime(it.created_at)}</td>
-              <td className="px-2 py-1">{String((it.delivery_outcome as { status?: string })?.status ?? "—")}</td>
-            </tr>
+            <Tr key={it.dlq_key} data-testid={`dlq-row-${it.dlq_key}`}>
+              <Td className="font-mono text-xs">{it.dlq_key}</Td>
+              <Td>{it.channel}</Td>
+              <Td>#{it.provider_id}</Td>
+              <Td>{formatDateTime(it.created_at)}</Td>
+              <Td>{String((it.delivery_outcome as { status?: string })?.status ?? "—")}</Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </section>
   );
 }

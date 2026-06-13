@@ -3,6 +3,8 @@ import { getOfferDetailCard } from "@/lib/offers/api";
 import { isOfferStatus } from "@/lib/offers/types";
 import OfferDetail from "./_components/OfferDetail";
 import OfferModerationPanel from "./_components/OfferModerationPanel";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import Alert from "@/app/_components/ui/Alert";
 
 export default async function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,24 +14,26 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   if (!result.ok) {
     if (result.status === 404) notFound();
     return (
-      <main className="space-y-3 p-6">
-        <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
-        <p data-testid="offer-error" className="text-sm text-red-700">{result.message}</p>
+      <main className="space-y-4 p-8">
+        <PageHeader title={`Offer #${offerId}`} />
+        <div data-testid="offer-error">
+          <Alert tone="danger">{result.message}</Alert>
+        </div>
       </main>
     );
   }
   const offer = result.data;
   if (!isOfferStatus(offer.status)) {
     return (
-      <main className="space-y-3 p-6">
-        <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
-        <p className="text-sm text-red-700">Unknown offer status: {offer.status}</p>
+      <main className="space-y-4 p-8">
+        <PageHeader title={`Offer #${offerId}`} />
+        <Alert tone="danger">Unknown offer status: {offer.status}</Alert>
       </main>
     );
   }
   return (
-    <main className="space-y-4 p-6">
-      <h1 className="text-xl font-semibold">Offer #{offerId}</h1>
+    <main className="space-y-4 p-8">
+      <PageHeader title={`Offer #${offerId}`} />
       <OfferDetail offer={offer} />
       <OfferModerationPanel offerId={offerId} status={offer.status} />
     </main>

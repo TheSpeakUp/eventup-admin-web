@@ -16,6 +16,8 @@ import {
   rejectOfferAction,
 } from "../actions";
 import { EMPTY_STATE, type ActionState } from "../action-types";
+import Button, { type ButtonVariant } from "@/app/_components/ui/Button";
+import { Textarea } from "@/app/_components/ui/FormField";
 
 type Kind = OfferActionKind;
 
@@ -97,45 +99,40 @@ function ActionForm({
     <form action={formAction} className="space-y-3" data-testid={`moderation-form-${kind}`}>
       <input type="hidden" name="offerId" value={offerId} />
       {cfg.needsReason ? (
-        <textarea
+        <Textarea
           name="reason"
           required={!cfg.reasonOptional}
           minLength={10}
           rows={4}
           data-testid={`moderation-reason-${kind}`}
           placeholder={cfg.reasonOptional ? "Reason (optional, min 10 chars)…" : "Reason (min 10 chars)…"}
-          className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
       ) : null}
       {state.error ? (
-        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-700">
+        <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}
       <div className="flex justify-end gap-2">
-        <button
+        <Button
           type="submit"
           disabled={pending}
           data-testid={`moderation-submit-${kind}`}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
         >
           {pending ? "Submitting…" : cfg.confirmLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );
 }
 
-const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
-  { kind: "approve", label: "Approve", className: "bg-emerald-600 text-white hover:bg-emerald-700" },
-  { kind: "reject", label: "Reject", className: "bg-red-600 text-white hover:bg-red-700" },
-  { kind: "archive", label: "Archive", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
-  { kind: "disable", label: "Disable", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
-  { kind: "enable", label: "Enable", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
+const ALL_KINDS: { kind: Kind; label: string; variant: ButtonVariant }[] = [
+  { kind: "approve", label: "Approve", variant: "primary" },
+  { kind: "reject", label: "Reject", variant: "danger" },
+  { kind: "archive", label: "Archive", variant: "secondary" },
+  { kind: "disable", label: "Disable", variant: "secondary" },
+  { kind: "enable", label: "Enable", variant: "secondary" },
 ];
-
-const DISABLED_CLASS =
-  "w-full rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-400 cursor-not-allowed";
 
 export default function OfferModerationPanel({
   offerId,
@@ -171,33 +168,35 @@ export default function OfferModerationPanel({
   return (
     <div className="space-y-2" data-testid="moderation-panel" data-status={status}>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        {ALL_KINDS.map(({ kind, label, className }) => {
+        {ALL_KINDS.map(({ kind, label, variant }) => {
           const isAllowed = allowed.has(kind);
           if (!isAllowed) {
             return (
-              <button
+              <Button
                 key={kind}
+                variant="secondary"
                 type="button"
                 disabled
                 title={offerActionUnavailableReason(kind, status)}
                 data-testid={`moderation-open-${kind}`}
                 data-disabled-reason={offerActionUnavailableReason(kind, status)}
-                className={DISABLED_CLASS}
+                className="w-full"
               >
                 {label}
-              </button>
+              </Button>
             );
           }
           return (
-            <button
+            <Button
               key={kind}
+              variant={variant}
               type="button"
               onClick={() => setOpen(kind)}
               data-testid={`moderation-open-${kind}`}
-              className={`w-full rounded-md px-3 py-2 text-sm font-medium ${className}`}
+              className="w-full"
             >
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -206,12 +205,12 @@ export default function OfferModerationPanel({
         ref={dialogRef}
         data-testid="moderation-dialog"
         onClose={() => setOpen(null)}
-        className="rounded-md border border-zinc-200 p-0 backdrop:bg-black/40"
+        className="rounded-lg border border-hairline bg-surface-1 p-0 text-ink backdrop:bg-black/60"
       >
         {open && cfg ? (
           <div className="w-[420px] p-5">
-            <h2 className="text-lg font-semibold">{cfg.title}</h2>
-            <p className="mt-1 text-sm text-zinc-600">{cfg.body}</p>
+            <h2 className="text-lg font-semibold text-ink">{cfg.title}</h2>
+            <p className="mt-1 text-sm text-ink-subtle">{cfg.body}</p>
             <div className="mt-4">
               <ActionForm
                 key={open}
@@ -221,14 +220,15 @@ export default function OfferModerationPanel({
               />
             </div>
             <div className="mt-3 flex justify-end">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={() => setOpen(null)}
                 data-testid="moderation-cancel"
-                className="text-xs text-zinc-500 hover:text-zinc-700"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}

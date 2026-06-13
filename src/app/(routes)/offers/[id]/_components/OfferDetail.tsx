@@ -9,14 +9,14 @@ function formatMoney(minor: number | null, currency: string | null): string {
 
 export default function OfferDetail({ offer }: { offer: OfferDetailCard }) {
   return (
-    <section data-testid="offer-detail" className="space-y-3 rounded-md border border-zinc-200 bg-surface-1 p-4">
+    <section data-testid="offer-detail" className="space-y-3 rounded-lg border border-hairline bg-surface-1 p-4">
       <div className="flex items-center gap-2">
         <OfferStatusBadge status={offer.status} />
         <QueueStatusBadge status={offer.queue_status} />
-        <span className="text-sm text-zinc-600">waiting {offer.waiting_hours.toFixed(1)}h</span>
+        <span className="text-sm text-ink-subtle">waiting {offer.waiting_hours.toFixed(1)}h</span>
       </div>
-      <h2 className="text-lg font-semibold text-zinc-900">{offer.offer_title ?? `Offer #${offer.offer_id}`}</h2>
-      {offer.offer_description ? <p className="text-sm text-zinc-700">{offer.offer_description}</p> : null}
+      <h2 className="text-lg font-semibold text-ink">{offer.offer_title ?? `Offer #${offer.offer_id}`}</h2>
+      {offer.offer_description ? <p className="text-sm text-ink-muted">{offer.offer_description}</p> : null}
       <dl className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
         <Row label="Service" value={offer.service_title ? `${offer.service_title} (#${offer.service_id})` : `#${offer.service_id}`} />
         <Row label="Provider" value={offer.provider_name ?? (offer.provider_id ? `#${offer.provider_id}` : "—")} />
@@ -36,9 +36,9 @@ export default function OfferDetail({ offer }: { offer: OfferDetailCard }) {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-2 border-b border-zinc-100 py-1 sm:border-b-0">
-      <dt className="text-zinc-500">{label}</dt>
-      <dd className="text-zinc-900">{value}</dd>
+    <div className="flex justify-between gap-2 border-b border-hairline py-1 sm:border-b-0">
+      <dt className="text-ink-subtle">{label}</dt>
+      <dd className="text-ink">{value}</dd>
     </div>
   );
 }

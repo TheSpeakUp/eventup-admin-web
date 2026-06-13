@@ -1,16 +1,17 @@
 import { formatDateTime } from "@/lib/format";
 import type { ProviderDetail } from "@/lib/providers/types";
 import StatusBadge from "../../_components/StatusBadge";
+import Alert from "@/app/_components/ui/Alert";
 
 export default function ProviderDetailView({ provider }: { provider: ProviderDetail }) {
   return (
-    <div className="space-y-5 rounded-md border border-zinc-200 bg-surface-1 p-6">
+    <div className="space-y-5 rounded-lg border border-hairline bg-surface-1 p-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold" data-testid="provider-detail-title">
             {provider.name}
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ink-subtle">
             {provider.contact_email ?? "no contact email"}
           </p>
         </div>
@@ -18,62 +19,62 @@ export default function ProviderDetailView({ provider }: { provider: ProviderDet
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div>
-          <dt className="text-zinc-500">Provider ID</dt>
-          <dd className="text-zinc-900 font-mono text-xs">{provider.id}</dd>
+          <dt className="text-ink-subtle">Provider ID</dt>
+          <dd className="text-ink font-mono text-xs">{provider.id}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Services</dt>
-          <dd className="text-zinc-900">{provider.services_count}</dd>
+          <dt className="text-ink-subtle">Services</dt>
+          <dd className="text-ink">{provider.services_count}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Active offers</dt>
-          <dd className="text-zinc-900">{provider.active_offers_count}</dd>
+          <dt className="text-ink-subtle">Active offers</dt>
+          <dd className="text-ink">{provider.active_offers_count}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Location</dt>
-          <dd className="text-zinc-900">
+          <dt className="text-ink-subtle">Location</dt>
+          <dd className="text-ink">
             {provider.location_name ??
               (provider.location_id !== null ? `#${provider.location_id}` : "—")}
           </dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Phone</dt>
-          <dd className="text-zinc-900">{provider.phone ?? "—"}</dd>
+          <dt className="text-ink-subtle">Phone</dt>
+          <dd className="text-ink">{provider.phone ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Website</dt>
-          <dd className="text-zinc-900 break-all">{provider.website ?? "—"}</dd>
+          <dt className="text-ink-subtle">Website</dt>
+          <dd className="text-ink break-all">{provider.website ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Created</dt>
-          <dd className="text-zinc-900">{formatDateTime(provider.created_at)}</dd>
+          <dt className="text-ink-subtle">Created</dt>
+          <dd className="text-ink">{formatDateTime(provider.created_at)}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Updated</dt>
-          <dd className="text-zinc-900">{formatDateTime(provider.updated_at)}</dd>
+          <dt className="text-ink-subtle">Updated</dt>
+          <dd className="text-ink">{formatDateTime(provider.updated_at)}</dd>
         </div>
       </dl>
       {provider.description ? (
         <div>
-          <h2 className="text-sm font-medium text-zinc-500">Description</h2>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-800">{provider.description}</p>
+          <h2 className="text-sm font-medium text-ink-subtle">Description</h2>
+          <p className="mt-1 whitespace-pre-line text-sm text-ink-muted">{provider.description}</p>
         </div>
       ) : null}
       {provider.verification_message ? (
-        <div className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+        <Alert tone="success">
+          <p className="text-xs font-medium uppercase tracking-wide">
             Verification note
           </p>
           <p className="mt-1">{provider.verification_message}</p>
-        </div>
+        </Alert>
       ) : null}
       {provider.block_reason ? (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
+        <Alert tone="danger">
+          <p className="text-xs font-medium uppercase tracking-wide">
             Block reason
           </p>
           <p className="mt-1">{provider.block_reason}</p>
-        </div>
+        </Alert>
       ) : null}
     </div>
   );

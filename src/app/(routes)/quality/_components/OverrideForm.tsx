@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { setOverrideAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
 import type { ServiceQualityMetricRead } from "@/lib/quality/types";
+import Button from "@/app/_components/ui/Button";
+import { FormField, Input } from "@/app/_components/ui/FormField";
 
 // Manual-override SET form (POST /services/{id}/override). Pre-fills from the
 // current override when one is active. coefficient bounded (0, 10]; reason
@@ -25,15 +27,13 @@ export default function OverrideForm({
     <form
       action={formAction}
       data-testid="override-form"
-      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
+      className="space-y-3 rounded-lg border border-hairline bg-surface-1 p-4"
     >
       <input type="hidden" name="service_id" value={metric.service_id} />
 
-      <label className="block">
-        <span className="text-sm font-medium text-zinc-700">
-          Coefficient (0, 10]
-        </span>
-        <input
+      <FormField label="Coefficient (0, 10]" htmlFor="override-coefficient">
+        <Input
+          id="override-coefficient"
           name="coefficient"
           data-testid="override-coefficient"
           type="number"
@@ -42,44 +42,34 @@ export default function OverrideForm({
           max="10"
           defaultValue={metric.manual_override_coefficient ?? ""}
           required
-          className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-sm"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium text-zinc-700">Reason</span>
-        <input
+      <FormField label="Reason" htmlFor="override-reason">
+        <Input
+          id="override-reason"
           name="reason"
           data-testid="override-reason"
           defaultValue={metric.manual_override_reason ?? ""}
           required
-          className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-sm"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium text-zinc-700">
-          Until (optional)
-        </span>
-        <input
+      <FormField label="Until (optional)" htmlFor="override-until">
+        <Input
+          id="override-until"
           name="until"
           data-testid="override-until"
           type="datetime-local"
           defaultValue={untilDefault}
-          className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-sm"
         />
-      </label>
+      </FormField>
 
-      <button
-        type="submit"
-        disabled={pending}
-        data-testid="override-submit"
-        className="rounded bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending} data-testid="override-submit">
         {pending ? "Saving…" : "Set override"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
-        <p data-testid="override-error" className="text-sm text-red-700">
+        <p data-testid="override-error" className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}

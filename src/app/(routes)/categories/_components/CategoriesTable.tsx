@@ -1,6 +1,8 @@
 // src/app/(routes)/categories/_components/CategoriesTable.tsx
 import Link from "next/link";
 import type { CategoryRead } from "@/lib/categories/types";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 export function CategoriesTable({
   rows,
@@ -10,51 +12,45 @@ export function CategoriesTable({
   parentNames: Map<number, string>;
 }) {
   if (rows.length === 0)
-    return (
-      <p data-testid="categories-empty" className="p-4 text-gray-500">
-        No categories yet.
-      </p>
-    );
+    return <EmptyState testid="categories-empty">No categories yet.</EmptyState>;
   return (
-    <table className="w-full text-sm" data-testid="categories-table">
-      <thead>
-        <tr className="text-left text-gray-500">
-          <th className="py-2">Name</th>
-          <th>Slug</th>
-          <th>Parent</th>
-          <th>Sort</th>
-          <th>Leaf</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
+    <div data-testid="categories-table">
+    <Table>
+      <THead>
+        <Tr>
+          <Th>Name</Th>
+          <Th>Slug</Th>
+          <Th>Parent</Th>
+          <Th>Sort</Th>
+          <Th>Leaf</Th>
+          <Th />
+        </Tr>
+      </THead>
+      <TBody>
         {rows.map((r) => (
-          <tr
-            key={r.id}
-            className="border-t"
-            data-testid={`category-row-${r.id}`}
-          >
-            <td className="py-2">{r.name}</td>
-            <td>{r.slug}</td>
-            <td>
+          <Tr key={r.id} data-testid={`category-row-${r.id}`}>
+            <Td>{r.name}</Td>
+            <Td>{r.slug}</Td>
+            <Td>
               {r.parent_id != null
                 ? (parentNames.get(r.parent_id) ?? "—")
                 : "—"}
-            </td>
-            <td>{r.sort_order}</td>
-            <td>{r.is_leaf ? "yes" : "no"}</td>
-            <td>
+            </Td>
+            <Td>{r.sort_order}</Td>
+            <Td>{r.is_leaf ? "yes" : "no"}</Td>
+            <Td>
               <Link
                 href={`/categories/${r.id}`}
                 data-testid={`category-edit-${r.id}`}
-                className="text-blue-700"
+                className="text-primary-hover hover:underline"
               >
                 Edit
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </TBody>
+    </Table>
+    </div>
   );
 }

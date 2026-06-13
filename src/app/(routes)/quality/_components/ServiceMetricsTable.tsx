@@ -4,6 +4,9 @@
 // live. An "Override" badge flags rows with an active manual override.
 import Link from "next/link";
 import type { ServiceQualityMetricRead } from "@/lib/quality/types";
+import Badge from "@/app/_components/ui/Badge";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
 import TierBadge from "./TierBadge";
 
 export default function ServiceMetricsTable({
@@ -13,60 +16,56 @@ export default function ServiceMetricsTable({
 }) {
   if (rows.length === 0)
     return (
-      <p data-testid="service-metrics-empty" className="p-4 text-zinc-500">
+      <EmptyState testid="service-metrics-empty">
         No service quality metrics yet.
-      </p>
+      </EmptyState>
     );
   return (
-    <table className="w-full text-sm" data-testid="service-metrics-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Service</th>
-          <th>Provider</th>
-          <th>Tier</th>
-          <th>Ranking</th>
-          <th>Trust</th>
-          <th>Anomaly</th>
-          <th>Override</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
+    <div data-testid="service-metrics-table">
+    <Table>
+      <THead>
+        <Tr>
+          <Th>Service</Th>
+          <Th>Provider</Th>
+          <Th>Tier</Th>
+          <Th>Ranking</Th>
+          <Th>Trust</Th>
+          <Th>Anomaly</Th>
+          <Th>Override</Th>
+          <Th />
+        </Tr>
+      </THead>
+      <TBody>
         {rows.map((r) => (
-          <tr
-            key={r.service_id}
-            className="border-t border-zinc-200"
-            data-testid={`service-metric-row-${r.service_id}`}
-          >
-            <td className="py-2 font-mono text-xs">#{r.service_id}</td>
-            <td>{r.provider_id}</td>
-            <td>
+          <Tr key={r.service_id} data-testid={`service-metric-row-${r.service_id}`}>
+            <Td className="font-mono text-xs">#{r.service_id}</Td>
+            <Td>{r.provider_id}</Td>
+            <Td>
               <TierBadge tier={r.quality_tier} />
-            </td>
-            <td>{r.ranking_score.toFixed(2)}</td>
-            <td>{r.trust_score.toFixed(2)}</td>
-            <td>{r.anomaly_score.toFixed(2)}</td>
-            <td data-testid={`service-metric-override-${r.service_id}`}>
+            </Td>
+            <Td>{r.ranking_score.toFixed(2)}</Td>
+            <Td>{r.trust_score.toFixed(2)}</Td>
+            <Td>{r.anomaly_score.toFixed(2)}</Td>
+            <Td data-testid={`service-metric-override-${r.service_id}`}>
               {r.manual_override_coefficient !== null ? (
-                <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 ring-1 ring-inset ring-purple-200">
-                  ×{r.manual_override_coefficient}
-                </span>
+                <Badge tone="info">×{r.manual_override_coefficient}</Badge>
               ) : (
-                <span className="text-zinc-400">—</span>
+                <span className="text-ink-tertiary">—</span>
               )}
-            </td>
-            <td className="whitespace-nowrap">
+            </Td>
+            <Td className="whitespace-nowrap">
               <Link
                 href={`/quality/services/${r.service_id}`}
                 data-testid={`service-metric-view-${r.service_id}`}
-                className="text-blue-700"
+                className="text-primary-hover hover:underline"
               >
                 View
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </TBody>
+    </Table>
+    </div>
   );
 }

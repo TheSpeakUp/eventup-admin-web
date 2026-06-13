@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCategory, listCategories } from "@/lib/categories/api";
 import { getAdminSession } from "@/lib/auth/session";
+import Alert from "@/app/_components/ui/Alert";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import { CategoryForm } from "../_components/CategoryForm";
 import { DeleteCategoryButton } from "../_components/DeleteCategoryButton";
 
@@ -23,12 +25,9 @@ export default async function CategoryDetailPage({
   if (!catRes.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Category</h1>
-        <div
-          data-testid="category-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-        >
-          {`Failed to load category: ${catRes.message}`}
+        <PageHeader title="Category" />
+        <div data-testid="category-error" className="mt-4">
+          <Alert tone="danger">{`Failed to load category: ${catRes.message}`}</Alert>
         </div>
       </div>
     );
@@ -48,13 +47,16 @@ export default async function CategoryDetailPage({
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold" data-testid="category-detail-name">
+      <h1
+        className="text-2xl font-semibold tracking-tight text-ink"
+        data-testid="category-detail-name"
+      >
         {category.name}
       </h1>
       <Link
         href={`/categories/${category.id}/attributes`}
         data-testid="category-attributes-link"
-        className="mt-1 inline-block text-sm text-blue-700"
+        className="mt-1 inline-block text-sm text-primary-hover hover:underline"
       >
         Manage attributes →
       </Link>

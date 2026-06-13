@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { clearOverrideAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
 
 // Clear the active manual override (DELETE /services/{id}/override). Confirm
 // then clear; structured backend errors render inline.
@@ -25,16 +26,16 @@ export default function ClearOverrideButton({
       }}
     >
       <input type="hidden" name="service_id" value={serviceId} />
-      <button
+      <Button
         type="submit"
+        variant="secondary"
         disabled={pending}
         data-testid="clear-override-submit"
-        className="rounded border border-zinc-300 px-3 py-1 text-sm text-zinc-700 disabled:opacity-50"
       >
         {pending ? "Clearing…" : "Clear override"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
-        <p data-testid="clear-override-error" className="mt-1 text-sm text-red-700">
+        <p data-testid="clear-override-error" className="mt-1 text-sm text-red-400">
           {state.error}
         </p>
       ) : null}

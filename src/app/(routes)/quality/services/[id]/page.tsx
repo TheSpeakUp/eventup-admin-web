@@ -7,6 +7,8 @@
 import Link from "next/link";
 import { getServiceMetric } from "@/lib/quality/api";
 import { getAdminSession } from "@/lib/auth/session";
+import Alert from "@/app/_components/ui/Alert";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import TierBadge from "../../_components/TierBadge";
 import OverrideForm from "../../_components/OverrideForm";
 import ClearOverrideButton from "../../_components/ClearOverrideButton";
@@ -22,20 +24,19 @@ export default async function ServiceMetricDetailPage({
   if (!res.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Service quality metric</h1>
-        <div
-          data-testid="service-metric-error"
-          className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-        >
-          {res.status === 404
-            ? `No service quality metric with id ${id}.`
-            : res.status === 403
-              ? "Viewing quality metrics requires an admin role."
-              : `Failed to load metric: ${res.message}`}
+        <PageHeader title="Service quality metric" />
+        <div data-testid="service-metric-error" className="mt-4">
+          <Alert tone="danger">
+            {res.status === 404
+              ? `No service quality metric with id ${id}.`
+              : res.status === 403
+                ? "Viewing quality metrics requires an admin role."
+                : `Failed to load metric: ${res.message}`}
+          </Alert>
         </div>
         <Link
           href="/quality?tab=services"
-          className="mt-4 inline-block text-sm text-blue-700"
+          className="mt-4 inline-block text-sm text-primary-hover hover:underline"
         >
           ← Back to service metrics
         </Link>
@@ -65,66 +66,69 @@ export default async function ServiceMetricDetailPage({
   return (
     <div className="p-8">
       <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold" data-testid="service-metric-id">
+        <h1
+          className="text-2xl font-semibold tracking-tight text-ink"
+          data-testid="service-metric-id"
+        >
           {m.service_title ?? `Service #${m.service_id}`}
         </h1>
         <TierBadge tier={m.quality_tier} />
-        <span className="text-sm text-zinc-500">
+        <span className="text-sm text-ink-subtle">
           {m.provider_name ?? `provider #${m.provider_id}`} · formula{" "}
           {m.formula_version}
         </span>
       </div>
 
-      <h2 className="mt-6 text-lg font-semibold">Score breakdown</h2>
+      <h2 className="mt-6 text-lg font-semibold text-ink">Score breakdown</h2>
       <dl
-        className="mt-2 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-2 text-sm text-zinc-700"
+        className="mt-2 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-2 text-sm text-ink"
         data-testid="service-metric-scores"
       >
         {scoreRows.map((row) => (
           <div key={row.label} className="flex justify-between gap-2">
-            <dt className="text-zinc-500">{row.label}</dt>
+            <dt className="text-ink-subtle">{row.label}</dt>
             <dd className="font-mono">{row.value}</dd>
           </div>
         ))}
       </dl>
 
-      <h2 className="mt-6 text-lg font-semibold">Volumes</h2>
+      <h2 className="mt-6 text-lg font-semibold text-ink">Volumes</h2>
       <dl
-        className="mt-2 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-2 text-sm text-zinc-700"
+        className="mt-2 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-2 text-sm text-ink"
         data-testid="service-metric-volumes"
       >
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">Favorites</dt>
+          <dt className="text-ink-subtle">Favorites</dt>
           <dd>{m.favorites_total}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">Reservations</dt>
+          <dt className="text-ink-subtle">Reservations</dt>
           <dd>{m.reservations_total}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">Converted</dt>
+          <dt className="text-ink-subtle">Converted</dt>
           <dd>{m.reservations_converted}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">Failed</dt>
+          <dt className="text-ink-subtle">Failed</dt>
           <dd>{m.reservations_failed}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">Complaints</dt>
+          <dt className="text-ink-subtle">Complaints</dt>
           <dd>{m.complaints_total}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-zinc-500">SLA breaches</dt>
+          <dt className="text-ink-subtle">SLA breaches</dt>
           <dd>
             {m.sla_breaches} / {m.sla_activity_total}
           </dd>
         </div>
       </dl>
 
-      <h2 className="mt-6 text-lg font-semibold">Manual override</h2>
+      <h2 className="mt-6 text-lg font-semibold text-ink">Manual override</h2>
       <div className="mt-2" data-testid="override-state">
         {hasOverride ? (
-          <p className="text-sm text-zinc-700">
+          <p className="text-sm text-ink">
             Active:{" "}
             <span className="font-mono" data-testid="override-coefficient-value">
               ×{m.manual_override_coefficient}
@@ -137,7 +141,7 @@ export default async function ServiceMetricDetailPage({
               : ""}
           </p>
         ) : (
-          <p className="text-sm text-zinc-500" data-testid="override-none">
+          <p className="text-sm text-ink-subtle" data-testid="override-none">
             No manual override on this service.
           </p>
         )}
@@ -154,7 +158,7 @@ export default async function ServiceMetricDetailPage({
 
       <Link
         href="/quality?tab=services"
-        className="mt-6 inline-block text-sm text-blue-700"
+        className="mt-6 inline-block text-sm text-primary-hover hover:underline"
       >
         ← Back to service metrics
       </Link>

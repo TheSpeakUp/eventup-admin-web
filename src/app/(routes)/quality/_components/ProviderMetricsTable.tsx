@@ -1,6 +1,8 @@
 // src/app/(routes)/quality/_components/ProviderMetricsTable.tsx
 // Provider quality metrics list (read-only — no detail route, no writes).
 import type { ProviderQualityMetricRead } from "@/lib/quality/types";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 export default function ProviderMetricsTable({
   rows,
@@ -9,42 +11,40 @@ export default function ProviderMetricsTable({
 }) {
   if (rows.length === 0)
     return (
-      <p data-testid="provider-metrics-empty" className="p-4 text-zinc-500">
+      <EmptyState testid="provider-metrics-empty">
         No provider quality metrics yet.
-      </p>
+      </EmptyState>
     );
   return (
-    <table className="w-full text-sm" data-testid="provider-metrics-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Provider</th>
-          <th>Trust</th>
-          <th>Verification</th>
-          <th>Rating</th>
-          <th>Services</th>
-          <th>Active</th>
-          <th>Complaints</th>
-          <th>SLA breaches</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div data-testid="provider-metrics-table">
+    <Table>
+      <THead>
+        <Tr>
+          <Th>Provider</Th>
+          <Th>Trust</Th>
+          <Th>Verification</Th>
+          <Th>Rating</Th>
+          <Th>Services</Th>
+          <Th>Active</Th>
+          <Th>Complaints</Th>
+          <Th>SLA breaches</Th>
+        </Tr>
+      </THead>
+      <TBody>
         {rows.map((r) => (
-          <tr
-            key={r.provider_id}
-            className="border-t border-zinc-200"
-            data-testid={`provider-metric-row-${r.provider_id}`}
-          >
-            <td className="py-2 font-mono text-xs">#{r.provider_id}</td>
-            <td>{r.trust_score.toFixed(2)}</td>
-            <td>{r.verification_score.toFixed(2)}</td>
-            <td>{r.rating_score.toFixed(2)}</td>
-            <td>{r.services_count}</td>
-            <td>{r.active_services_count}</td>
-            <td>{r.complaints_total}</td>
-            <td>{r.sla_breaches}</td>
-          </tr>
+          <Tr key={r.provider_id} data-testid={`provider-metric-row-${r.provider_id}`}>
+            <Td className="font-mono text-xs">#{r.provider_id}</Td>
+            <Td>{r.trust_score.toFixed(2)}</Td>
+            <Td>{r.verification_score.toFixed(2)}</Td>
+            <Td>{r.rating_score.toFixed(2)}</Td>
+            <Td>{r.services_count}</Td>
+            <Td>{r.active_services_count}</Td>
+            <Td>{r.complaints_total}</Td>
+            <Td>{r.sla_breaches}</Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </TBody>
+    </Table>
+    </div>
   );
 }

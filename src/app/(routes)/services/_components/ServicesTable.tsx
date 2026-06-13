@@ -9,6 +9,8 @@ import BulkModerationBar, {
 } from "@/app/_components/BulkModerationBar";
 import { bulkModerateServices } from "../bulk-actions";
 import StatusBadge from "./StatusBadge";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 
 function formatPrice(minor: number | null, currency: string | null): string {
   if (minor === null) return "—";
@@ -68,72 +70,69 @@ export default function ServicesTable({ rows }: { rows: ServiceListItem[] }) {
 
   if (rows.length === 0) {
     return (
-      <div
-        data-testid="services-empty"
-        className="rounded-md border border-dashed border-zinc-300 p-10 text-center text-sm text-zinc-500"
-      >
+      <EmptyState testid="services-empty">
         No services match the current filters.
-      </div>
+      </EmptyState>
     );
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
-        <table className="min-w-full divide-y divide-zinc-200 text-sm" data-testid="services-table">
-          <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
-            <tr>
-              <th className="w-10 px-4 py-2.5">
-                <input
-                  type="checkbox"
-                  aria-label="Select all reviewable"
-                  data-testid="services-select-all"
-                  checked={allSelected}
-                  disabled={selectableIds.length === 0}
-                  onChange={toggleAll}
-                />
-              </th>
-              <th className="px-4 py-2.5 text-left font-medium">Title</th>
-              <th className="px-4 py-2.5 text-left font-medium">Provider</th>
-              <th className="px-4 py-2.5 text-left font-medium">Base price</th>
-              <th className="px-4 py-2.5 text-left font-medium">Status</th>
-              <th className="px-4 py-2.5 text-left font-medium">Updated</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {rows.map((row) => (
-              <tr key={row.id} data-testid={`services-row-${row.id}`} className="hover:bg-zinc-50">
-                <td className="px-4 py-2.5">
-                  {row.status === SELECTABLE_STATUS ? (
-                    <input
-                      type="checkbox"
-                      aria-label={`Select service ${row.id}`}
-                      data-testid={`services-select-${row.id}`}
-                      checked={selected.has(row.id)}
-                      onChange={() => toggle(row.id)}
-                    />
-                  ) : null}
-                </td>
-                <td className="px-4 py-2.5">
-                  <Link
-                    href={`/services/${row.id}`}
-                    className="text-zinc-900 hover:text-zinc-700 hover:underline"
-                    data-testid={`services-row-link-${row.id}`}
-                  >
-                    {row.title}
-                  </Link>
-                </td>
-                <td className="px-4 py-2.5 text-zinc-700">
-                  {row.provider_name ?? `#${row.provider_id}`}
-                </td>
-                <td className="px-4 py-2.5 text-zinc-700">
-                  {formatPrice(row.base_price_minor, row.currency)}
-                </td>
-                <td className="px-4 py-2.5"><StatusBadge status={row.status} /></td>
-                <td className="px-4 py-2.5 text-zinc-500">{formatDate(row.updated_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div data-testid="services-table">
+      <Table>
+        <THead>
+          <Tr>
+            <Th className="w-10">
+              <input
+                type="checkbox"
+                aria-label="Select all reviewable"
+                data-testid="services-select-all"
+                checked={allSelected}
+                disabled={selectableIds.length === 0}
+                onChange={toggleAll}
+              />
+            </Th>
+            <Th>Title</Th>
+            <Th>Provider</Th>
+            <Th>Base price</Th>
+            <Th>Status</Th>
+            <Th>Updated</Th>
+          </Tr>
+        </THead>
+        <TBody>
+          {rows.map((row) => (
+            <Tr key={row.id} data-testid={`services-row-${row.id}`}>
+              <Td>
+                {row.status === SELECTABLE_STATUS ? (
+                  <input
+                    type="checkbox"
+                    aria-label={`Select service ${row.id}`}
+                    data-testid={`services-select-${row.id}`}
+                    checked={selected.has(row.id)}
+                    onChange={() => toggle(row.id)}
+                  />
+                ) : null}
+              </Td>
+              <Td>
+                <Link
+                  href={`/services/${row.id}`}
+                  className="text-ink hover:text-ink-muted hover:underline"
+                  data-testid={`services-row-link-${row.id}`}
+                >
+                  {row.title}
+                </Link>
+              </Td>
+              <Td className="text-ink-muted">
+                {row.provider_name ?? `#${row.provider_id}`}
+              </Td>
+              <Td className="text-ink-muted">
+                {formatPrice(row.base_price_minor, row.currency)}
+              </Td>
+              <Td><StatusBadge status={row.status} /></Td>
+              <Td className="text-ink-subtle">{formatDate(row.updated_at)}</Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       </div>
       <BulkModerationBar
         count={selected.size}

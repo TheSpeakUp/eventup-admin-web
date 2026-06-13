@@ -10,11 +10,11 @@ const LABELS: { key: keyof SlaCounters; label: string }[] = [
 
 export default function CountersCard({ counters }: { counters: SlaCounters }) {
   return (
-    <div data-testid="counters-card" className="grid grid-cols-2 gap-2 rounded-md border border-zinc-200 bg-surface-1 p-3 sm:grid-cols-5">
+    <div data-testid="counters-card" className="grid grid-cols-2 gap-2 rounded-lg border border-hairline bg-surface-1 p-3 sm:grid-cols-5">
       {LABELS.map((l) => (
         <div key={l.key} className="flex flex-col">
-          <span className="text-xs text-zinc-500">{l.label}</span>
-          <span data-testid={`counter-${l.key}`} className="text-lg font-semibold text-zinc-900">
+          <span className="text-xs text-ink-subtle">{l.label}</span>
+          <span data-testid={`counter-${l.key}`} className="text-lg font-semibold text-ink">
             {counters[l.key]}
           </span>
         </div>

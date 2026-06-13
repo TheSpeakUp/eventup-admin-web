@@ -14,6 +14,8 @@ import {
 } from "@/lib/quality/api";
 import { isQualityTab, type QualityTab } from "@/lib/quality/types";
 import { getAdminSession } from "@/lib/auth/session";
+import Alert from "@/app/_components/ui/Alert";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import QualityTabs from "./_components/QualityTabs";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import ServiceMetricsTable from "./_components/ServiceMetricsTable";
@@ -24,13 +26,12 @@ import AnomaliesFilter from "./_components/AnomaliesFilter";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
-    <div
-      data-testid="quality-error"
-      className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-    >
-      {status === 403
-        ? "Viewing quality metrics requires an admin role."
-        : `Failed to load quality data: ${message}`}
+    <div data-testid="quality-error" className="mt-4">
+      <Alert tone="danger">
+        {status === 403
+          ? "Viewing quality metrics requires an admin role."
+          : `Failed to load quality data: ${message}`}
+      </Alert>
     </div>
   );
 }
@@ -106,12 +107,14 @@ export default async function QualityPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Quality &amp; ranking</h1>
-        {tab === "services" ? (
-          <ExportCsvButton surface="quality-services" />
-        ) : null}
-      </div>
+      <PageHeader
+        title="Quality & ranking"
+        actions={
+          tab === "services" ? (
+            <ExportCsvButton surface="quality-services" />
+          ) : null
+        }
+      />
       <div className="mt-4">
         <QualityTabs active={tab} />
       </div>

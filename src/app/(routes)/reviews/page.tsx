@@ -7,18 +7,19 @@
 import { listReviews } from "@/lib/reviews/api";
 import { getAdminSession } from "@/lib/auth/session";
 import type { ReviewListQuery, ReviewStatus } from "@/lib/reviews/types";
+import Alert from "@/app/_components/ui/Alert";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import ReviewsTable from "./_components/ReviewsTable";
 import ReviewsFilter from "./_components/ReviewsFilter";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
-    <div
-      data-testid="reviews-error"
-      className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-800"
-    >
-      {status === 403
-        ? "Viewing reviews requires an admin role."
-        : `Failed to load reviews: ${message}`}
+    <div data-testid="reviews-error" className="mt-4">
+      <Alert tone="danger">
+        {status === 403
+          ? "Viewing reviews requires an admin role."
+          : `Failed to load reviews: ${message}`}
+      </Alert>
     </div>
   );
 }
@@ -51,9 +52,7 @@ export default async function ReviewsPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Reviews</h1>
-      </div>
+      <PageHeader title="Reviews" />
       <div className="mt-4">
         <ReviewsFilter
           status={sp.status as ReviewStatus | undefined}

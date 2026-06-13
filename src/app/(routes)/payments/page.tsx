@@ -11,6 +11,8 @@ import { isPaymentStatus } from "@/lib/payments/types";
 import PaymentsFilters from "./_components/PaymentsFilters";
 import PaymentsPagination from "./_components/PaymentsPagination";
 import PaymentsTable from "./_components/PaymentsTable";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import Alert from "@/app/_components/ui/Alert";
 
 const LIMIT = 10;
 
@@ -51,13 +53,12 @@ export default async function PaymentsPage({
     return (
       <div className="p-8">
         <h1 className="text-2xl font-semibold">Payments</h1>
-        <div
-          data-testid="payments-error"
-          className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          {result.status === 403
-            ? "Viewing payments requires an admin role."
-            : `Failed to load payments: ${result.message}`}
+        <div data-testid="payments-error" className="mt-6">
+          <Alert tone="danger">
+            {result.status === 403
+              ? "Viewing payments requires an admin role."
+              : `Failed to load payments: ${result.message}`}
+          </Alert>
         </div>
       </div>
     );
@@ -68,15 +69,20 @@ export default async function PaymentsPage({
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Payments</h1>
-        <div className="flex items-center gap-3">
-          <ExportCsvButton surface="payments" params={{ status, currency, q }} />
-          <span className="text-xs text-zinc-500" data-testid="payments-total">
-            {total} payment{total === 1 ? "" : "s"} total
-          </span>
-        </div>
-      </div>
+      <PageHeader
+        title="Payments"
+        actions={
+          <>
+            <ExportCsvButton surface="payments" params={{ status, currency, q }} />
+            <span
+              className="text-xs text-ink-subtle"
+              data-testid="payments-total"
+            >
+              {total} payment{total === 1 ? "" : "s"} total
+            </span>
+          </>
+        }
+      />
       <PaymentsFilters />
       <PaymentsTable rows={items} />
       <PaymentsPagination

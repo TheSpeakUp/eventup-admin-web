@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPayment } from "@/lib/payments/api";
 import PaymentDetailView from "./_components/PaymentDetailView";
 import RefundPanel from "./_components/RefundPanel";
+import Alert from "@/app/_components/ui/Alert";
 
 type Params = Promise<{ id: string }>;
 
@@ -23,17 +24,16 @@ export default async function PaymentDetailPage({
       <div className="p-8">
         <Link
           href="/payments"
-          className="text-sm text-zinc-500 hover:underline"
+          className="text-sm text-ink-subtle hover:underline"
         >
           ← Back to payments
         </Link>
-        <div
-          data-testid="payment-detail-error"
-          className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          {result.status === 403
-            ? "Viewing payments requires an admin role."
-            : `Failed to load payment: ${result.message}`}
+        <div data-testid="payment-detail-error" className="mt-4">
+          <Alert tone="danger">
+            {result.status === 403
+              ? "Viewing payments requires an admin role."
+              : `Failed to load payment: ${result.message}`}
+          </Alert>
         </div>
       </div>
     );
@@ -41,7 +41,7 @@ export default async function PaymentDetailPage({
 
   return (
     <div className="p-8 space-y-5">
-      <Link href="/payments" className="text-sm text-zinc-500 hover:underline">
+      <Link href="/payments" className="text-sm text-ink-subtle hover:underline">
         ← Back to payments
       </Link>
       <PaymentDetailView payment={result.data} />

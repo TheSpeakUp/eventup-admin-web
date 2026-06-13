@@ -3,6 +3,7 @@ import ServiceHealthSection from "./_components/ServiceHealthSection";
 import ProviderHealthSection from "./_components/ProviderHealthSection";
 import DispatchRunsSection from "./_components/DispatchRunsSection";
 import DlqSection from "./_components/DlqSection";
+import PageHeader from "@/app/_components/ui/PageHeader";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -10,8 +11,8 @@ export default async function OpsPage({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const excludeReplayed = sp.exclude_replayed !== "false";
   return (
-    <main className="space-y-6 p-6">
-      <h1 className="text-xl font-semibold">Offers — SLA ops</h1>
+    <main className="space-y-6 p-8">
+      <PageHeader title="Offers — SLA ops" />
       <ForceDispatchButtons />
       <ServiceHealthSection />
       <ProviderHealthSection />

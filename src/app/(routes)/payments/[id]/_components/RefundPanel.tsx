@@ -5,6 +5,10 @@ import { formatDateTime, formatMoneyMinor, minorUnitExponent } from "@/lib/forma
 import type { RefundRead } from "@/lib/payments/types";
 import { refundPaymentAction } from "../actions";
 import { EMPTY_REFUND_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
+import EmptyState from "@/app/_components/ui/EmptyState";
+import { Input, Textarea } from "@/app/_components/ui/FormField";
+import { Table, THead, TBody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 // Refund action + history for one payment (M5 refund-write).
 //
@@ -66,15 +70,15 @@ export default function RefundPanel({
 
   return (
     <div
-      className="rounded-md border border-zinc-200 bg-surface-1 p-6"
+      className="rounded-lg border border-hairline bg-surface-1 p-6"
       data-testid="refund-panel"
     >
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-ink-subtle">
             Refunds
           </h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-ink-muted">
             Refunded{" "}
             <span data-testid="refunded-total" className="font-medium">
               {formatMoneyMinor(refundedAmountMinor, currency)}
@@ -85,60 +89,58 @@ export default function RefundPanel({
             </span>
           </p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="danger"
           data-testid="refund-open"
           disabled={!canRefund}
           onClick={() => setOpen(true)}
-          className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300"
         >
           Refund…
-        </button>
+        </Button>
       </div>
 
       {refunds.length > 0 ? (
-        <table className="mt-4 w-full text-sm" data-testid="refunds-table">
-          <thead>
-            <tr className="border-b border-zinc-100 text-left text-xs uppercase tracking-wide text-zinc-400">
-              <th className="py-1.5 pr-4 font-medium">Amount</th>
-              <th className="py-1.5 pr-4 font-medium">Status</th>
-              <th className="py-1.5 pr-4 font-medium">Reason</th>
-              <th className="py-1.5 pr-4 font-medium">Stripe ref</th>
-              <th className="py-1.5 font-medium">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {refunds.map((r) => (
-              <tr
-                key={r.id}
-                className="border-b border-zinc-50"
-                data-testid={`refund-row-${r.id}`}
-              >
-                <td className="py-2 pr-4 font-medium text-zinc-900">
-                  {formatMoneyMinor(r.amount_minor, r.currency)}
-                </td>
-                <td className="py-2 pr-4">{r.status}</td>
-                <td className="py-2 pr-4 text-zinc-600">{r.reason ?? "—"}</td>
-                <td className="py-2 pr-4 font-mono text-xs">
-                  {r.stripe_refund_id ?? "—"}
-                </td>
-                <td className="py-2 text-zinc-600">
-                  {formatDateTime(r.created_at)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="mt-4" data-testid="refunds-table">
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Amount</Th>
+                <Th>Status</Th>
+                <Th>Reason</Th>
+                <Th>Stripe ref</Th>
+                <Th>Date</Th>
+              </Tr>
+            </THead>
+            <TBody>
+              {refunds.map((r) => (
+                <Tr key={r.id} data-testid={`refund-row-${r.id}`}>
+                  <Td className="font-medium">
+                    {formatMoneyMinor(r.amount_minor, r.currency)}
+                  </Td>
+                  <Td>{r.status}</Td>
+                  <Td className="text-ink-muted">{r.reason ?? "—"}</Td>
+                  <Td className="font-mono text-xs">
+                    {r.stripe_refund_id ?? "—"}
+                  </Td>
+                  <Td className="text-ink-muted">
+                    {formatDateTime(r.created_at)}
+                  </Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </div>
       ) : (
-        <p className="mt-3 text-sm text-zinc-400" data-testid="refunds-empty">
+        <EmptyState testid="refunds-empty" className="mt-3">
           No refunds yet.
-        </p>
+        </EmptyState>
       )}
 
       <dialog
         ref={dialogRef}
         onClose={handleDialogClose}
-        className="w-full max-w-md rounded-lg border border-zinc-200 p-0 shadow-xl backdrop:bg-primary/30"
+        className="w-full max-w-md rounded-lg border border-hairline bg-surface-1 p-0 shadow-xl backdrop:bg-primary/30"
       >
         {open ? (
           <form
@@ -153,10 +155,10 @@ export default function RefundPanel({
               value={amountMinor ?? ""}
             />
             <div>
-              <h3 className="text-base font-semibold text-zinc-900">
+              <h3 className="text-base font-semibold text-ink">
                 Refund payment #{paymentId}
               </h3>
-              <p className="mt-1 text-sm text-zinc-600">
+              <p className="mt-1 text-sm text-ink-muted">
                 {isFull
                   ? "Full refund: the purchased promotion/publication is cancelled."
                   : "Partial refund: the purchased service keeps running."}{" "}
@@ -164,11 +166,11 @@ export default function RefundPanel({
               </p>
             </div>
             <label className="block text-sm">
-              <span className="text-zinc-600">
+              <span className="text-ink-muted">
                 Amount ({currency}) — leave empty for the full remaining{" "}
                 {formatMoneyMinor(refundableAmountMinor, currency)}
               </span>
-              <input
+              <Input
                 type="number"
                 inputMode="decimal"
                 min="0"
@@ -176,51 +178,51 @@ export default function RefundPanel({
                 value={amountMajor}
                 onChange={(e) => setAmountMajor(e.target.value)}
                 data-testid="refund-amount"
-                className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
+                className="mt-1"
               />
             </label>
             <label className="block text-sm">
-              <span className="text-zinc-600">Reason (optional)</span>
-              <textarea
+              <span className="text-ink-muted">Reason (optional)</span>
+              <Textarea
                 name="reason"
                 rows={3}
                 maxLength={500}
                 data-testid="refund-reason"
-                className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
+                className="mt-1"
               />
             </label>
             {amountTooHigh ? (
-              <p className="text-sm text-red-700" data-testid="refund-amount-error">
+              <p className="text-sm text-red-400" data-testid="refund-amount-error">
                 Exceeds the refundable remaining{" "}
                 {formatMoneyMinor(refundableAmountMinor, currency)}.
               </p>
             ) : null}
             {state.error ? (
-              <p className="text-sm text-red-700" data-testid="refund-error">
+              <p className="text-sm text-red-400" data-testid="refund-error">
                 {state.error}
               </p>
             ) : null}
             <div className="flex justify-end gap-2">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 data-testid="refund-cancel"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="danger"
                 disabled={pending || amountTooHigh}
                 data-testid="refund-submit"
-                className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:bg-zinc-400"
               >
                 {pending
                   ? "Refunding…"
                   : isFull
                     ? "Refund full amount"
                     : "Refund"}
-              </button>
+              </Button>
             </div>
           </form>
         ) : null}

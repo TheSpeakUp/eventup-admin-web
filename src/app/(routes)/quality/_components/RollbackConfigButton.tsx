@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { rollbackFormulaConfigAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import Button from "@/app/_components/ui/Button";
 
 // Confirm-then-rollback to the previous formula version. No payload — the
 // backend resolves the previous-active config. Structured errors render inline.
@@ -20,18 +21,18 @@ export default function RollbackConfigButton() {
           e.preventDefault();
       }}
     >
-      <button
+      <Button
         type="submit"
+        variant="secondary"
         disabled={pending}
         data-testid="formula-rollback"
-        className="rounded border border-amber-300 px-3 py-1 text-sm text-amber-800 disabled:opacity-50"
       >
         {pending ? "Rolling back…" : "Roll back to previous version"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
         <p
           data-testid="formula-rollback-error"
-          className="mt-1 text-xs text-red-700"
+          className="mt-1 text-xs text-red-400"
         >
           {state.error}
         </p>

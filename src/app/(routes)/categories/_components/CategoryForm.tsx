@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { createCategoryAction, updateCategoryAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
 import type { CategoryRead } from "@/lib/categories/types";
+import Button from "@/app/_components/ui/Button";
+import { FormField, Input, Select, Textarea } from "@/app/_components/ui/FormField";
 import { TranslationsEditor } from "./TranslationsEditor";
 import { AttributeSchemaEditor } from "./AttributeSchemaEditor";
 
@@ -32,63 +34,54 @@ export function CategoryForm({
         <input type="hidden" name="id" value={c.id} />
       ) : null}
 
-      <label className="block">
-        <span className="text-sm font-medium">Name</span>
-        <input
+      <FormField label="Name" htmlFor="category-name">
+        <Input
+          id="category-name"
           name="name"
           data-testid="category-name"
           defaultValue={c?.name ?? ""}
           required={mode === "create"}
-          className="mt-1 w-full rounded border px-2 py-1"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium">Slug</span>
-        <input
+      <FormField label="Slug" htmlFor="category-slug">
+        <Input
+          id="category-slug"
           name="slug"
           data-testid="category-slug"
           defaultValue={c?.slug ?? ""}
           required={mode === "create"}
-          className="mt-1 w-full rounded border px-2 py-1"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium">Icon</span>
-        <input
-          name="icon"
-          defaultValue={c?.icon ?? ""}
-          className="mt-1 w-full rounded border px-2 py-1"
-        />
-      </label>
+      <FormField label="Icon" htmlFor="category-icon">
+        <Input id="category-icon" name="icon" defaultValue={c?.icon ?? ""} />
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium">Description</span>
-        <textarea
+      <FormField label="Description" htmlFor="category-description">
+        <Textarea
+          id="category-description"
           name="description"
           defaultValue={c?.description ?? ""}
-          className="mt-1 w-full rounded border px-2 py-1"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium">Sort order</span>
-        <input
+      <FormField label="Sort order" htmlFor="category-sort-order">
+        <Input
+          id="category-sort-order"
           name="sort_order"
           type="number"
           defaultValue={c?.sort_order ?? 100}
-          className="mt-1 w-32 rounded border px-2 py-1"
+          className="w-32"
         />
-      </label>
+      </FormField>
 
-      <label className="block">
-        <span className="text-sm font-medium">Parent</span>
-        <select
+      <FormField label="Parent" htmlFor="category-parent">
+        <Select
+          id="category-parent"
           name="parent_id"
           data-testid="category-parent"
           defaultValue={c?.parent_id != null ? String(c.parent_id) : ""}
-          className="mt-1 w-full rounded border px-2 py-1"
         >
           <option value="">— none —</option>
           {parentOptions
@@ -98,28 +91,27 @@ export function CategoryForm({
                 {p.name}
               </option>
             ))}
-        </select>
-      </label>
+        </Select>
+      </FormField>
 
       <fieldset className="grid grid-cols-3 gap-2">
-        <legend className="text-sm font-medium">Publication pricing</legend>
-        <input
+        <legend className="text-sm font-medium text-ink-muted">
+          Publication pricing
+        </legend>
+        <Input
           name="publication_currency"
           placeholder="USD"
           defaultValue={c?.publication_currency ?? ""}
-          className="rounded border px-2 py-1"
         />
-        <input
+        <Input
           name="publication_price_monthly"
           placeholder="Monthly"
           defaultValue={c?.publication_price_monthly ?? ""}
-          className="rounded border px-2 py-1"
         />
-        <input
+        <Input
           name="publication_price_monthly_discounted"
           placeholder="Discounted"
           defaultValue={c?.publication_price_monthly_discounted ?? ""}
-          className="rounded border px-2 py-1"
         />
       </fieldset>
 
@@ -135,16 +127,11 @@ export function CategoryForm({
       />
       <AttributeSchemaEditor initial={c?.attribute_schema ?? null} />
 
-      <button
-        type="submit"
-        disabled={pending}
-        data-testid="category-submit"
-        className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending} data-testid="category-submit">
         {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}
-      </button>
+      </Button>
       {state && !state.ok && state.error ? (
-        <p data-testid="category-error" className="text-sm text-red-700">
+        <p data-testid="category-error" className="text-sm text-red-400">
           {state.error}
         </p>
       ) : null}

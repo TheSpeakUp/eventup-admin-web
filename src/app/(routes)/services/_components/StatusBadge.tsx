@@ -1,35 +1,32 @@
 import type { ServiceStatus } from "@/lib/services/types";
+import type { BadgeTone } from "@/app/_components/ui/Badge";
 
-const STYLES: Record<ServiceStatus, { label: string; cls: string }> = {
-  draft: {
-    label: "Draft",
-    cls: "bg-zinc-100 text-zinc-700 ring-zinc-200",
-  },
-  on_review: {
-    label: "On review",
-    cls: "bg-amber-100 text-amber-800 ring-amber-200",
-  },
-  published: {
-    label: "Published",
-    cls: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-  },
-  unpublished: {
-    label: "Unpublished",
-    cls: "bg-orange-100 text-orange-800 ring-orange-200",
-  },
-  archived: {
-    label: "Archived",
-    cls: "bg-red-100 text-red-800 ring-red-200",
-  },
+// Dark-safe status badge. Tones mirror the shared <Badge> palette, but this keeps
+// its own <span> so the `data-testid="status-badge"` + `data-status` attributes
+// the Playwright suite asserts ride on the colored element itself.
+const TONE_CLS: Record<BadgeTone, string> = {
+  neutral: "bg-surface-2 text-ink-muted ring-hairline-strong",
+  success: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
+  warning: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
+  danger: "bg-red-500/10 text-red-400 ring-red-500/20",
+  info: "bg-primary/10 text-primary-hover ring-primary/20",
+};
+
+const STYLES: Record<ServiceStatus, { label: string; tone: BadgeTone }> = {
+  draft: { label: "Draft", tone: "neutral" },
+  on_review: { label: "On review", tone: "warning" },
+  published: { label: "Published", tone: "success" },
+  unpublished: { label: "Unpublished", tone: "warning" },
+  archived: { label: "Archived", tone: "danger" },
 };
 
 export default function StatusBadge({ status }: { status: ServiceStatus }) {
-  const { label, cls } = STYLES[status];
+  const { label, tone } = STYLES[status];
   return (
     <span
       data-testid="status-badge"
       data-status={status}
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${cls}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${TONE_CLS[tone]}`}
     >
       {label}
     </span>

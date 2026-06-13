@@ -38,17 +38,17 @@ export default function Pagination({
   if (onFirstPage && !hasMore) return null;
   return (
     <div className="flex items-center justify-between" data-testid="services-pagination">
-      <span className="text-xs text-zinc-500" data-testid="page-count">
+      <span className="text-xs text-ink-subtle" data-testid="page-count">
         {count} on this page
       </span>
       <div className="flex items-center gap-2">
         {onFirstPage ? (
-          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">First</span>
+          <span className="rounded-md border border-hairline px-3 py-1 text-xs text-ink-tertiary">First</span>
         ) : (
           <Link
             href={withParams(basePath, searchParams, { last_id: null })}
             data-testid="services-first"
-            className="rounded-md border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:bg-zinc-50"
+            className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs text-ink hover:border-hairline-strong hover:bg-surface-2"
           >
             First
           </Link>
@@ -57,12 +57,12 @@ export default function Pagination({
           <Link
             href={withParams(basePath, searchParams, { last_id: String(nextLastId) })}
             data-testid="services-next"
-            className="rounded-md border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:bg-zinc-50"
+            className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs text-ink hover:border-hairline-strong hover:bg-surface-2"
           >
             Next
           </Link>
         ) : (
-          <span className="rounded-md border border-zinc-200 px-3 py-1 text-xs text-zinc-300">Next</span>
+          <span className="rounded-md border border-hairline px-3 py-1 text-xs text-ink-tertiary">Next</span>
         )}
       </div>
     </div>

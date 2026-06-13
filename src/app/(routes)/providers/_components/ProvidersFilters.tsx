@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Input } from "@/app/_components/ui/FormField";
 
 const DEBOUNCE_MS = 300;
 
@@ -35,13 +36,13 @@ export default function ProvidersFilters() {
       data-testid="providers-filters"
       data-pending={pending ? "true" : "false"}
     >
-      <input
+      <Input
         type="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search providers…"
         data-testid="providers-search"
-        className="h-9 w-64 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="w-64"
       />
     </div>
   );
