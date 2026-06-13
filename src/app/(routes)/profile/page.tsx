@@ -79,6 +79,16 @@ export default async function ProfilePage() {
 
       <Card title="Account">
         <dl className="grid grid-cols-[8rem_1fr] gap-x-6 gap-y-3 text-sm">
+          <dt className="text-zinc-500">Account ID</dt>
+          <dd className="text-zinc-800">
+            <span
+              data-testid="profile-id"
+              className="font-mono text-xs break-all text-zinc-600"
+            >
+              {self.id}
+            </span>
+          </dd>
+
           <dt className="text-zinc-500">Email</dt>
           <dd className="text-zinc-800">
             <span data-testid="profile-email">{self.email}</span>
