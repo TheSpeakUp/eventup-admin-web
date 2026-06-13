@@ -3,6 +3,7 @@ import { getAdminSession } from "@/lib/auth/session";
 import MockBackendBoot from "@/app/_components/MockBackendBoot";
 import StepUpProvider from "@/app/_components/step-up/StepUpProvider";
 import LogoutButton from "./LogoutButton";
+import SidebarAccount from "./SidebarAccount";
 
 const navItems = [
   { href: "/services", label: "Services" },
@@ -57,6 +58,10 @@ export default async function RoutesLayout({
             </Link>
           ))}
         </nav>
+        <SidebarAccount
+          fallbackEmail={session?.email ?? null}
+          fallbackRole={session?.role ?? null}
+        />
       </aside>
       <div className="flex-1 flex flex-col">
         <header className="h-14 border-b border-zinc-200 bg-surface-1 flex items-center justify-between px-6 gap-4">
