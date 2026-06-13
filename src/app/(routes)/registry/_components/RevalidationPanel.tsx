@@ -11,7 +11,7 @@ export default function RevalidationPanel() {
   return (
     <section
       data-testid="revalidation-panel"
-      className="rounded-md border border-zinc-200 bg-white p-5"
+      className="rounded-md border border-zinc-200 bg-surface-1 p-5"
     >
       <h2 className="text-lg font-semibold">Run attribute revalidation</h2>
       <p className="mt-1 text-sm text-zinc-500">

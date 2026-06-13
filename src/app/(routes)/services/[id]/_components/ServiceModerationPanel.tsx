@@ -117,7 +117,7 @@ function ActionForm({
           type="submit"
           disabled={pending}
           data-testid={`moderation-submit-${kind}`}
-          className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:bg-zinc-400"
+          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
         >
           {pending ? "Submitting…" : cfg.confirmLabel}
         </button>
@@ -129,9 +129,9 @@ function ActionForm({
 const ALL_KINDS: { kind: Kind; label: string; className: string }[] = [
   { kind: "approve", label: "Approve", className: "bg-emerald-600 text-white hover:bg-emerald-700" },
   { kind: "reject", label: "Reject", className: "bg-red-600 text-white hover:bg-red-700" },
-  { kind: "unpublish", label: "Unpublish", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
-  { kind: "republish", label: "Republish", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
-  { kind: "archive", label: "Archive", className: "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50" },
+  { kind: "unpublish", label: "Unpublish", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
+  { kind: "republish", label: "Republish", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
+  { kind: "archive", label: "Archive", className: "border border-zinc-300 bg-surface-1 text-zinc-700 hover:bg-zinc-50" },
 ];
 
 const DISABLED_CLASS =

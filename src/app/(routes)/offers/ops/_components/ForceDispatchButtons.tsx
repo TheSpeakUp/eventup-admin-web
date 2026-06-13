@@ -55,8 +55,8 @@ function ConfirmButton({
     variant === "danger"
       ? "rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:bg-zinc-400"
       : variant === "ghost"
-      ? "rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:text-zinc-400"
-      : "rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:bg-zinc-400";
+      ? "rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:text-zinc-400"
+      : "rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400";
 
   return (
     <div className="space-y-1">
@@ -89,7 +89,7 @@ function ConfirmButton({
                 type="button"
                 data-testid={`${testid}-cancel`}
                 onClick={() => setConfirmed(false)}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50"
+                className="rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -109,7 +109,7 @@ function ConfirmButton({
 
 export default function ForceDispatchButtons() {
   return (
-    <section data-testid="force-dispatch" className="space-y-3 rounded-md border border-zinc-200 bg-white p-3">
+    <section data-testid="force-dispatch" className="space-y-3 rounded-md border border-zinc-200 bg-surface-1 p-3">
       <h2 className="text-sm font-semibold">Force dispatch</h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         <ConfirmButton

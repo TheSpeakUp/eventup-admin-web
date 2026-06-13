@@ -24,7 +24,7 @@ export default function AcceptForm({ token }: { token: string }) {
           required
           minLength={12}
           data-testid="accept-password"
-          className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-focus"
         />
         <p className="mt-1 text-xs text-zinc-500">At least 12 characters.</p>
       </div>
@@ -39,7 +39,7 @@ export default function AcceptForm({ token }: { token: string }) {
           required
           minLength={12}
           data-testid="accept-confirm"
-          className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-focus"
         />
       </div>
       {state.error ? (
@@ -51,7 +51,7 @@ export default function AcceptForm({ token }: { token: string }) {
         type="submit"
         disabled={pending}
         data-testid="accept-submit"
-        className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:bg-zinc-400"
+        className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
       >
         {pending ? "Activating…" : "Set password & activate"}
       </button>

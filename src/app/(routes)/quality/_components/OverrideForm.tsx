@@ -25,7 +25,7 @@ export default function OverrideForm({
     <form
       action={formAction}
       data-testid="override-form"
-      className="space-y-3 rounded border border-zinc-200 bg-white p-4"
+      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
     >
       <input type="hidden" name="service_id" value={metric.service_id} />
 

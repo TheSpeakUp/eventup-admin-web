@@ -16,7 +16,7 @@ function Card({
   return (
     <div
       data-testid={testid}
-      className="rounded border border-zinc-200 bg-white px-4 py-3"
+      className="rounded border border-zinc-200 bg-surface-1 px-4 py-3"
     >
       <div className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}

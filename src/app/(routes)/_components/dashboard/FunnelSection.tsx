@@ -12,7 +12,7 @@ export default function FunnelSection({ data }: { data: FunnelResponse }) {
   return (
     <div data-testid="funnel-section" className="space-y-6">
       {/* Status Counts */}
-      <div className="rounded border border-zinc-200 bg-white p-4">
+      <div className="rounded border border-zinc-200 bg-surface-1 p-4">
         <h3 className="mb-4 text-sm font-semibold text-zinc-700">
           Booking Status Distribution
         </h3>
@@ -51,7 +51,7 @@ export default function FunnelSection({ data }: { data: FunnelResponse }) {
       </div>
 
       {/* Failure Reasons */}
-      <div className="rounded border border-zinc-200 bg-white p-4">
+      <div className="rounded border border-zinc-200 bg-surface-1 p-4">
         <h3 className="mb-4 text-sm font-semibold text-zinc-700">
           Failure Reasons
         </h3>

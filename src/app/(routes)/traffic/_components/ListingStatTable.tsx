@@ -21,7 +21,7 @@ export default function ListingStatTable({
     return (
       <div
         data-testid={`${testid}-empty`}
-        className="rounded border border-zinc-200 bg-white p-4 text-sm text-zinc-500"
+        className="rounded border border-zinc-200 bg-surface-1 p-4 text-sm text-zinc-500"
       >
         {emptyLabel}
       </div>
@@ -31,7 +31,7 @@ export default function ListingStatTable({
   return (
     <table
       data-testid={testid}
-      className="w-full border-collapse overflow-hidden rounded border border-zinc-200 bg-white text-sm"
+      className="w-full border-collapse overflow-hidden rounded border border-zinc-200 bg-surface-1 text-sm"
     >
       <thead>
         <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500">

@@ -1,19 +1,105 @@
 @import "tailwindcss";
 
+/*
+ * Linear-inspired dark design system.
+ * Source spec: design-systems-library / linear.app.
+ *
+ * Strategy: the admin shell is many pages styled with ad-hoc zinc/white Tailwind
+ * classes. Rather than rewrite every className, we (1) invert the zinc scale to a
+ * dark Linear ramp so existing text-/border-/bg-zinc-* utilities read correctly on
+ * the dark canvas, and (2) add Linear semantic tokens (canvas / surface / ink /
+ * primary / hairline) that a small set of utilities (bg-surface-1, bg-primary,
+ * ring-primary-focus …) target after a mechanical sweep of bg-white / bg-zinc-900.
+ */
+
 :root {
-  --background: #fafafa;
-  --foreground: #18181b;
+  /* Linear canvas + four-step surface ladder */
+  --canvas: #010102;
+  --surface-1: #0f1011;
+  --surface-2: #141516;
+  --surface-3: #18191a;
+  --surface-4: #191a1b;
+
+  /* Ink ramp */
+  --ink: #f7f8f8;
+  --ink-muted: #d0d6e0;
+  --ink-subtle: #8a8f98;
+  --ink-tertiary: #62666d;
+
+  /* Hairline borders */
+  --hairline: #23252a;
+  --hairline-strong: #34343a;
+
+  /* Lavender-blue accent — the single chromatic color */
+  --primary: #5e6ad2;
+  --primary-hover: #828fff;
+  --primary-focus: #5e69d1;
+
+  --success: #27a644;
+
+  /* legacy aliases kept for any direct var() consumers */
+  --background: var(--canvas);
+  --foreground: var(--ink);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Linear semantic utilities → bg-canvas, bg-surface-1, text-ink, border-hairline,
+     bg-primary, ring-primary-focus, text-ink-subtle, etc. */
+  --color-canvas: var(--canvas);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-tertiary: var(--ink-tertiary);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-focus: var(--primary-focus);
+  --color-success: var(--success);
+
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Invert the zinc ramp to a dark Linear-aligned scale. Existing utilities like
+     text-zinc-900 (body ink), border-zinc-200 (hairline), bg-zinc-50 (page canvas),
+     text-zinc-500 (subtle) now resolve dark without touching component markup. */
+  --color-zinc-50: #010102;
+  --color-zinc-100: #18191a;
+  --color-zinc-200: #23252a;
+  --color-zinc-300: #34343a;
+  --color-zinc-400: #62666d;
+  --color-zinc-500: #8a8f98;
+  --color-zinc-600: #a0a6af;
+  --color-zinc-700: #d0d6e0;
+  --color-zinc-800: #e9ebee;
+  --color-zinc-900: #f7f8f8;
+  --color-zinc-950: #ffffff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--canvas);
+  color: var(--ink);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Linear body tracking */
+  letter-spacing: -0.05px;
+}
+
+/* Linear pulls display/heading tracking aggressively negative. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.4px;
+}
+
+/* Dark-friendly form controls (native date pickers, selects). */
+input,
+select,
+textarea {
+  color-scheme: dark;
 }

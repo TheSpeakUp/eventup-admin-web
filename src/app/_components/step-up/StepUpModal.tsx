@@ -110,7 +110,7 @@ export default function StepUpModal({
                 data-testid="step-up-submit"
                 disabled={code.length !== 6 || phase === "verifying"}
                 onClick={() => void submitCode()}
-                className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:bg-zinc-400"
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-hover disabled:bg-zinc-400"
               >
                 {phase === "verifying" ? "Verifying…" : "Verify"}
               </button>

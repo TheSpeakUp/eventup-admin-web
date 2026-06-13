@@ -32,7 +32,7 @@ export default function OffersFilters() {
   }
 
   return (
-    <form data-testid="offers-filters" onSubmit={apply} className="flex flex-wrap items-end gap-3 rounded-md border border-zinc-200 bg-white p-3">
+    <form data-testid="offers-filters" onSubmit={apply} className="flex flex-wrap items-end gap-3 rounded-md border border-zinc-200 bg-surface-1 p-3">
       <label className="flex flex-col text-xs">
         <span className="text-zinc-600">Service ID</span>
         <input data-testid="filter-service-id" value={serviceId} onChange={(e) => setServiceId(e.target.value)} className="rounded border px-2 py-1 text-sm" />
@@ -55,14 +55,14 @@ export default function OffersFilters() {
               data-testid={`filter-queue-${q}`}
               data-active={queue.has(q) ? "true" : "false"}
               onClick={() => toggle(q)}
-              className={`rounded-full border px-2 py-0.5 text-xs ${queue.has(q) ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-700"}`}
+              className={`rounded-full border px-2 py-0.5 text-xs ${queue.has(q) ? "border-zinc-900 bg-primary text-white" : "border-zinc-300 bg-surface-1 text-zinc-700"}`}
             >
               {q}
             </button>
           ))}
         </div>
       </div>
-      <button type="submit" data-testid="filter-apply" className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800">
+      <button type="submit" data-testid="filter-apply" className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover">
         Apply
       </button>
     </form>

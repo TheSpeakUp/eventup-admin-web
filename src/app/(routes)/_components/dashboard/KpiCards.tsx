@@ -13,12 +13,12 @@ function Card({
   return (
     <div
       data-testid={testid}
-      className="rounded border border-zinc-200 bg-white px-4 py-3"
+      className="rounded-lg border border-zinc-200 bg-surface-1 px-5 py-4 transition-colors hover:border-hairline-strong"
     >
-      <div className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+      <div className="text-xs font-medium uppercase tracking-wider text-zinc-500">
         {label}
       </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
+      <div className="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-zinc-900">
         {value ?? "—"}
       </div>
     </div>

@@ -33,7 +33,7 @@ export default function BulkModerationBar({
   return (
     <div
       data-testid="bulk-bar"
-      className="sticky bottom-4 z-10 mt-3 flex flex-wrap items-center gap-3 rounded-md border border-zinc-300 bg-white p-3 shadow-lg"
+      className="sticky bottom-4 z-10 mt-3 flex flex-wrap items-center gap-3 rounded-md border border-zinc-300 bg-surface-1 p-3 shadow-lg"
     >
       {count > 0 ? (
         <>

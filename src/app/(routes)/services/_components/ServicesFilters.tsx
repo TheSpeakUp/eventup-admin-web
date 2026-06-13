@@ -61,7 +61,7 @@ export default function ServicesFilters() {
         value={status}
         onChange={(e) => onStatusChange(e.target.value)}
         data-testid="services-status-filter"
-        className="h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm focus:border-zinc-500 focus:outline-none"
+        className="h-9 rounded-md border border-zinc-300 bg-surface-1 px-2 text-sm focus:border-zinc-500 focus:outline-none"
       >
         <option value="">All statuses</option>
         {SERVICE_STATUSES.map((s) => {

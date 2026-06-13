@@ -15,7 +15,7 @@ function Table({
   emptyMessage: string;
 }) {
   return (
-    <div data-testid={testid} className="rounded border border-zinc-200 bg-white p-4">
+    <div data-testid={testid} className="rounded border border-zinc-200 bg-surface-1 p-4">
       <h3 className="mb-3 text-sm font-semibold text-zinc-700">{title}</h3>
       {rows.length === 0 ? (
         <div className="text-xs text-zinc-400">{emptyMessage}</div>

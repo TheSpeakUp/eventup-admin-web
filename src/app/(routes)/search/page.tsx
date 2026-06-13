@@ -32,7 +32,7 @@ export default async function SearchPage({
           {total === 0 && !hasAnyError && (
             <div
               data-testid="search-empty"
-              className="mt-6 rounded border border-zinc-200 bg-white p-6 text-sm text-zinc-500"
+              className="mt-6 rounded border border-zinc-200 bg-surface-1 p-6 text-sm text-zinc-500"
             >
               Nothing matched “{query}”.
             </div>
@@ -52,7 +52,7 @@ export default async function SearchPage({
             ) : results.providers.items.length === 0 ? (
               <p className="mt-2 text-sm text-zinc-400">No matching providers.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-white">
+              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-surface-1">
                 {results.providers.items.map((p) => (
                   <li key={p.id}>
                     <Link
@@ -85,7 +85,7 @@ export default async function SearchPage({
             ) : results.services.items.length === 0 ? (
               <p className="mt-2 text-sm text-zinc-400">No matching services.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-white">
+              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-surface-1">
                 {results.services.items.map((s) => (
                   <li key={s.id}>
                     <Link
@@ -125,7 +125,7 @@ export default async function SearchPage({
             ) : results.offers.items.length === 0 ? (
               <p className="mt-2 text-sm text-zinc-400">No matching offers.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-white">
+              <ul className="mt-2 divide-y divide-zinc-100 rounded border border-zinc-200 bg-surface-1">
                 {results.offers.items.map((o) => (
                   <li key={o.id}>
                     <Link

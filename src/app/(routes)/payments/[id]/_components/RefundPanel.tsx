@@ -66,7 +66,7 @@ export default function RefundPanel({
 
   return (
     <div
-      className="rounded-md border border-zinc-200 bg-white p-6"
+      className="rounded-md border border-zinc-200 bg-surface-1 p-6"
       data-testid="refund-panel"
     >
       <div className="flex items-start justify-between">
@@ -138,7 +138,7 @@ export default function RefundPanel({
       <dialog
         ref={dialogRef}
         onClose={handleDialogClose}
-        className="w-full max-w-md rounded-lg border border-zinc-200 p-0 shadow-xl backdrop:bg-zinc-900/30"
+        className="w-full max-w-md rounded-lg border border-zinc-200 p-0 shadow-xl backdrop:bg-primary/30"
       >
         {open ? (
           <form
@@ -205,7 +205,7 @@ export default function RefundPanel({
                 type="button"
                 data-testid="refund-cancel"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
               >
                 Cancel
               </button>

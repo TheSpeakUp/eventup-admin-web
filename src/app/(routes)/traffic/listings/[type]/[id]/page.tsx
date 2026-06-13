@@ -62,19 +62,19 @@ export default async function ListingDetailPage({
       </p>
 
       <div className="mt-6 grid grid-cols-3 gap-3" data-testid="listing-detail-cards">
-        <div className="rounded border border-zinc-200 bg-white px-4 py-3">
+        <div className="rounded border border-zinc-200 bg-surface-1 px-4 py-3">
           <div className="text-xs uppercase tracking-wide text-zinc-500">Views</div>
           <div className="mt-1 text-2xl font-semibold tabular-nums">
             {formatCount(d.total_views)}
           </div>
         </div>
-        <div className="rounded border border-zinc-200 bg-white px-4 py-3">
+        <div className="rounded border border-zinc-200 bg-surface-1 px-4 py-3">
           <div className="text-xs uppercase tracking-wide text-zinc-500">Clicks</div>
           <div className="mt-1 text-2xl font-semibold tabular-nums">
             {formatCount(d.total_clicks)}
           </div>
         </div>
-        <div className="rounded border border-zinc-200 bg-white px-4 py-3">
+        <div className="rounded border border-zinc-200 bg-surface-1 px-4 py-3">
           <div className="text-xs uppercase tracking-wide text-zinc-500">CTR</div>
           <div className="mt-1 text-2xl font-semibold tabular-nums">
             {formatCtr(d.ctr)}
@@ -82,7 +82,7 @@ export default async function ListingDetailPage({
         </div>
       </div>
 
-      <section className="mt-6 rounded border border-zinc-200 bg-white p-4">
+      <section className="mt-6 rounded border border-zinc-200 bg-surface-1 p-4">
         <h2 className="mb-2 text-sm font-semibold text-zinc-700">
           Views &amp; clicks over time
         </h2>

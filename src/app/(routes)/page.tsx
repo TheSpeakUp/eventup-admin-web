@@ -84,7 +84,7 @@ export default async function DashboardPage({
   return (
     <div className="p-8" data-testid="dashboard-page">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Dashboard</h1>
         <span className="text-sm text-zinc-500" data-testid="dashboard-window">
           {from} → {to}
         </span>
@@ -109,7 +109,7 @@ export default async function DashboardPage({
       {/* Revenue Chart */}
       {canPayments && (
         <section className="mt-8" data-testid="dashboard-revenue-section">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-700">Revenue</h2>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Revenue</h2>
           {revenueRes && !revenueRes.ok ? (
             <ErrorMessage message={revenueRes.message} status={revenueRes.status} />
           ) : revenueRes?.ok ? (
@@ -123,7 +123,7 @@ export default async function DashboardPage({
       {/* Content Growth Chart */}
       {canGrowth && (
         <section className="mt-8" data-testid="dashboard-growth-section">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-700">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
             Content Growth
           </h2>
           {growthRes && !growthRes.ok ? (
@@ -139,7 +139,7 @@ export default async function DashboardPage({
       {/* Funnel Section */}
       {canPayments && (
         <section className="mt-8" data-testid="dashboard-funnel-section">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-700">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
             Booking Funnel
           </h2>
           {funnelRes && !funnelRes.ok ? (
@@ -155,7 +155,7 @@ export default async function DashboardPage({
       {/* Tops Section */}
       {canPayments && (
         <section className="mt-8" data-testid="dashboard-tops-section">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-700">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
             Top Performers
           </h2>
           {topsRes && !topsRes.ok ? (

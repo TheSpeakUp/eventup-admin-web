@@ -36,27 +36,31 @@ export default function ContentGrowthChart({
   }));
 
   return (
-    <div data-testid="content-growth-chart" className="rounded border border-zinc-200 bg-white p-4">
+    <div data-testid="content-growth-chart" className="rounded border border-zinc-200 bg-surface-1 p-4">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#23252a" />
           <XAxis
             dataKey="period"
-            tick={{ fontSize: 12, fill: "#71717a" }}
+            tick={{ fontSize: 12, fill: "#8a8f98" }}
             angle={-45}
             textAnchor="end"
             height={60}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: "#71717a" }}
-            label={{ value: "Count", angle: -90, position: "insideLeft" }}
+            tick={{ fontSize: 12, fill: "#8a8f98" }}
+            label={{ value: "Count", angle: -90, position: "insideLeft", fill: "#8a8f98" }}
           />
           <Tooltip
+            cursor={{ stroke: "#34343a" }}
             contentStyle={{
-              backgroundColor: "#fafafa",
-              border: "1px solid #e4e4e7",
-              borderRadius: "0.375rem",
+              backgroundColor: "#0f1011",
+              border: "1px solid #23252a",
+              borderRadius: "0.5rem",
+              color: "#f7f8f8",
             }}
+            labelStyle={{ color: "#f7f8f8" }}
+            itemStyle={{ color: "#d0d6e0" }}
           />
           <Legend />
           <Line

@@ -19,7 +19,7 @@ export default function TariffForm({
     <form
       action={formAction}
       data-testid="tariff-form"
-      className="space-y-3 rounded border border-zinc-200 bg-white p-4"
+      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
     >
       {mode === "edit" && t ? (
         <input type="hidden" name="id" value={t.id} />

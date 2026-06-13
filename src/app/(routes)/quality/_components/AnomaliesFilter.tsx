@@ -25,7 +25,7 @@ export default function AnomaliesFilter({
   ];
   return (
     <div
-      className="inline-flex gap-0.5 rounded border border-zinc-200 bg-white p-0.5 text-sm"
+      className="inline-flex gap-0.5 rounded border border-zinc-200 bg-surface-1 p-0.5 text-sm"
       data-testid="anomalies-filter"
     >
       {options.map((o) => (
@@ -36,7 +36,7 @@ export default function AnomaliesFilter({
           data-active={o.key === current}
           className={`rounded px-3 py-1 ${
             o.key === current
-              ? "bg-zinc-900 text-white"
+              ? "bg-primary text-white"
               : "text-zinc-600 hover:bg-zinc-100"
           }`}
         >

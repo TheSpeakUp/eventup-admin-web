@@ -17,7 +17,7 @@ export default function ExportCsvButton({
       href={`/api/export?${qs.toString()}`}
       download
       data-testid={`export-csv-${surface}`}
-      className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+      className="rounded-md border border-zinc-300 bg-surface-1 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
     >
       Export CSV
     </a>

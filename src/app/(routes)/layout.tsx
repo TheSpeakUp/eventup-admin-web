@@ -40,7 +40,7 @@ export default async function RoutesLayout({
   return (
     <div className="flex min-h-screen">
       <MockBackendBoot />
-      <aside className="w-56 border-r border-zinc-200 bg-white flex flex-col">
+      <aside className="w-56 border-r border-zinc-200 bg-surface-1 flex flex-col">
         <div className="px-6 py-5 border-b border-zinc-200">
           <Link href="/" className="font-semibold text-lg tracking-tight">
             EventUp Admin
@@ -59,7 +59,7 @@ export default async function RoutesLayout({
         </nav>
       </aside>
       <div className="flex-1 flex flex-col">
-        <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-6 gap-4">
+        <header className="h-14 border-b border-zinc-200 bg-surface-1 flex items-center justify-between px-6 gap-4">
           <form action="/search" role="search" className="flex-1 max-w-md">
             <input
               type="search"

@@ -12,7 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="w-full px-3 py-2 rounded-md bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 disabled:bg-zinc-400 disabled:cursor-not-allowed"
+      className="w-full px-3 py-2 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary-hover disabled:bg-zinc-400 disabled:cursor-not-allowed"
     >
       {pending ? "Signing in…" : "Sign in"}
     </button>
@@ -34,7 +34,7 @@ export default function LoginForm({ next }: { next: string }) {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-focus"
         />
       </div>
       <div>
@@ -47,7 +47,7 @@ export default function LoginForm({ next }: { next: string }) {
           type="password"
           autoComplete="current-password"
           required
-          className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-focus"
         />
       </div>
       {state.error ? (
