@@ -966,8 +966,22 @@ export const handlers = [
         { status: 409 },
       );
     }
-    const body = await parseJsonBody<{ message?: unknown }>(request);
+    const body = await parseJsonBody<{ message?: unknown; override?: unknown }>(
+      request,
+    );
     const message = typeof body?.message === "string" ? body.message : null;
+    const override = body?.override === true;
+    const prv = getProviderById(id);
+    if (!prv) return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    // T4 gate — mirrors the backend: verifying a provider with no evidence on
+    // file is a 400 unless `override` is set. The specific reason rides in
+    // meta.original_detail (the FE reads it first), matching message_key
+    // core.error.http.business.
+    if (!override && prv.verification_evidence.length === 0) {
+      return adminValidationError(
+        `Provider ${id} is missing required verification evidence`,
+      );
+    }
     const next = setProviderStatus(id, "verified", {
       verification_message: message,
     });

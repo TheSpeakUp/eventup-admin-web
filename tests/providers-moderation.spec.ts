@@ -50,3 +50,41 @@ test.describe("providers moderation actions (A6.2 contract)", () => {
     await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
   });
 });
+
+test.describe("provider verification evidence (T4)", () => {
+  test("detail renders uploaded evidence with a doc link", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/1`);
+    await openProviderDetail(page, 1);
+    const item = page.getByTestId("provider-evidence-item").first();
+    await expect(item).toBeVisible();
+    await expect(page.getByTestId("provider-evidence-link").first()).toHaveAttribute(
+      "href",
+      /evidence\.example\.com/,
+    );
+  });
+
+  test("detail shows empty-state when no evidence is on file", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/9998`);
+    await openProviderDetail(page, 9998);
+    await expect(page.getByTestId("provider-evidence-empty")).toBeVisible();
+  });
+
+  test("verify without evidence is gated (400); override path verifies", async ({ page }) => {
+    await loginAsMockAdmin(page, `/providers/9998`);
+    await openProviderDetail(page, 9998);
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
+
+    // First attempt without override trips the evidence-missing gate and keeps
+    // the dialog open with an inline hint.
+    await page.getByTestId("moderation-open-verify").click();
+    await page.getByTestId("moderation-submit-verify").click();
+    await expect(page.getByTestId("moderation-evidence-hint")).toBeVisible();
+    await expect(page.getByTestId("moderation-dialog")).toBeVisible();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "pending");
+
+    // Tick override and resubmit — verification goes through.
+    await page.getByTestId("moderation-override-verify").check();
+    await page.getByTestId("moderation-submit-verify").click();
+    await expect(page.getByTestId("status-badge")).toHaveAttribute("data-status", "verified");
+  });
+});

@@ -40,10 +40,16 @@ export function getProviderStats(
 export function verifyProvider(
   id: number,
   message?: string,
+  override?: boolean,
 ): Promise<ApiFetchResult<ProviderModerationResponse>> {
+  // T4 gate: company/talent providers need kind-evidence on file. `override`
+  // (offline/trusted verify) bypasses the requirement — audited server-side.
+  const body: { message?: string; override?: boolean } = {};
+  if (message) body.message = message;
+  if (override) body.override = true;
   return apiFetch<ProviderModerationResponse>(`${BASE}/${id}/verify`, {
     method: "POST",
-    body: JSON.stringify(message ? { message } : {}),
+    body: JSON.stringify(body),
     redirectOn401: false,
   });
 }

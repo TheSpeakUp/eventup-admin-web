@@ -29,7 +29,7 @@ type DialogConfig = {
 const DIALOGS: Record<Kind, DialogConfig> = {
   verify: {
     title: "Verify provider?",
-    body: "Mark provider as verified. Optional verification note.",
+    body: "Mark provider as verified. Review the uploaded evidence first. If none is on file, check Override to verify without it (offline/trusted — audited).",
     needsReason: true,
     reasonField: "message",
     confirmLabel: "Verify",
@@ -74,20 +74,27 @@ function ActionForm({
 }: {
   kind: Kind;
   providerId: number;
-  onSettled: (ok: boolean, error: string | null) => void;
+  onSettled: (state: ActionState) => void;
 }) {
   const [state, formAction, pending] = useActionState(ACTIONS[kind], EMPTY_STATE);
-  const lastReported = useRef<{ ok: boolean; error: string | null } | null>(null);
+  const lastReported = useRef<ActionState | null>(null);
   useEffect(() => {
     if (pending) return;
     if (state === EMPTY_STATE) return;
     const prev = lastReported.current;
-    if (prev && prev.ok === state.ok && prev.error === state.error) return;
-    lastReported.current = { ok: state.ok, error: state.error };
-    onSettled(state.ok, state.error);
+    if (
+      prev &&
+      prev.ok === state.ok &&
+      prev.error === state.error &&
+      prev.evidenceMissing === state.evidenceMissing
+    )
+      return;
+    lastReported.current = state;
+    onSettled(state);
   }, [state, pending, onSettled]);
   const cfg = DIALOGS[kind];
   const isMessage = cfg.reasonField === "message";
+  const isVerify = kind === "verify";
   return (
     <form action={formAction} className="space-y-3" data-testid={`moderation-form-${kind}`}>
       <input type="hidden" name="providerId" value={providerId} />
@@ -104,9 +111,32 @@ function ActionForm({
           className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
       ) : null}
+      {isVerify ? (
+        <label className="flex items-start gap-2 text-sm text-zinc-700">
+          <input
+            type="checkbox"
+            name="override"
+            value="true"
+            data-testid="moderation-override-verify"
+            className="mt-0.5"
+          />
+          <span>
+            Override — verify without the required evidence (offline/trusted).
+          </span>
+        </label>
+      ) : null}
       {state.error ? (
         <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-700">
           {state.error}
+        </p>
+      ) : null}
+      {isVerify && state.evidenceMissing ? (
+        <p
+          data-testid="moderation-evidence-hint"
+          className="rounded-md bg-amber-50 p-2 text-xs text-amber-800"
+        >
+          No required verification evidence is on file. Ask the provider to upload
+          it, or check Override above to verify without it.
         </p>
       ) : null}
       <div className="flex justify-end gap-2">
@@ -152,13 +182,19 @@ export default function ProviderModerationPanel({
     if (!open && el.open) el.close();
   }, [open]);
 
-  function handleSettled(ok: boolean, error: string | null) {
+  function handleSettled(state: ActionState) {
+    // Evidence-missing keeps the verify dialog open so the admin can tick
+    // Override and resubmit — the inline hint + checkbox live in the form.
+    if (state.evidenceMissing) {
+      setToast(null);
+      return;
+    }
     dialogRef.current?.close();
     setOpen(null);
-    if (ok) {
+    if (state.ok) {
       setToast(null);
-    } else if (error) {
-      setToast(error);
+    } else if (state.error) {
+      setToast(state.error);
     }
   }
 

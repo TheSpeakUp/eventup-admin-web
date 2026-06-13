@@ -11,6 +11,25 @@ export function isProviderStatus(value: string): value is ProviderStatus {
   return (PROVIDER_STATUSES as readonly string[]).includes(value);
 }
 
+// Verification-evidence (T4) — kind-branched proof the admin reviews before
+// verifying. `identity_document` / `selfie` for talent, `org_document` for a
+// company. Detail-only; the list endpoints never carry it.
+export const PROVIDER_EVIDENCE_TYPES = [
+  "identity_document",
+  "selfie",
+  "org_document",
+] as const;
+
+export type ProviderEvidenceType = (typeof PROVIDER_EVIDENCE_TYPES)[number];
+
+export type ProviderVerificationEvidence = {
+  id: number;
+  evidence_type: ProviderEvidenceType;
+  file_url: string;
+  caption: string | null;
+  created_at: string;
+};
+
 export type ProviderListItem = {
   id: number;
   name: string;
@@ -36,6 +55,9 @@ export type ProviderDetail = ProviderListItem & {
   logo_url: string | null;
   verification_message: string | null;
   block_reason: string | null;
+  // T4 — evidence rows the admin inspects before verifying. Empty array when
+  // the provider has uploaded nothing yet (verify then needs `override`).
+  verification_evidence: ProviderVerificationEvidence[];
 };
 
 /**

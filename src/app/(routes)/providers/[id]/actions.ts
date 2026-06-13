@@ -31,6 +31,14 @@ function parseProviderId(formData: FormData): { ok: true; id: number } | { ok: f
   return { ok: true, id: parsed.data };
 }
 
+// Distinguishes the T4 "evidence missing" 400 from any other verify failure
+// (e.g. an invalid-status 400). The backend surfaces the raw exception message
+// verbatim in `meta.original_detail` (stable English, not localized), so a text
+// match on it is safe — and lets the dialog offer the override path inline.
+function isEvidenceMissing(status: number, message: string): boolean {
+  return status === 400 && /verification evidence/i.test(message);
+}
+
 export async function verifyProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const idR = parseProviderId(formData);
   if (!idR.ok) return idR.state;
@@ -41,8 +49,15 @@ export async function verifyProviderAction(_prev: ActionState, formData: FormDat
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid message");
     message = parsed.data;
   }
-  const result = await verifyProvider(idR.id, message);
-  if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
+  const override = formData.get("override") === "true";
+  const result = await verifyProvider(idR.id, message, override);
+  if (!result.ok) {
+    const msg = result.message ?? `Request failed (${result.status})`;
+    if (isEvidenceMissing(result.status, msg)) {
+      return { ok: false, error: msg, evidenceMissing: true };
+    }
+    return fail(msg);
+  }
   revalidate(idR.id);
   return { ok: true, error: null };
 }
