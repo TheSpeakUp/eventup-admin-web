@@ -1,5 +1,10 @@
 export { default as Badge, type BadgeTone } from "./Badge";
 export { default as Icon, type IconName } from "./Icon";
+export { default as SearchInput } from "./SearchInput";
+export {
+  default as StatusSegments,
+  type SegmentOption,
+} from "./StatusSegments";
 export {
   default as Button,
   buttonClass,

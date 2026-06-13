@@ -1,10 +1,8 @@
 import { listProviders } from "@/lib/providers/api";
 import Pagination from "./_components/Pagination";
-import ProvidersFilters from "./_components/ProvidersFilters";
 import ProvidersTable from "./_components/ProvidersTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
-import PageHeader from "@/app/_components/ui/PageHeader";
-import { Panel } from "@/app/_components/ui";
+import { Alert, PageHeader, Panel, SearchInput } from "@/app/_components/ui";
 
 const LIMIT = 10;
 
@@ -21,7 +19,11 @@ function pickPositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(n) && n > 0 ? n : undefined;
 }
 
-export default async function ProvidersPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function ProvidersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const sp = await searchParams;
   const search = pickString(sp.search)?.trim() || undefined;
   const lastId = pickPositiveInt(pickString(sp.last_id));
@@ -34,16 +36,14 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
 
   if (!result.ok) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Providers moderation
-        </h1>
-        <div
-          data-testid="providers-error"
-          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
-        >
+      <div className="p-8 space-y-5">
+        <PageHeader
+          title="Providers"
+          description="Moderate provider profiles and verification status."
+        />
+        <Alert variant="danger" data-testid="providers-error">
           Failed to load providers: {result.message}
-        </div>
+        </Alert>
       </div>
     );
   }
@@ -52,22 +52,30 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader title="Providers moderation" />
+      <PageHeader
+        title="Providers"
+        description="Moderate provider profiles and verification status."
+        actions={<ExportCsvButton surface="providers" params={{ search }} />}
+      />
       <Panel
         title="All providers"
         accent="primary"
         bodyClassName="p-0"
         action={
-          <div className="flex items-center gap-3">
-            <ExportCsvButton surface="providers" params={{ search }} />
-            <span className="text-xs text-zinc-500" data-testid="providers-count">
-              {count} provider{count === 1 ? "" : "s"} on this page
-            </span>
-          </div>
+          <span
+            className="text-xs text-ink-subtle"
+            data-testid="providers-count"
+          >
+            {count} provider{count === 1 ? "" : "s"} on this page
+          </span>
         }
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
-          <ProvidersFilters />
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+          <SearchInput
+            param="search"
+            testid="providers-search"
+            placeholder="Search providers…"
+          />
         </div>
         <ProvidersTable rows={items} />
         <div className="px-4 py-3 border-t border-hairline">

@@ -1,13 +1,27 @@
 import { listServices } from "@/lib/services/api";
-import { isServiceStatus, type ServiceStatus } from "@/lib/services/types";
+import {
+  SERVICE_STATUSES,
+  isServiceStatus,
+  type ServiceStatus,
+} from "@/lib/services/types";
 import Pagination from "./_components/Pagination";
-import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
-import PageHeader from "@/app/_components/ui/PageHeader";
-import { Panel } from "@/app/_components/ui";
+import {
+  Alert,
+  PageHeader,
+  Panel,
+  SearchInput,
+  StatusSegments,
+  type SegmentOption,
+} from "@/app/_components/ui";
 
 const LIMIT = 10;
+
+const STATUS_OPTIONS: SegmentOption[] = SERVICE_STATUSES.map((s) => ({
+  value: s,
+  label: s.replace(/_/g, " "),
+}));
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -22,7 +36,11 @@ function pickPositiveInt(value: string | undefined): number | undefined {
   return Number.isInteger(n) && n > 0 ? n : undefined;
 }
 
-export default async function ServicesPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function ServicesPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const sp = await searchParams;
   const search = pickString(sp.search)?.trim() || undefined;
   const statusRaw = pickString(sp.status);
@@ -41,47 +59,59 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
 
   if (!result.ok) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Services moderation
-        </h1>
-        <div
-          data-testid="services-error"
-          className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
-        >
+      <div className="p-8 space-y-5">
+        <PageHeader
+          title="Services"
+          description="Review, publish and moderate marketplace service listings."
+        />
+        <Alert variant="danger" data-testid="services-error">
           Failed to load services: {result.message}
-        </div>
+        </Alert>
       </div>
     );
   }
 
   const { items, has_more, next_last_id, count } = result.data;
+  const otherParams = {
+    search,
+    provider_id: providerId !== undefined ? String(providerId) : undefined,
+  };
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader title="Services moderation" />
+      <PageHeader
+        title="Services"
+        description="Review, publish and moderate marketplace service listings."
+        actions={
+          <ExportCsvButton
+            surface="services"
+            params={{ status, ...otherParams }}
+          />
+        }
+      />
       <Panel
         title="All services"
         accent="primary"
         bodyClassName="p-0"
         action={
-          <div className="flex items-center gap-3">
-            <ExportCsvButton
-              surface="services"
-              params={{
-                search,
-                status,
-                provider_id: providerId !== undefined ? String(providerId) : undefined,
-              }}
-            />
-            <span className="text-xs text-zinc-500" data-testid="services-count">
-              {count} service{count === 1 ? "" : "s"} on this page
-            </span>
-          </div>
+          <span className="text-xs text-ink-subtle" data-testid="services-count">
+            {count} service{count === 1 ? "" : "s"} on this page
+          </span>
         }
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
-          <ServicesFilters />
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+          <StatusSegments
+            options={STATUS_OPTIONS}
+            current={status}
+            basePath="/services"
+            searchParams={otherParams}
+            testidPrefix="services-status"
+          />
+          <SearchInput
+            param="search"
+            testid="services-search"
+            placeholder="Search services…"
+          />
         </div>
         <ServicesTable rows={items} />
         <div className="px-4 py-3 border-t border-hairline">
@@ -90,11 +120,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
             hasMore={has_more}
             count={count}
             basePath="/services"
-            searchParams={{
-              search,
-              status,
-              provider_id: providerId !== undefined ? String(providerId) : undefined,
-            }}
+            searchParams={{ status, ...otherParams }}
             lastId={lastId}
           />
         </div>
