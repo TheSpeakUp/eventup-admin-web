@@ -174,120 +174,123 @@ export default async function DashboardPage({
       </div>
 
       {/* Hero + KPI cards */}
-      <div className="mt-6" data-testid="dashboard-kpi-section">
+      <div className="mt-6 space-y-3" data-testid="dashboard-kpi-section">
         {canPayments && revenueRes && !revenueRes.ok ? (
           <ErrorMessage message={revenueRes.message} status={revenueRes.status} />
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <>
             {canPayments ? (
-              <>
-                <div className="sm:col-span-2">
-                  <KpiCard
-                    testid={`kpi-revenue-${cur}`}
-                    label={`Gross revenue (${cur})`}
-                    value={formatMoneyMinor(curGross, cur)}
-                    delta={revenueDelta}
-                    deltaAbsLabel={signedMoney(revenueDelta.absolute, cur)}
-                    comparisonLabel={`${COMPARE} · ${formatCompactMoney(prevGross, cur)}`}
-                    sparkData={revenueSpark}
-                    sparkColor="#5e6ad2"
-                    hero
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <KpiCard
-                    testid="kpi-payments"
-                    label="Successful payments"
-                    value={curPayments.toLocaleString()}
-                    delta={paymentsDelta}
-                    deltaAbsLabel={signed(paymentsDelta.absolute)}
-                    comparisonLabel={COMPARE}
-                    sparkData={paymentsSpark}
-                    sparkColor="#5dcaa5"
-                    hero
-                  />
-                </div>
-              </>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                <KpiCard
+                  testid={`kpi-revenue-${cur}`}
+                  label={`Gross revenue (${cur})`}
+                  value={formatMoneyMinor(curGross, cur)}
+                  delta={revenueDelta}
+                  deltaAbsLabel={signedMoney(revenueDelta.absolute, cur)}
+                  comparisonLabel={`${COMPARE} · ${formatCompactMoney(prevGross, cur)}`}
+                  sparkData={revenueSpark}
+                  sparkColor="#5e6ad2"
+                  hero
+                />
+                <KpiCard
+                  testid="kpi-payments"
+                  label="Successful payments"
+                  value={curPayments.toLocaleString()}
+                  delta={paymentsDelta}
+                  deltaAbsLabel={signed(paymentsDelta.absolute)}
+                  comparisonLabel={COMPARE}
+                  sparkData={paymentsSpark}
+                  sparkColor="#5dcaa5"
+                  hero
+                />
+              </div>
             ) : null}
 
-            {canGrowth ? (
-              <>
-                <KpiCard
-                  testid="kpi-new-providers"
-                  label="New providers"
-                  value={g.providers.toLocaleString()}
-                  delta={providersDelta}
-                  deltaAbsLabel={signed(providersDelta.absolute)}
-                  comparisonLabel={COMPARE}
-                />
-                <KpiCard
-                  testid="kpi-new-services"
-                  label="New services"
-                  value={g.services.toLocaleString()}
-                  delta={servicesDelta}
-                  deltaAbsLabel={signed(servicesDelta.absolute)}
-                  comparisonLabel={COMPARE}
-                />
-                <KpiCard
-                  testid="kpi-new-offers"
-                  label="New offers"
-                  value={g.offers.toLocaleString()}
-                  delta={offersDelta}
-                  deltaAbsLabel={signed(offersDelta.absolute)}
-                  comparisonLabel={COMPARE}
-                />
-              </>
-            ) : null}
+            {canGrowth || (canPayments && curFailRate !== null) ? (
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {canGrowth ? (
+                  <>
+                    <KpiCard
+                      testid="kpi-new-providers"
+                      label="New providers"
+                      value={g.providers.toLocaleString()}
+                      delta={providersDelta}
+                      deltaAbsLabel={signed(providersDelta.absolute)}
+                      comparisonLabel={COMPARE}
+                    />
+                    <KpiCard
+                      testid="kpi-new-services"
+                      label="New services"
+                      value={g.services.toLocaleString()}
+                      delta={servicesDelta}
+                      deltaAbsLabel={signed(servicesDelta.absolute)}
+                      comparisonLabel={COMPARE}
+                    />
+                    <KpiCard
+                      testid="kpi-new-offers"
+                      label="New offers"
+                      value={g.offers.toLocaleString()}
+                      delta={offersDelta}
+                      deltaAbsLabel={signed(offersDelta.absolute)}
+                      comparisonLabel={COMPARE}
+                    />
+                  </>
+                ) : null}
 
-            {canPayments && curFailRate !== null && failRateDelta ? (
-              <KpiCard
-                testid="kpi-fail-rate"
-                label="Failed-payment rate"
-                value={`${curFailRate.toFixed(1)}%`}
-                delta={failRateDelta}
-                invertDelta
-                comparisonLabel="of terminal bookings"
-              />
+                {canPayments && curFailRate !== null && failRateDelta ? (
+                  <KpiCard
+                    testid="kpi-fail-rate"
+                    label="Failed-payment rate"
+                    value={`${curFailRate.toFixed(1)}%`}
+                    delta={failRateDelta}
+                    invertDelta
+                    comparisonLabel="of terminal bookings"
+                  />
+                ) : null}
+              </div>
             ) : null}
-          </div>
+          </>
         )}
       </div>
 
-      {/* Revenue chart */}
-      {canPayments && (
-        <section className="mt-8" data-testid="dashboard-revenue-section">
-          <SectionHeading>Revenue trend</SectionHeading>
-          {revenueRes && !revenueRes.ok ? (
-            <ErrorMessage message={revenueRes.message} status={revenueRes.status} />
-          ) : revenue ? (
-            <RevenueChart
-              buckets={revenue.buckets}
-              granularity={granularity}
-              currency={cur}
-            />
-          ) : (
-            <div className="text-sm text-ink-subtle">No data available</div>
+      {/* Trend charts — side by side on wide screens for density */}
+      {(canPayments || canGrowth) && (
+        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {canPayments && (
+            <section data-testid="dashboard-revenue-section">
+              <SectionHeading>Revenue trend</SectionHeading>
+              {revenueRes && !revenueRes.ok ? (
+                <ErrorMessage message={revenueRes.message} status={revenueRes.status} />
+              ) : revenue ? (
+                <RevenueChart
+                  buckets={revenue.buckets}
+                  granularity={granularity}
+                  currency={cur}
+                />
+              ) : (
+                <div className="text-sm text-ink-subtle">No data available</div>
+              )}
+            </section>
           )}
-        </section>
-      )}
 
-      {/* Content growth */}
-      {canGrowth && (
-        <section className="mt-8" data-testid="dashboard-growth-section">
-          <SectionHeading>Content growth</SectionHeading>
-          {growthRes && !growthRes.ok ? (
-            <ErrorMessage message={growthRes.message} status={growthRes.status} />
-          ) : growth ? (
-            <ContentGrowthChart buckets={growth.buckets} granularity={granularity} />
-          ) : (
-            <div className="text-sm text-ink-subtle">No data available</div>
+          {canGrowth && (
+            <section data-testid="dashboard-growth-section">
+              <SectionHeading>Content growth</SectionHeading>
+              {growthRes && !growthRes.ok ? (
+                <ErrorMessage message={growthRes.message} status={growthRes.status} />
+              ) : growth ? (
+                <ContentGrowthChart buckets={growth.buckets} granularity={granularity} />
+              ) : (
+                <div className="text-sm text-ink-subtle">No data available</div>
+              )}
+            </section>
           )}
-        </section>
+        </div>
       )}
 
       {/* Funnel */}
       {canPayments && (
-        <section className="mt-8" data-testid="dashboard-funnel-section">
+        <section className="mt-6" data-testid="dashboard-funnel-section">
           <SectionHeading>Booking funnel</SectionHeading>
           {funnelRes && !funnelRes.ok ? (
             <ErrorMessage message={funnelRes.message} status={funnelRes.status} />
@@ -301,7 +304,7 @@ export default async function DashboardPage({
 
       {/* Tops */}
       {canPayments && (
-        <section className="mt-8" data-testid="dashboard-tops-section">
+        <section className="mt-6" data-testid="dashboard-tops-section">
           <SectionHeading>Top performers</SectionHeading>
           {topsRes && !topsRes.ok ? (
             <ErrorMessage message={topsRes.message} status={topsRes.status} />

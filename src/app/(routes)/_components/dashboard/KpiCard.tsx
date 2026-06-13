@@ -60,8 +60,8 @@ export default function KpiCard({
       ) : null}
 
       {sparkData && sparkData.length >= 2 ? (
-        <div className="mt-3">
-          <Sparkline data={sparkData} color={sparkColor} height={hero ? 52 : 40} />
+        <div className="mt-2">
+          <Sparkline data={sparkData} color={sparkColor} height={hero ? 40 : 32} />
         </div>
       ) : null}
     </div>
