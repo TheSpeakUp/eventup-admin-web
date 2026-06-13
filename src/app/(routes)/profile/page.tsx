@@ -25,7 +25,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-4 rounded-md border border-zinc-200 bg-white p-5">
+    <section className="space-y-4 rounded-md border border-zinc-200 bg-surface-1 p-5">
       <div>
         <h2 className="text-sm font-semibold text-zinc-700">{title}</h2>
         {description ? (
