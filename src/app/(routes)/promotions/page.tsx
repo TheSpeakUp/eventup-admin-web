@@ -19,6 +19,7 @@ import {
 } from "@/lib/promotions/types";
 import PromotionsTabs from "./_components/PromotionsTabs";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import NewItemPanel from "./_components/NewItemPanel";
 import ProductsTable from "./_components/ProductsTable";
 import ProductForm from "./_components/ProductForm";
@@ -172,21 +173,23 @@ export default async function PromotionsPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Promotions</h1>
-        {tab === "orders" || tab === "campaigns" ? (
-          <ExportCsvButton
-            surface={tab === "orders" ? "promotion-orders" : "promotion-campaigns"}
-            params={{
-              status: filters.status,
-              service_id:
-                filters.service_id !== undefined
-                  ? String(filters.service_id)
-                  : undefined,
-            }}
-          />
-        ) : null}
-      </div>
+      <PageHeader
+        title="Promotions"
+        actions={
+          tab === "orders" || tab === "campaigns" ? (
+            <ExportCsvButton
+              surface={tab === "orders" ? "promotion-orders" : "promotion-campaigns"}
+              params={{
+                status: filters.status,
+                service_id:
+                  filters.service_id !== undefined
+                    ? String(filters.service_id)
+                    : undefined,
+              }}
+            />
+          ) : null
+        }
+      />
       <div className="mt-4">
         <PromotionsTabs active={tab} />
       </div>

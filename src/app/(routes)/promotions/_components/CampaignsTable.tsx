@@ -3,6 +3,8 @@
 // to the detail route (GET /promotions/campaigns/{id}).
 import Link from "next/link";
 import type { CampaignRead } from "@/lib/promotions/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 import CancelCampaignButton from "./CancelCampaignButton";
 import StatusPill from "./StatusPill";
 
@@ -10,40 +12,32 @@ const TERMINAL = new Set(["canceled", "cancelled", "expired"]);
 
 export default function CampaignsTable({ rows }: { rows: CampaignRead[] }) {
   if (rows.length === 0)
-    return (
-      <p data-testid="campaigns-empty" className="p-4 text-zinc-500">
-        No promotion campaigns yet.
-      </p>
-    );
+    return <EmptyState data-testid="campaigns-empty">No promotion campaigns yet.</EmptyState>;
   return (
-    <table className="w-full text-sm" data-testid="campaigns-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Campaign</th>
-          <th>Service</th>
-          <th>Product</th>
-          <th>Window</th>
-          <th>Status</th>
-          <th />
+    <Table data-testid="campaigns-table">
+      <Thead>
+        <tr>
+          <Th>Campaign</Th>
+          <Th>Service</Th>
+          <Th>Product</Th>
+          <Th>Window</Th>
+          <Th>Status</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
-          <tr
-            key={r.id}
-            className="border-t border-zinc-200"
-            data-testid={`campaign-row-${r.id}`}
-          >
-            <td className="py-2 font-mono text-xs">#{r.id}</td>
-            <td>{r.service_id}</td>
-            <td>{r.product_id}</td>
-            <td className="whitespace-nowrap text-zinc-500">
+          <Tr key={r.id} data-testid={`campaign-row-${r.id}`}>
+            <Td className="font-mono text-xs">#{r.id}</Td>
+            <Td>{r.service_id}</Td>
+            <Td>{r.product_id}</Td>
+            <Td className="whitespace-nowrap text-zinc-500">
               {r.start_date} → {r.end_date}
-            </td>
-            <td data-testid={`campaign-status-${r.id}`}>
+            </Td>
+            <Td data-testid={`campaign-status-${r.id}`}>
               <StatusPill status={r.status} />
-            </td>
-            <td className="space-x-2 whitespace-nowrap">
+            </Td>
+            <Td className="space-x-2 whitespace-nowrap">
               <Link
                 href={`/promotions/campaigns/${r.id}`}
                 data-testid={`campaign-view-${r.id}`}
@@ -54,10 +48,10 @@ export default function CampaignsTable({ rows }: { rows: CampaignRead[] }) {
               {TERMINAL.has(r.status) ? null : (
                 <CancelCampaignButton id={r.id} />
               )}
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

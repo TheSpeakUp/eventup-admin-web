@@ -2,6 +2,8 @@
 "use client";
 import { Fragment, useState } from "react";
 import type { ProductRead } from "@/lib/promotions/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 import { deactivateProductAction } from "../actions";
 import ActiveBadge from "./ActiveBadge";
 import DeactivateButton from "./DeactivateButton";
@@ -10,38 +12,31 @@ import ProductForm from "./ProductForm";
 export default function ProductsTable({ rows }: { rows: ProductRead[] }) {
   const [editing, setEditing] = useState<number | null>(null);
   if (rows.length === 0)
-    return (
-      <p data-testid="products-empty" className="p-4 text-zinc-500">
-        No promotion products yet.
-      </p>
-    );
+    return <EmptyState data-testid="products-empty">No promotion products yet.</EmptyState>;
   return (
-    <table className="w-full text-sm" data-testid="products-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Code</th>
-          <th>Name (en)</th>
-          <th>Billing unit</th>
-          <th>Scope</th>
-          <th>Status</th>
-          <th />
+    <Table data-testid="products-table">
+      <Thead>
+        <tr>
+          <Th>Code</Th>
+          <Th>Name (en)</Th>
+          <Th>Billing unit</Th>
+          <Th>Scope</Th>
+          <Th>Status</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
           <Fragment key={r.id}>
-            <tr
-              className="border-t border-zinc-200"
-              data-testid={`product-row-${r.id}`}
-            >
-              <td className="py-2 font-mono text-xs">{r.code}</td>
-              <td>{r.name_translations.en ?? "—"}</td>
-              <td>{r.default_billing_unit}</td>
-              <td>{r.service_scope}</td>
-              <td data-testid={`product-status-${r.id}`}>
+            <Tr data-testid={`product-row-${r.id}`}>
+              <Td className="font-mono text-xs">{r.code}</Td>
+              <Td>{r.name_translations.en ?? "—"}</Td>
+              <Td>{r.default_billing_unit}</Td>
+              <Td>{r.service_scope}</Td>
+              <Td data-testid={`product-status-${r.id}`}>
                 <ActiveBadge isActive={r.is_active} />
-              </td>
-              <td className="space-x-2 whitespace-nowrap">
+              </Td>
+              <Td className="space-x-2 whitespace-nowrap">
                 <button
                   type="button"
                   data-testid={`product-edit-${r.id}`}
@@ -60,18 +55,18 @@ export default function ProductsTable({ rows }: { rows: ProductRead[] }) {
                     confirmLabel="Deactivate this product?"
                   />
                 ) : null}
-              </td>
-            </tr>
+              </Td>
+            </Tr>
             {editing === r.id ? (
-              <tr className="border-t border-zinc-100">
-                <td colSpan={6} className="bg-zinc-50 p-3">
+              <Tr>
+                <Td colSpan={6} className="bg-zinc-50 p-3">
                   <ProductForm mode="edit" product={r} />
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ) : null}
           </Fragment>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

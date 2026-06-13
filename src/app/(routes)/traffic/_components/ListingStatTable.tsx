@@ -5,6 +5,7 @@ import {
   type ListingStat,
   type ListingType,
 } from "@/lib/traffic/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 export default function ListingStatTable({
   rows,
@@ -29,49 +30,37 @@ export default function ListingStatTable({
   }
 
   return (
-    <table
+    <Table
       data-testid={testid}
-      className="w-full border-collapse overflow-hidden rounded border border-zinc-200 bg-surface-1 text-sm"
+      className="border-collapse overflow-hidden rounded border border-zinc-200 bg-surface-1"
     >
-      <thead>
-        <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500">
-          <th className="px-3 py-2 font-medium">Listing</th>
-          <th className="px-3 py-2 font-medium">Provider</th>
-          <th className="px-3 py-2 text-right font-medium">Views</th>
-          <th className="px-3 py-2 text-right font-medium">Clicks</th>
-          <th className="px-3 py-2 text-right font-medium">CTR</th>
+      <Thead>
+        <tr>
+          <Th>Listing</Th>
+          <Th>Provider</Th>
+          <Th className="text-right">Views</Th>
+          <Th className="text-right">Clicks</Th>
+          <Th className="text-right">CTR</Th>
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
-          <tr
-            key={r.subject_id}
-            data-testid={`${testid}-row-${r.subject_id}`}
-            className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50"
-          >
-            <td className="px-3 py-2">
+          <Tr key={r.subject_id} data-testid={`${testid}-row-${r.subject_id}`}>
+            <Td>
               <Link
                 href={`/traffic/listings/${type}/${r.subject_id}`}
                 className="font-medium text-blue-600 hover:underline"
               >
                 {r.name ?? `#${r.subject_id}`}
               </Link>
-            </td>
-            <td className="px-3 py-2 text-zinc-600">
-              {r.provider_name ?? "—"}
-            </td>
-            <td className="px-3 py-2 text-right tabular-nums">
-              {formatCount(r.views)}
-            </td>
-            <td className="px-3 py-2 text-right tabular-nums">
-              {formatCount(r.clicks)}
-            </td>
-            <td className="px-3 py-2 text-right tabular-nums">
-              {formatCtr(r.ctr)}
-            </td>
-          </tr>
+            </Td>
+            <Td className="text-zinc-600">{r.provider_name ?? "—"}</Td>
+            <Td className="text-right tabular-nums">{formatCount(r.views)}</Td>
+            <Td className="text-right tabular-nums">{formatCount(r.clicks)}</Td>
+            <Td className="text-right tabular-nums">{formatCtr(r.ctr)}</Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

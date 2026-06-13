@@ -9,6 +9,8 @@ import Badge, { type BadgeTone } from "@/app/_components/ui/Badge";
 import type { AdminReviewRead } from "@/lib/reviews/types";
 import ReviewModerationButton from "./ReviewModerationButton";
 import ReplyModerationButton from "./ReplyModerationButton";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   published: "success",
@@ -62,47 +64,39 @@ export default function ReviewsTable({
 }) {
   if (rows.length === 0)
     return (
-      <p data-testid="reviews-empty" className="p-4 text-zinc-500">
-        No reviews found.
-      </p>
+      <EmptyState data-testid="reviews-empty">No reviews found.</EmptyState>
     );
 
   return (
-    <table className="w-full text-sm" data-testid="reviews-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Rating</th>
-          <th>Status</th>
-          <th>Body</th>
-          <th>Author</th>
-          <th>Created</th>
-          <th>Provider Reply</th>
-          <th />
+    <Table data-testid="reviews-table">
+      <Thead>
+        <tr>
+          <Th>Rating</Th>
+          <Th>Status</Th>
+          <Th>Body</Th>
+          <Th>Author</Th>
+          <Th>Created</Th>
+          <Th>Provider Reply</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((review) => (
-          <tr
-            key={review.id}
-            className="border-t border-zinc-200"
-            data-testid={`reviews-row-${review.id}`}
-          >
-            <td className="py-2">
+          <Tr key={review.id} data-testid={`reviews-row-${review.id}`}>
+            <Td>
               <RatingStars rating={review.rating} />
-            </td>
-            <td>
+            </Td>
+            <Td>
               <StatusBadge status={review.status} />
-            </td>
-            <td className="max-w-xs truncate text-zinc-700">
+            </Td>
+            <Td className="max-w-xs truncate text-zinc-700">
               {truncate(review.body)}
-            </td>
-            <td className="font-mono text-xs text-zinc-600">
+            </Td>
+            <Td className="font-mono text-xs text-zinc-600">
               {review.author_user_id}
-            </td>
-            <td className="text-zinc-600">
-              {formatDate(review.created_at)}
-            </td>
-            <td>
+            </Td>
+            <Td className="text-zinc-600">{formatDate(review.created_at)}</Td>
+            <Td>
               {review.provider_reply_body ? (
                 <div className="space-y-1">
                   <div className="text-xs text-zinc-600">
@@ -115,8 +109,8 @@ export default function ReviewsTable({
               ) : (
                 <span className="text-zinc-400">—</span>
               )}
-            </td>
-            <td className="whitespace-nowrap">
+            </Td>
+            <Td className="whitespace-nowrap">
               {canManage ? (
                 <div className="flex flex-col gap-1">
                   <ReviewModerationButton reviewId={review.id} status={review.status} />
@@ -128,10 +122,10 @@ export default function ReviewsTable({
                   )}
                 </div>
               ) : null}
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

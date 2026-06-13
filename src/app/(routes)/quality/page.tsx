@@ -16,6 +16,7 @@ import { isQualityTab, type QualityTab } from "@/lib/quality/types";
 import { getAdminSession } from "@/lib/auth/session";
 import QualityTabs from "./_components/QualityTabs";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import ServiceMetricsTable from "./_components/ServiceMetricsTable";
 import ProviderMetricsTable from "./_components/ProviderMetricsTable";
 import FormulaConfigsTable from "./_components/FormulaConfigsTable";
@@ -106,12 +107,14 @@ export default async function QualityPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Quality &amp; ranking</h1>
-        {tab === "services" ? (
-          <ExportCsvButton surface="quality-services" />
-        ) : null}
-      </div>
+      <PageHeader
+        title="Quality & ranking"
+        actions={
+          tab === "services" ? (
+            <ExportCsvButton surface="quality-services" />
+          ) : null
+        }
+      />
       <div className="mt-4">
         <QualityTabs active={tab} />
       </div>

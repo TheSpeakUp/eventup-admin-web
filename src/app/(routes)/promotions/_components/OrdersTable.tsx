@@ -3,46 +3,40 @@
 // (/promotions/orders/[id]) which exercises GET /promotions/orders/{id}.
 import Link from "next/link";
 import type { OrderListItem } from "@/lib/promotions/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 import StatusPill from "./StatusPill";
 
 export default function OrdersTable({ rows }: { rows: OrderListItem[] }) {
   if (rows.length === 0)
-    return (
-      <p data-testid="orders-empty" className="p-4 text-zinc-500">
-        No promotion orders yet.
-      </p>
-    );
+    return <EmptyState data-testid="orders-empty">No promotion orders yet.</EmptyState>;
   return (
-    <table className="w-full text-sm" data-testid="orders-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Order</th>
-          <th>Service</th>
-          <th>Status</th>
-          <th>Total</th>
-          <th>Created</th>
-          <th />
+    <Table data-testid="orders-table">
+      <Thead>
+        <tr>
+          <Th>Order</Th>
+          <Th>Service</Th>
+          <Th>Status</Th>
+          <Th>Total</Th>
+          <Th>Created</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
-          <tr
-            key={r.id}
-            className="border-t border-zinc-200"
-            data-testid={`order-row-${r.id}`}
-          >
-            <td className="py-2 font-mono text-xs">#{r.id}</td>
-            <td>{r.service_id}</td>
-            <td data-testid={`order-status-${r.id}`}>
+          <Tr key={r.id} data-testid={`order-row-${r.id}`}>
+            <Td className="font-mono text-xs">#{r.id}</Td>
+            <Td>{r.service_id}</Td>
+            <Td data-testid={`order-status-${r.id}`}>
               <StatusPill status={r.status} />
-            </td>
-            <td className="whitespace-nowrap">
+            </Td>
+            <Td className="whitespace-nowrap">
               {r.total_price} {r.currency}
-            </td>
-            <td className="whitespace-nowrap text-zinc-500">
+            </Td>
+            <Td className="whitespace-nowrap text-zinc-500">
               {r.created_at.slice(0, 10)}
-            </td>
-            <td className="whitespace-nowrap">
+            </Td>
+            <Td className="whitespace-nowrap">
               <Link
                 href={`/promotions/orders/${r.id}`}
                 data-testid={`order-view-${r.id}`}
@@ -50,10 +44,10 @@ export default function OrdersTable({ rows }: { rows: OrderListItem[] }) {
               >
                 View
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

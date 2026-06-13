@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { listAttributeDefinitions } from "@/lib/attribute-definitions/api";
 import { isAttributeDefinitionSort } from "@/lib/attribute-definitions/types";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import { buttonClass } from "@/app/_components/ui/Button";
 import { AttributeDefinitionsTable } from "./_components/AttributeDefinitionsTable";
 
 export default async function AttributeDefinitionsPage({
@@ -29,7 +31,9 @@ export default async function AttributeDefinitionsPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Attribute Definitions</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Attribute Definitions
+        </h1>
         <div
           data-testid="attribute-definitions-error"
           className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
@@ -46,16 +50,18 @@ export default async function AttributeDefinitionsPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Attribute Definitions</h1>
-        <Link
-          href="/attribute-definitions/new"
-          data-testid="attribute-definition-new"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-        >
-          New attribute definition
-        </Link>
-      </div>
+      <PageHeader
+        title="Attribute Definitions"
+        actions={
+          <Link
+            href="/attribute-definitions/new"
+            data-testid="attribute-definition-new"
+            className={buttonClass("primary")}
+          >
+            New attribute definition
+          </Link>
+        }
+      />
 
       <form
         className="mt-4 flex flex-wrap gap-2"
