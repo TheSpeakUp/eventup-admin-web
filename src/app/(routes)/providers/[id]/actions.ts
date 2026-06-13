@@ -41,7 +41,9 @@ export async function verifyProviderAction(_prev: ActionState, formData: FormDat
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid message");
     message = parsed.data;
   }
-  const result = await verifyProvider(idR.id, message);
+  // Checkbox sends "on" when ticked, absent otherwise (T4 evidence override).
+  const override = formData.get("override") === "on";
+  const result = await verifyProvider(idR.id, message, override);
   if (!result.ok) return fail(result.message ?? `Request failed (${result.status})`);
   revalidate(idR.id);
   return { ok: true, error: null };

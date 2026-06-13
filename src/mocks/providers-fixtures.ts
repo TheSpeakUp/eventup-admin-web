@@ -34,6 +34,9 @@ function pick<T>(arr: readonly T[], i: number): T {
 }
 
 export const CONFLICT_PROVIDER_ID = 9999;
+// Pending provider with NO evidence — verify 400s unless `override` is sent
+// (mirrors backend T4 evidence gate for a company-kind provider).
+export const EVIDENCE_MISSING_PROVIDER_ID = 9998;
 
 export function buildFixtureProviders(): ProviderDetail[] {
   const out: ProviderDetail[] = [];
@@ -54,6 +57,28 @@ export function buildFixtureProviders(): ProviderDetail[] {
     logo_url: null,
     verification_message: null,
     block_reason: null,
+    verification_evidence: [],
+    created_at: "2026-05-01T10:00:00.000Z",
+    updated_at: "2026-05-01T10:00:00.000Z",
+  });
+  out.push({
+    id: EVIDENCE_MISSING_PROVIDER_ID,
+    name: "Evidence-missing fixture (verify needs override)",
+    verification_status: "pending",
+    location_id: null,
+    location_name: null,
+    services_count: 0,
+    active_offers_count: 0,
+    description: "Used by Playwright to assert the T4 evidence gate + override.",
+    contact_email: "evidence@example.com",
+    phone: null,
+    website: null,
+    account_currency: "USD",
+    address: null,
+    logo_url: null,
+    verification_message: null,
+    block_reason: null,
+    verification_evidence: [],
     created_at: "2026-05-01T10:00:00.000Z",
     updated_at: "2026-05-01T10:00:00.000Z",
   });
@@ -82,6 +107,27 @@ export function buildFixtureProviders(): ProviderDetail[] {
       logo_url: i % 3 === 0 ? `https://${slug(name)}.example.com/logo.png` : null,
       verification_message: status === "verified" ? "All documents reviewed." : null,
       block_reason: status === "blocked" ? "Insurance certificate expired." : null,
+      // Seed evidence on the first fixture so the evidence-list UI has data to
+      // render in tests; the rest submit nothing.
+      verification_evidence:
+        i === 0
+          ? [
+              {
+                id: 1,
+                evidence_type: "org_document",
+                file_url: `https://${slug(name)}.example.com/org-cert.pdf`,
+                caption: "Company registration certificate",
+                created_at: `2026-05-${dd}T09:00:00.000Z`,
+              },
+              {
+                id: 2,
+                evidence_type: "identity_document",
+                file_url: `https://${slug(name)}.example.com/id.jpg`,
+                caption: null,
+                created_at: `2026-05-${dd}T09:05:00.000Z`,
+              },
+            ]
+          : [],
       created_at: `2026-05-${dd}T10:00:00.000Z`,
       updated_at: `2026-06-${ud}T10:00:00.000Z`,
     });

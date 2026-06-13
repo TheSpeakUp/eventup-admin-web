@@ -12,7 +12,10 @@ import type {
   ProviderModerationResponse,
 } from "@/lib/providers/types";
 import { CONFLICT_SERVICE_ID } from "./fixtures";
-import { CONFLICT_PROVIDER_ID } from "./providers-fixtures";
+import {
+  CONFLICT_PROVIDER_ID,
+  EVIDENCE_MISSING_PROVIDER_ID,
+} from "./providers-fixtures";
 import { getAll, getById, patchServiceFields, setStatus } from "./store";
 import {
   getAllProviders,
@@ -939,8 +942,20 @@ export const handlers = [
         { status: 409 },
       );
     }
-    const body = await parseJsonBody<{ message?: unknown }>(request);
+    const body = await parseJsonBody<{ message?: unknown; override?: unknown }>(request);
     const message = typeof body?.message === "string" ? body.message : null;
+    const override = body?.override === true;
+    // T4 evidence gate: this fixture has no submitted docs, so verify is
+    // rejected with a 400 business error unless the moderator overrides.
+    if (id === EVIDENCE_MISSING_PROVIDER_ID && !override) {
+      return HttpResponse.json(
+        {
+          detail:
+            "Provider 9998 (company) is missing required verification evidence: ['org_document']",
+        },
+        { status: 400 },
+      );
+    }
     const next = setProviderStatus(id, "verified", {
       verification_message: message,
     });

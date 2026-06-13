@@ -11,6 +11,26 @@ export function isProviderStatus(value: string): value is ProviderStatus {
   return (PROVIDER_STATUSES as readonly string[]).includes(value);
 }
 
+// Kind-appropriate evidence types (backend T4). talent → identity_document |
+// selfie; company → org_document. The admin detail response does NOT expose
+// provider_kind, so the UI renders these generically and relies on the verify
+// 400 message to tell the moderator which doc is missing.
+export const PROVIDER_EVIDENCE_TYPES = [
+  "identity_document",
+  "selfie",
+  "org_document",
+] as const;
+
+export type ProviderEvidenceType = (typeof PROVIDER_EVIDENCE_TYPES)[number];
+
+export type ProviderVerificationEvidence = {
+  id: number;
+  evidence_type: ProviderEvidenceType;
+  file_url: string;
+  caption: string | null;
+  created_at: string;
+};
+
 export type ProviderListItem = {
   id: number;
   name: string;
@@ -36,6 +56,9 @@ export type ProviderDetail = ProviderListItem & {
   logo_url: string | null;
   verification_message: string | null;
   block_reason: string | null;
+  // Submitted verification documents (backend T4). Always present (defaults to
+  // [] server-side); the moderator reviews these before verifying.
+  verification_evidence: ProviderVerificationEvidence[];
 };
 
 /**

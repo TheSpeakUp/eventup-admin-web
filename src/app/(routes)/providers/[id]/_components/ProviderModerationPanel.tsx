@@ -24,15 +24,19 @@ type DialogConfig = {
   needsReason: boolean;
   reasonField: "reason" | "message" | null;
   confirmLabel: string;
+  // T4: verify is gated server-side on kind-appropriate evidence; this toggle
+  // lets a moderator bypass that gate for offline/trusted verification.
+  allowOverride?: boolean;
 };
 
 const DIALOGS: Record<Kind, DialogConfig> = {
   verify: {
     title: "Verify provider?",
-    body: "Mark provider as verified. Optional verification note.",
+    body: "Mark provider as verified. Optional verification note. Requires submitted evidence unless you override below.",
     needsReason: true,
     reasonField: "message",
     confirmLabel: "Verify",
+    allowOverride: true,
   },
   block: {
     title: "Block provider",
@@ -103,6 +107,23 @@ function ActionForm({
           }
           className="w-full rounded-md border border-zinc-300 p-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
+      ) : null}
+      {cfg.allowOverride ? (
+        <label className="flex items-start gap-2 text-sm text-zinc-700">
+          <input
+            type="checkbox"
+            name="override"
+            data-testid={`moderation-override-${kind}`}
+            className="mt-0.5 h-4 w-4 rounded border-zinc-300"
+          />
+          <span>
+            Verify without evidence (override)
+            <span className="block text-xs text-zinc-500">
+              Use for offline/trusted verification when no documents were
+              uploaded. This action is audited.
+            </span>
+          </span>
+        </label>
       ) : null}
       {state.error ? (
         <p data-testid={`moderation-error-${kind}`} className="text-sm text-red-700">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProvider } from "@/lib/providers/api";
 import ProviderDetailView from "./_components/ProviderDetail";
+import ProviderEvidenceList from "./_components/ProviderEvidenceList";
 import ProviderFieldEditForm from "./_components/ProviderFieldEditForm";
 import ProviderModerationPanel from "./_components/ProviderModerationPanel";
 
@@ -37,6 +38,7 @@ export default async function ProviderDetailPage({ params }: { params: Params })
       <div className="grid grid-cols-[1fr_280px] gap-6">
         <div className="space-y-5">
           <ProviderDetailView provider={result.data} />
+          <ProviderEvidenceList evidence={result.data.verification_evidence ?? []} />
           <ProviderFieldEditForm provider={result.data} />
         </div>
         <aside className="space-y-3">

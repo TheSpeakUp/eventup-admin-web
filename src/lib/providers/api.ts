@@ -40,10 +40,17 @@ export function getProviderStats(
 export function verifyProvider(
   id: number,
   message?: string,
+  override?: boolean,
 ): Promise<ApiFetchResult<ProviderModerationResponse>> {
+  // Backend T4 gates verify on kind-appropriate evidence; `override: true`
+  // bypasses it for offline/trusted verification. Omit both keys when unset so
+  // the body stays `{}` for the common (evidence-present) path.
+  const payload: { message?: string; override?: boolean } = {};
+  if (message) payload.message = message;
+  if (override) payload.override = true;
   return apiFetch<ProviderModerationResponse>(`${BASE}/${id}/verify`, {
     method: "POST",
-    body: JSON.stringify(message ? { message } : {}),
+    body: JSON.stringify(payload),
     redirectOn401: false,
   });
 }
