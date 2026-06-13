@@ -19,13 +19,28 @@ export default function AuditFilters() {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
-  // Free-text fields are debounced; the success select is immediate.
+  // Free-text fields are debounced; the success select + date range are
+  // immediate.
   const [actor, setActor] = useState(params.get("actor_email") ?? "");
   const [action, setAction] = useState(params.get("action") ?? "");
   const [entityType, setEntityType] = useState(params.get("entity_type") ?? "");
+  const [realm, setRealm] = useState(params.get("realm") ?? "");
   const lastPushed = useRef<string>(params.toString());
 
   const success = params.get("success") ?? "";
+  const occurredFrom = params.get("occurred_from") ?? "";
+  const occurredTo = params.get("occurred_to") ?? "";
+
+  // Shared Linear-token control styling for inputs/selects.
+  const controlClass =
+    "h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none";
+
+  function setParam(key: string, value: string): void {
+    pushImmediate((next) => {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    });
+  }
 
   function pushImmediate(mutate: (next: URLSearchParams) => void): void {
     const next = new URLSearchParams(params.toString());
@@ -49,6 +64,7 @@ export default function AuditFilters() {
       setOrDelete("actor_email", actor);
       setOrDelete("action", action);
       setOrDelete("entity_type", entityType);
+      setOrDelete("realm", realm);
       next.delete("offset");
       const serialized = next.toString();
       if (serialized === lastPushed.current) return;
@@ -58,7 +74,7 @@ export default function AuditFilters() {
       });
     }, DEBOUNCE_MS);
     return () => window.clearTimeout(handle);
-  }, [actor, action, entityType, params, pathname, router]);
+  }, [actor, action, entityType, realm, params, pathname, router]);
 
   return (
     <div
@@ -72,7 +88,7 @@ export default function AuditFilters() {
         onChange={(e) => setActor(e.target.value)}
         placeholder="Actor email…"
         data-testid="audit-actor-filter"
-        className="h-9 w-56 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="h-9 w-56 rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink placeholder:text-ink-subtle focus:border-hairline-strong focus:outline-none"
       />
       <input
         type="search"
@@ -80,7 +96,7 @@ export default function AuditFilters() {
         onChange={(e) => setAction(e.target.value)}
         placeholder="Action…"
         data-testid="audit-action-filter"
-        className="h-9 w-48 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="h-9 w-48 rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink placeholder:text-ink-subtle focus:border-hairline-strong focus:outline-none"
       />
       <input
         type="search"
@@ -88,7 +104,15 @@ export default function AuditFilters() {
         onChange={(e) => setEntityType(e.target.value)}
         placeholder="Entity type…"
         data-testid="audit-entity-filter"
-        className="h-9 w-44 rounded-md border border-zinc-300 px-3 text-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
+        className="h-9 w-44 rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink placeholder:text-ink-subtle focus:border-hairline-strong focus:outline-none"
+      />
+      <input
+        type="search"
+        value={realm}
+        onChange={(e) => setRealm(e.target.value)}
+        placeholder="Realm"
+        data-testid="audit-realm-filter"
+        className="h-9 w-40 rounded-md border border-hairline bg-surface-2 px-3 text-sm text-ink placeholder:text-ink-subtle focus:border-hairline-strong focus:outline-none"
       />
       <select
         value={success}
@@ -99,7 +123,7 @@ export default function AuditFilters() {
             else next.delete("success");
           })
         }
-        className="h-9 rounded-md border border-zinc-300 px-2 text-sm focus:border-zinc-500 focus:outline-none"
+        className={controlClass}
       >
         {SUCCESS_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>
@@ -107,6 +131,25 @@ export default function AuditFilters() {
           </option>
         ))}
       </select>
+      <div className="flex items-center gap-1.5">
+        <input
+          type="date"
+          value={occurredFrom}
+          aria-label="Occurred from"
+          data-testid="audit-date-from"
+          onChange={(e) => setParam("occurred_from", e.target.value)}
+          className={controlClass}
+        />
+        <span className="text-xs text-ink-tertiary">→</span>
+        <input
+          type="date"
+          value={occurredTo}
+          aria-label="Occurred to"
+          data-testid="audit-date-to"
+          onChange={(e) => setParam("occurred_to", e.target.value)}
+          className={controlClass}
+        />
+      </div>
     </div>
   );
 }

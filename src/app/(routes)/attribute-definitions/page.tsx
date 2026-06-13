@@ -3,7 +3,7 @@ import { listAttributeDefinitions } from "@/lib/attribute-definitions/api";
 import { isAttributeDefinitionSort } from "@/lib/attribute-definitions/types";
 import PageHeader from "@/app/_components/ui/PageHeader";
 import { buttonClass } from "@/app/_components/ui/Button";
-import { Panel } from "@/app/_components/ui";
+import { Panel, StatusSegments } from "@/app/_components/ui";
 import { AttributeDefinitionsTable } from "./_components/AttributeDefinitionsTable";
 
 export default async function AttributeDefinitionsPage({
@@ -65,41 +65,61 @@ export default async function AttributeDefinitionsPage({
       />
 
       <Panel title="Attribute definitions" accent="primary" bodyClassName="p-0" className="mt-4">
-        <form
-          className="flex flex-wrap gap-2 px-4 py-3 border-b border-hairline"
-          data-testid="attribute-definitions-search"
-        >
-          <input
-            name="search"
-            placeholder="Search key or group"
-            defaultValue={sp.search ?? ""}
-            className="rounded border px-2 py-1"
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-hairline">
+          <StatusSegments
+            param="is_active"
+            options={[
+              { value: "true", label: "Active" },
+              { value: "false", label: "Inactive" },
+            ]}
+            current={
+              is_active === true ? "true" : is_active === false ? "false" : undefined
+            }
+            basePath="/attribute-definitions"
+            searchParams={{ search: sp.search, group_name: sp.group_name, sort }}
+            testidPrefix="attr-active"
           />
-          <input
-            name="group_name"
-            placeholder="Group name"
-            defaultValue={sp.group_name ?? ""}
-            className="rounded border px-2 py-1"
-          />
-          <select
-            name="is_active"
-            defaultValue={sp.is_active ?? ""}
-            className="rounded border px-2 py-1"
+          <form
+            className="flex flex-wrap items-center gap-2"
+            data-testid="attribute-definitions-search"
           >
-            <option value="">Any status</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
-          </select>
-          <select name="sort" defaultValue={sort} className="rounded border px-2 py-1">
-            <option value="sort_order_asc">Sort ↑</option>
-            <option value="sort_order_desc">Sort ↓</option>
-            <option value="key_asc">Key A–Z</option>
-            <option value="key_desc">Key Z–A</option>
-          </select>
-          <button type="submit" className="rounded border px-3 py-1">
-            Apply
-          </button>
-        </form>
+            {/* GET form — carry the active is_active segment + sort so a
+                search / group-name submit doesn't drop those filters. */}
+            {is_active === true || is_active === false ? (
+              <input
+                type="hidden"
+                name="is_active"
+                value={is_active ? "true" : "false"}
+              />
+            ) : null}
+            <input
+              name="search"
+              placeholder="Search key or group"
+              defaultValue={sp.search ?? ""}
+              className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+            />
+            <input
+              name="group_name"
+              data-testid="attr-group-filter"
+              placeholder="Group"
+              defaultValue={sp.group_name ?? ""}
+              className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+            />
+            <select
+              name="sort"
+              defaultValue={sort}
+              className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+            >
+              <option value="sort_order_asc">Sort ↑</option>
+              <option value="sort_order_desc">Sort ↓</option>
+              <option value="key_asc">Key A–Z</option>
+              <option value="key_desc">Key Z–A</option>
+            </select>
+            <button type="submit" className={buttonClass("secondary", "sm")}>
+              Apply
+            </button>
+          </form>
+        </div>
         <AttributeDefinitionsTable rows={rows} />
       </Panel>
     </div>

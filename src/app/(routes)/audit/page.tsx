@@ -46,6 +46,11 @@ export default async function AuditPage({
   const entityType = pickString(sp.entity_type)?.trim() || undefined;
   const rawSuccess = pickString(sp.success)?.trim();
   const success = pickSuccess(rawSuccess);
+  const realm = pickString(sp.realm)?.trim() || undefined;
+  // Date params carry the raw YYYY-MM-DD value — the backend accepts it; no
+  // time-zone conversion (matches the payments date-range filter).
+  const occurredFrom = pickString(sp.occurred_from)?.trim() || undefined;
+  const occurredTo = pickString(sp.occurred_to)?.trim() || undefined;
   const offset = pickOffset(pickString(sp.offset));
 
   const result = await listAuditEvents({
@@ -53,6 +58,9 @@ export default async function AuditPage({
     action,
     entity_type: entityType,
     success,
+    realm,
+    occurred_from: occurredFrom,
+    occurred_to: occurredTo,
     limit: LIMIT,
     offset,
   });
@@ -83,6 +91,9 @@ export default async function AuditPage({
     success: rawSuccess && (rawSuccess === "true" || rawSuccess === "false")
       ? rawSuccess
       : undefined,
+    realm,
+    occurred_from: occurredFrom,
+    occurred_to: occurredTo,
   };
 
   return (
