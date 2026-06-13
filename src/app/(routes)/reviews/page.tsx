@@ -9,6 +9,7 @@ import { getAdminSession } from "@/lib/auth/session";
 import type { ReviewListQuery, ReviewStatus } from "@/lib/reviews/types";
 import ReviewsTable from "./_components/ReviewsTable";
 import ReviewsFilter from "./_components/ReviewsFilter";
+import PageHeader from "@/app/_components/ui/PageHeader";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
@@ -51,9 +52,7 @@ export default async function ReviewsPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Reviews</h1>
-      </div>
+      <PageHeader title="Reviews" />
       <div className="mt-4">
         <ReviewsFilter
           status={sp.status as ReviewStatus | undefined}

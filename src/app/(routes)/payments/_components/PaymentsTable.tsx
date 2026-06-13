@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatDateTime, formatMoneyMinor } from "@/lib/format";
 import type { PaymentListItem } from "@/lib/payments/types";
 import PaymentStatusBadge from "./PaymentStatusBadge";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 function resourceRef(row: PaymentListItem): string {
   const label = row.service_title ?? row.provider_name;
@@ -22,27 +23,20 @@ export default function PaymentsTable({ rows }: { rows: PaymentListItem[] }) {
   }
   return (
     <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
-      <table
-        className="min-w-full divide-y divide-zinc-200 text-sm"
-        data-testid="payments-table"
-      >
-        <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
+      <Table className="min-w-full" data-testid="payments-table">
+        <Thead>
           <tr>
-            <th className="px-4 py-2.5 text-left font-medium">ID</th>
-            <th className="px-4 py-2.5 text-left font-medium">Resource</th>
-            <th className="px-4 py-2.5 text-right font-medium">Amount</th>
-            <th className="px-4 py-2.5 text-left font-medium">Status</th>
-            <th className="px-4 py-2.5 text-left font-medium">Created</th>
+            <Th>ID</Th>
+            <Th>Resource</Th>
+            <Th className="text-right">Amount</Th>
+            <Th>Status</Th>
+            <Th>Created</Th>
           </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-100">
+        </Thead>
+        <Tbody>
           {rows.map((row) => (
-            <tr
-              key={row.id}
-              data-testid={`payments-row-${row.id}`}
-              className="hover:bg-zinc-50"
-            >
-              <td className="px-4 py-2.5">
+            <Tr key={row.id} data-testid={`payments-row-${row.id}`}>
+              <Td>
                 <Link
                   href={`/payments/${row.id}`}
                   className="font-mono text-xs text-zinc-900 hover:text-zinc-700 hover:underline"
@@ -50,27 +44,27 @@ export default function PaymentsTable({ rows }: { rows: PaymentListItem[] }) {
                 >
                   #{row.id}
                 </Link>
-              </td>
-              <td className="px-4 py-2.5 text-zinc-700">{resourceRef(row)}</td>
-              <td
-                className="px-4 py-2.5 text-right font-medium text-zinc-900"
+              </Td>
+              <Td className="text-zinc-700">{resourceRef(row)}</Td>
+              <Td
+                className="text-right font-medium text-zinc-900"
                 data-testid={`payments-row-amount-${row.id}`}
               >
                 {formatMoneyMinor(
                   row.total_gross_minor ?? row.amount_minor,
                   row.currency,
                 )}
-              </td>
-              <td className="px-4 py-2.5">
+              </Td>
+              <Td>
                 <PaymentStatusBadge status={row.status} />
-              </td>
-              <td className="px-4 py-2.5 text-zinc-500">
+              </Td>
+              <Td className="text-zinc-500">
                 {formatDateTime(row.created_at)}
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </Tbody>
+      </Table>
     </div>
   );
 }

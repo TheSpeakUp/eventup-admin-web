@@ -6,6 +6,8 @@ import type { AdminInvitationItem } from "@/lib/admins/types";
 import { RoleBadge } from "./RoleBadge";
 import { revokeInvitationAction } from "../actions";
 import { EMPTY_STATE } from "../action-types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 
 function fmtDate(value: string | null): string {
   if (!value) return "—";
@@ -49,50 +51,43 @@ export default function InvitationsTable({
 }) {
   if (rows.length === 0) {
     return (
-      <p data-testid="invitations-empty" className="text-sm text-zinc-500">
-        No invitations.
-      </p>
+      <EmptyState data-testid="invitations-empty">No invitations.</EmptyState>
     );
   }
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200">
-      <table
-        data-testid="invitations-table"
-        className="min-w-full divide-y divide-zinc-200 text-sm"
-      >
-        <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
+      <Table data-testid="invitations-table" className="min-w-full">
+        <Thead>
           <tr>
-            <th className="px-4 py-2.5 text-left font-medium">Email</th>
-            <th className="px-4 py-2.5 text-left font-medium">Role</th>
-            <th className="px-4 py-2.5 text-left font-medium">Status</th>
-            <th className="px-4 py-2.5 text-left font-medium">Expires</th>
-            <th className="px-4 py-2.5 text-right font-medium">Action</th>
+            <Th>Email</Th>
+            <Th>Role</Th>
+            <Th>Status</Th>
+            <Th>Expires</Th>
+            <Th className="text-right">Action</Th>
           </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-100">
+        </Thead>
+        <Tbody>
           {rows.map((inv) => {
             const status = statusLabel(inv);
             const revocable = !inv.is_accepted;
             return (
-              <tr key={inv.id} className="hover:bg-zinc-50">
-                <td className="px-4 py-2.5 text-zinc-900">{inv.email}</td>
-                <td className="px-4 py-2.5">
+              <Tr key={inv.id}>
+                <Td className="text-zinc-900">{inv.email}</Td>
+                <Td>
                   <RoleBadge role={inv.role} />
-                </td>
-                <td className="px-4 py-2.5">
+                </Td>
+                <Td>
                   <Badge tone={status.tone}>{status.text}</Badge>
-                </td>
-                <td className="px-4 py-2.5 text-zinc-600">
-                  {fmtDate(inv.expires_at)}
-                </td>
-                <td className="px-4 py-2.5 text-right">
+                </Td>
+                <Td className="text-zinc-600">{fmtDate(inv.expires_at)}</Td>
+                <Td className="text-right">
                   {revocable ? <RevokeButton id={inv.id} /> : <span className="text-zinc-400">—</span>}
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             );
           })}
-        </tbody>
-      </table>
+        </Tbody>
+      </Table>
     </div>
   );
 }

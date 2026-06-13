@@ -3,6 +3,8 @@ import Link from "next/link";
 import { listPromoCodes } from "@/lib/promo-codes/api";
 import type { PromoCodeFilter } from "@/lib/promo-codes/types";
 import PromoCodesTable from "./_components/PromoCodesTable";
+import PageHeader from "@/app/_components/ui/PageHeader";
+import { buttonClass } from "@/app/_components/ui/Button";
 
 export default async function PromoCodesPage({
   searchParams,
@@ -20,7 +22,9 @@ export default async function PromoCodesPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Promo codes</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Promo codes
+        </h1>
         <div
           data-testid="promo-codes-error"
           className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
@@ -37,16 +41,18 @@ export default async function PromoCodesPage({
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Promo codes</h1>
-        <Link
-          href="/promo-codes/new"
-          data-testid="promo-new"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-        >
-          New promo code
-        </Link>
-      </div>
+      <PageHeader
+        title="Promo codes"
+        actions={
+          <Link
+            href="/promo-codes/new"
+            data-testid="promo-new"
+            className={buttonClass("primary")}
+          >
+            New promo code
+          </Link>
+        }
+      />
 
       <form className="mt-4 flex gap-2" data-testid="promo-codes-search">
         <input

@@ -4,6 +4,7 @@
 // surfaces the read-permission panel. The revalidation panel lives at the
 // bottom — running it requires MODERATOR+ (any authenticated admin).
 import { listRegistrySnapshots } from "@/lib/registry/api";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import RegistryFilters from "./_components/RegistryFilters";
 import RegistryPagination from "./_components/RegistryPagination";
 import { RegistrySnapshotsTable } from "./_components/RegistrySnapshotsTable";
@@ -47,7 +48,9 @@ export default async function RegistryPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Registry</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Registry
+        </h1>
         <div
           data-testid="registry-error"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -69,7 +72,7 @@ export default async function RegistryPage({
 
   return (
     <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-semibold">Registry snapshots</h1>
+      <PageHeader title="Registry snapshots" />
       <RegistryFilters
         attributeKey={attributeKey}
         categoryId={categoryIdRaw}

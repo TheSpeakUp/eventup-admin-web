@@ -2,6 +2,8 @@
 "use client";
 import { Fragment, useState } from "react";
 import type { DiscountRuleRead } from "@/lib/promotions/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 import { deactivateDiscountRuleAction } from "../actions";
 import ActiveBadge from "./ActiveBadge";
 import DeactivateButton from "./DeactivateButton";
@@ -14,38 +16,31 @@ export default function DiscountRulesTable({
 }) {
   const [editing, setEditing] = useState<number | null>(null);
   if (rows.length === 0)
-    return (
-      <p data-testid="discount-rules-empty" className="p-4 text-zinc-500">
-        No discount rules yet.
-      </p>
-    );
+    return <EmptyState data-testid="discount-rules-empty">No discount rules yet.</EmptyState>;
   return (
-    <table className="w-full text-sm" data-testid="discount-rules-table">
-      <thead>
-        <tr className="text-left text-zinc-500">
-          <th className="py-2">Product</th>
-          <th>Tariff</th>
-          <th>Min units</th>
-          <th>Discount %</th>
-          <th>Status</th>
-          <th />
+    <Table data-testid="discount-rules-table">
+      <Thead>
+        <tr>
+          <Th>Product</Th>
+          <Th>Tariff</Th>
+          <Th>Min units</Th>
+          <Th>Discount %</Th>
+          <Th>Status</Th>
+          <Th />
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
           <Fragment key={r.id}>
-            <tr
-              className="border-t border-zinc-200"
-              data-testid={`discount-rule-row-${r.id}`}
-            >
-              <td className="py-2">{r.product_id ?? "—"}</td>
-              <td>{r.tariff_id ?? "—"}</td>
-              <td>{r.min_units}</td>
-              <td>{r.discount_percent}</td>
-              <td data-testid={`discount-rule-status-${r.id}`}>
+            <Tr data-testid={`discount-rule-row-${r.id}`}>
+              <Td>{r.product_id ?? "—"}</Td>
+              <Td>{r.tariff_id ?? "—"}</Td>
+              <Td>{r.min_units}</Td>
+              <Td>{r.discount_percent}</Td>
+              <Td data-testid={`discount-rule-status-${r.id}`}>
                 <ActiveBadge isActive={r.is_active} />
-              </td>
-              <td className="space-x-2 whitespace-nowrap">
+              </Td>
+              <Td className="space-x-2 whitespace-nowrap">
                 <button
                   type="button"
                   data-testid={`discount-rule-edit-${r.id}`}
@@ -64,18 +59,18 @@ export default function DiscountRulesTable({
                     confirmLabel="Deactivate this discount rule?"
                   />
                 ) : null}
-              </td>
-            </tr>
+              </Td>
+            </Tr>
             {editing === r.id ? (
-              <tr className="border-t border-zinc-100">
-                <td colSpan={6} className="bg-zinc-50 p-3">
+              <Tr>
+                <Td colSpan={6} className="bg-zinc-50 p-3">
                   <DiscountRuleForm mode="edit" rule={r} />
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ) : null}
           </Fragment>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

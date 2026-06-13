@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { AdminListItem } from "@/lib/admins/types";
 import { ActiveBadge, RoleBadge } from "./RoleBadge";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
+import EmptyState from "@/app/_components/ui/EmptyState";
 
 function fmtDate(value: string | null): string {
   if (!value) return "—";
@@ -10,56 +12,45 @@ function fmtDate(value: string | null): string {
 
 export default function AdminsTable({ rows }: { rows: AdminListItem[] }) {
   if (rows.length === 0) {
-    return (
-      <p data-testid="admins-empty" className="text-sm text-zinc-500">
-        No admins yet.
-      </p>
-    );
+    return <EmptyState data-testid="admins-empty">No admins yet.</EmptyState>;
   }
   return (
     <div className="overflow-x-auto rounded-md border border-zinc-200">
-      <table
-        data-testid="admins-table"
-        className="min-w-full divide-y divide-zinc-200 text-sm"
-      >
-        <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
+      <Table data-testid="admins-table" className="min-w-full">
+        <Thead>
           <tr>
-            <th className="px-4 py-2.5 text-left font-medium">Email</th>
-            <th className="px-4 py-2.5 text-left font-medium">Name</th>
-            <th className="px-4 py-2.5 text-left font-medium">Role</th>
-            <th className="px-4 py-2.5 text-left font-medium">Status</th>
-            <th className="px-4 py-2.5 text-left font-medium">Last login</th>
-            <th className="px-4 py-2.5 text-right font-medium">Manage</th>
+            <Th>Email</Th>
+            <Th>Name</Th>
+            <Th>Role</Th>
+            <Th>Status</Th>
+            <Th>Last login</Th>
+            <Th className="text-right">Manage</Th>
           </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-100">
+        </Thead>
+        <Tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="hover:bg-zinc-50">
-              <td className="px-4 py-2.5 text-zinc-900">{row.email}</td>
-              <td className="px-4 py-2.5 text-zinc-600">
-                {row.display_name ?? "—"}
-              </td>
-              <td className="px-4 py-2.5">
+            <Tr key={row.id}>
+              <Td className="text-zinc-900">{row.email}</Td>
+              <Td className="text-zinc-600">{row.display_name ?? "—"}</Td>
+              <Td>
                 <RoleBadge role={row.role} />
-              </td>
-              <td className="px-4 py-2.5">
+              </Td>
+              <Td>
                 <ActiveBadge active={row.is_active} />
-              </td>
-              <td className="px-4 py-2.5 text-zinc-600">
-                {fmtDate(row.last_login_at)}
-              </td>
-              <td className="px-4 py-2.5 text-right">
+              </Td>
+              <Td className="text-zinc-600">{fmtDate(row.last_login_at)}</Td>
+              <Td className="text-right">
                 <Link
                   href={`/admins/${row.id}`}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800"
                 >
                   Manage
                 </Link>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </Tbody>
+      </Table>
     </div>
   );
 }

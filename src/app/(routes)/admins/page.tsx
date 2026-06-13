@@ -1,4 +1,5 @@
 import { listAdmins, listInvitations } from "@/lib/admins/api";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import AdminsTable from "./_components/AdminsTable";
 import InviteForm from "./_components/InviteForm";
 import InvitationsTable from "./_components/InvitationsTable";
@@ -12,7 +13,9 @@ export default async function AdminsPage() {
   if (!adminsR.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Admin team</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Admin team
+        </h1>
         <div
           data-testid="admins-error"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -30,12 +33,14 @@ export default async function AdminsPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Admin team</h1>
-        <span className="text-xs text-zinc-500" data-testid="admins-count">
-          {admins.length} admin{admins.length === 1 ? "" : "s"}
-        </span>
-      </div>
+      <PageHeader
+        title="Admin team"
+        actions={
+          <span className="text-xs text-zinc-500" data-testid="admins-count">
+            {admins.length} admin{admins.length === 1 ? "" : "s"}
+          </span>
+        }
+      />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-zinc-700">Invite a new admin</h2>

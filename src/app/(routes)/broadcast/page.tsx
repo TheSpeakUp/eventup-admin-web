@@ -4,6 +4,7 @@
 // surface (backend gate ADMIN_NOTIFICATIONS_WRITE); the nav link is already
 // role-filtered, the page guards directly via the role claim too.
 import { getAdminSession } from "@/lib/auth/session";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import BroadcastComposer from "./_components/BroadcastComposer";
 
 export default async function BroadcastPage() {
@@ -11,7 +12,9 @@ export default async function BroadcastPage() {
   if (session?.role !== "SUPERADMIN") {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Broadcast</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Broadcast
+        </h1>
         <div
           data-testid="broadcast-denied"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -23,13 +26,10 @@ export default async function BroadcastPage() {
   }
   return (
     <div className="p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold">Broadcast</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Send an in-app announcement to provider teams (console bell + live
-          push). Delivery rides the notification outbox with retries.
-        </p>
-      </div>
+      <PageHeader
+        title="Broadcast"
+        description="Send an in-app announcement to provider teams (console bell + live push). Delivery rides the notification outbox with retries."
+      />
       <BroadcastComposer />
     </div>
   );

@@ -4,6 +4,7 @@ import Pagination from "./_components/Pagination";
 import ServicesFilters from "./_components/ServicesFilters";
 import ServicesTable from "./_components/ServicesTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
 
 const LIMIT = 10;
 
@@ -40,7 +41,9 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Services moderation</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Services moderation
+        </h1>
         <div
           data-testid="services-error"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -55,20 +58,24 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Services moderation</h1>
-        <ExportCsvButton
-          surface="services"
-          params={{
-            search,
-            status,
-            provider_id: providerId !== undefined ? String(providerId) : undefined,
-          }}
-        />
-        <span className="text-xs text-zinc-500" data-testid="services-count">
-          {count} service{count === 1 ? "" : "s"} on this page
-        </span>
-      </div>
+      <PageHeader
+        title="Services moderation"
+        actions={
+          <>
+            <ExportCsvButton
+              surface="services"
+              params={{
+                search,
+                status,
+                provider_id: providerId !== undefined ? String(providerId) : undefined,
+              }}
+            />
+            <span className="text-xs text-zinc-500" data-testid="services-count">
+              {count} service{count === 1 ? "" : "s"} on this page
+            </span>
+          </>
+        }
+      />
       <ServicesFilters />
       <ServicesTable rows={items} />
       <Pagination

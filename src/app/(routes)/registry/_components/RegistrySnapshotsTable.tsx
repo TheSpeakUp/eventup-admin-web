@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatDateTime } from "@/lib/format";
 import type { RegistrySnapshot } from "@/lib/registry/types";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/app/_components/ui/Table";
 
 export function RegistrySnapshotsTable({
   rows,
@@ -18,40 +19,28 @@ export function RegistrySnapshotsTable({
     );
   }
   return (
-    <table
-      data-testid="registry-table"
-      className="w-full border-collapse text-sm"
-    >
-      <thead>
-        <tr className="border-b border-zinc-200 text-left text-zinc-500">
-          <th className="py-2 pr-4">ID</th>
-          <th className="py-2 pr-4">Entity</th>
-          <th className="py-2 pr-4">Action</th>
-          <th className="py-2 pr-4">Attribute key</th>
-          <th className="py-2 pr-4">Actor</th>
-          <th className="py-2 pr-4">When</th>
-          <th className="py-2 pr-4"></th>
+    <Table data-testid="registry-table" className="border-collapse">
+      <Thead>
+        <tr>
+          <Th>ID</Th>
+          <Th>Entity</Th>
+          <Th>Action</Th>
+          <Th>Attribute key</Th>
+          <Th>Actor</Th>
+          <Th>When</Th>
+          <Th></Th>
         </tr>
-      </thead>
-      <tbody>
+      </Thead>
+      <Tbody>
         {rows.map((r) => (
-          <tr
-            key={r.id}
-            data-testid="registry-row"
-            data-snapshot-id={r.id}
-            className="border-b border-zinc-100"
-          >
-            <td className="py-2 pr-4 font-mono text-xs">{r.id}</td>
-            <td className="py-2 pr-4">{r.entity_type}</td>
-            <td className="py-2 pr-4">{r.action}</td>
-            <td className="py-2 pr-4 font-mono text-xs">{r.attribute_key}</td>
-            <td className="py-2 pr-4 text-zinc-600">
-              {r.actor_display_name ?? "—"}
-            </td>
-            <td className="py-2 pr-4 text-zinc-500">
-              {formatDateTime(r.created_at)}
-            </td>
-            <td className="py-2 pr-4">
+          <Tr key={r.id} data-testid="registry-row" data-snapshot-id={r.id}>
+            <Td className="font-mono text-xs">{r.id}</Td>
+            <Td>{r.entity_type}</Td>
+            <Td>{r.action}</Td>
+            <Td className="font-mono text-xs">{r.attribute_key}</Td>
+            <Td className="text-zinc-600">{r.actor_display_name ?? "—"}</Td>
+            <Td className="text-zinc-500">{formatDateTime(r.created_at)}</Td>
+            <Td>
               <Link
                 href={`/registry/snapshots/${r.id}`}
                 data-testid="registry-row-view"
@@ -59,10 +48,10 @@ export function RegistrySnapshotsTable({
               >
                 View
               </Link>
-            </td>
-          </tr>
+            </Td>
+          </Tr>
         ))}
-      </tbody>
-    </table>
+      </Tbody>
+    </Table>
   );
 }

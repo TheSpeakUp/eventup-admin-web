@@ -10,6 +10,7 @@ import AuditFilters from "./_components/AuditFilters";
 import AuditPagination from "./_components/AuditPagination";
 import AuditTable from "./_components/AuditTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
 
 const LIMIT = 10;
 
@@ -58,7 +59,9 @@ export default async function AuditPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Audit log</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Audit log
+        </h1>
         <div
           data-testid="audit-error"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -83,13 +86,17 @@ export default async function AuditPage({
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Audit log</h1>
-        <ExportCsvButton surface="audit" params={preserved} />
-        <span className="text-xs text-zinc-500" data-testid="audit-total">
-          {total} event{total === 1 ? "" : "s"} total
-        </span>
-      </div>
+      <PageHeader
+        title="Audit log"
+        actions={
+          <>
+            <ExportCsvButton surface="audit" params={preserved} />
+            <span className="text-xs text-zinc-500" data-testid="audit-total">
+              {total} event{total === 1 ? "" : "s"} total
+            </span>
+          </>
+        }
+      />
       <AuditFilters />
       <AuditTable rows={items} />
       <AuditPagination

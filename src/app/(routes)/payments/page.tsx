@@ -7,6 +7,7 @@
 // write/refund path — reads only.
 import { listPayments } from "@/lib/payments/api";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import PageHeader from "@/app/_components/ui/PageHeader";
 import { isPaymentStatus } from "@/lib/payments/types";
 import PaymentsFilters from "./_components/PaymentsFilters";
 import PaymentsPagination from "./_components/PaymentsPagination";
@@ -50,7 +51,9 @@ export default async function PaymentsPage({
   if (!result.ok) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold">Payments</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Payments
+        </h1>
         <div
           data-testid="payments-error"
           className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
@@ -68,15 +71,17 @@ export default async function PaymentsPage({
 
   return (
     <div className="p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Payments</h1>
-        <div className="flex items-center gap-3">
-          <ExportCsvButton surface="payments" params={{ status, currency, q }} />
-          <span className="text-xs text-zinc-500" data-testid="payments-total">
-            {total} payment{total === 1 ? "" : "s"} total
-          </span>
-        </div>
-      </div>
+      <PageHeader
+        title="Payments"
+        actions={
+          <div className="flex items-center gap-3">
+            <ExportCsvButton surface="payments" params={{ status, currency, q }} />
+            <span className="text-xs text-zinc-500" data-testid="payments-total">
+              {total} payment{total === 1 ? "" : "s"} total
+            </span>
+          </div>
+        }
+      />
       <PaymentsFilters />
       <PaymentsTable rows={items} />
       <PaymentsPagination
