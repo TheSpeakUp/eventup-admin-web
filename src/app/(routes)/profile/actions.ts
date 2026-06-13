@@ -77,7 +77,9 @@ export async function changePasswordAction(
       `New password must be at least ${NEW_PASSWORD_MIN_LENGTH} characters.`,
     );
   }
-  if (typeof confirm === "string" && confirm.length > 0 && confirm !== next) {
+  // Confirmation is mandatory and must match. The length gate above runs first,
+  // so a too-short password reports that rather than a spurious mismatch.
+  if (typeof confirm !== "string" || confirm !== next) {
     return fail("New password and confirmation do not match.");
   }
 
