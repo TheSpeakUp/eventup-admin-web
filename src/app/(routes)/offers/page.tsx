@@ -29,6 +29,8 @@ function parseQuery(sp: SearchParams): SlaSummaryQuery {
   if (Number.isFinite(providerId) && providerId > 0) out.provider_id = providerId;
   const minHours = Number(sp.min_waiting_hours);
   if (Number.isFinite(minHours) && minHours >= 0) out.min_waiting_hours = minHours;
+  const maxHours = Number(sp.max_waiting_hours);
+  if (Number.isFinite(maxHours) && maxHours >= 0) out.max_waiting_hours = maxHours;
   return out;
 }
 
@@ -97,6 +99,10 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
               min_waiting_hours:
                 query.min_waiting_hours !== undefined
                   ? String(query.min_waiting_hours)
+                  : undefined,
+              max_waiting_hours:
+                query.max_waiting_hours !== undefined
+                  ? String(query.max_waiting_hours)
                   : undefined,
             }}
             multiParams={(query.queue_status ?? []).map((q) => [
