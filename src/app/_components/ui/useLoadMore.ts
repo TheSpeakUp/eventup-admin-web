@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export type LoadMorePage<T> = {
   items: T[];
@@ -24,9 +24,14 @@ export function useLoadMore<T>(
   const [hasMore, setHasMore] = useState<boolean>(initial.hasMore);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Synchronous in-flight guard: `loading` state updates async, so a fast
+  // double-click would otherwise fire two loads from the same cursor (the
+  // disabled button only blocks the click AFTER the re-render).
+  const inFlight = useRef(false);
 
   const loadMore = useCallback(async () => {
-    if (!cursor || loading) return;
+    if (!cursor || inFlight.current) return;
+    inFlight.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -37,9 +42,10 @@ export function useLoadMore<T>(
     } catch {
       setError("Couldn’t load more — try again.");
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
-  }, [cursor, loading, load]);
+  }, [cursor, load]);
 
   return { items, hasMore, loading, error, loadMore };
 }
