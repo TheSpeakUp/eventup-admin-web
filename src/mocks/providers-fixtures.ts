@@ -34,6 +34,9 @@ function pick<T>(arr: readonly T[], i: number): T {
 }
 
 export const CONFLICT_PROVIDER_ID = 9999;
+// T4 — pending provider with NO verification evidence on file. Verifying it
+// without `override` trips the evidence-missing 400; with override it succeeds.
+export const EVIDENCE_MISSING_PROVIDER_ID = 9998;
 
 export function buildFixtureProviders(): ProviderDetail[] {
   const out: ProviderDetail[] = [];
@@ -54,8 +57,30 @@ export function buildFixtureProviders(): ProviderDetail[] {
     logo_url: null,
     verification_message: null,
     block_reason: null,
+    verification_evidence: [],
     created_at: "2026-05-01T10:00:00.000Z",
     updated_at: "2026-05-01T10:00:00.000Z",
+  });
+  out.push({
+    id: EVIDENCE_MISSING_PROVIDER_ID,
+    name: "Evidence-missing fixture (verify needs override)",
+    verification_status: "pending",
+    location_id: null,
+    location_name: null,
+    services_count: 0,
+    active_offers_count: 0,
+    description: "Pending provider with no uploaded evidence — exercises the T4 gate.",
+    contact_email: "no-evidence@example.com",
+    phone: null,
+    website: null,
+    account_currency: "USD",
+    address: null,
+    logo_url: null,
+    verification_message: null,
+    block_reason: null,
+    verification_evidence: [],
+    created_at: "2026-05-02T10:00:00.000Z",
+    updated_at: "2026-05-02T10:00:00.000Z",
   });
   for (let i = 0; i < NAMES.length; i++) {
     const name = NAMES[i] as string;
@@ -82,6 +107,17 @@ export function buildFixtureProviders(): ProviderDetail[] {
       logo_url: i % 3 === 0 ? `https://${slug(name)}.example.com/logo.png` : null,
       verification_message: status === "verified" ? "All documents reviewed." : null,
       block_reason: status === "blocked" ? "Insurance certificate expired." : null,
+      // Every NAMES fixture carries at least one evidence row so the verify
+      // gate passes without override; alternate the kind for visual coverage.
+      verification_evidence: [
+        {
+          id: (i + 1) * 100 + 1,
+          evidence_type: i % 2 === 0 ? "org_document" : "identity_document",
+          file_url: `https://evidence.example.com/${slug(name)}/doc-${i + 1}.pdf`,
+          caption: i % 3 === 0 ? "Business registration certificate" : null,
+          created_at: `2026-05-${dd}T09:00:00.000Z`,
+        },
+      ],
       created_at: `2026-05-${dd}T10:00:00.000Z`,
       updated_at: `2026-06-${ud}T10:00:00.000Z`,
     });
