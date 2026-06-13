@@ -50,9 +50,7 @@ test.describe("payments", () => {
   test("status filter narrows the list", async ({ page }) => {
     await loginAsMockAdmin(page, "/payments");
 
-    await page
-      .getByTestId("payments-status-filter")
-      .selectOption("succeeded");
+    await page.getByTestId("payments-status-succeeded").click();
     await page.waitForURL(/status=succeeded/);
 
     const rows = await page

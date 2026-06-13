@@ -9,21 +9,19 @@ import { getAdminSession } from "@/lib/auth/session";
 import type { ReviewListQuery, ReviewStatus } from "@/lib/reviews/types";
 import ReviewsTable from "./_components/ReviewsTable";
 import ReviewsFilter from "./_components/ReviewsFilter";
-import PageHeader from "@/app/_components/ui/PageHeader";
-import { Panel } from "@/app/_components/ui";
+import {
+  Alert,
+  PageHeader,
+  Panel,
+  StatusSegments,
+  type SegmentOption,
+} from "@/app/_components/ui";
 
-function ErrorPanel({ message, status }: { message: string; status: number }) {
-  return (
-    <div
-      data-testid="reviews-error"
-      className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-red-300"
-    >
-      {status === 403
-        ? "Viewing reviews requires an admin role."
-        : `Failed to load reviews: ${message}`}
-    </div>
-  );
-}
+const STATUS_OPTIONS: SegmentOption[] = [
+  { value: "published", label: "Published" },
+  { value: "hidden", label: "Hidden" },
+  { value: "removed", label: "Removed" },
+];
 
 export default async function ReviewsPage({
   searchParams,
@@ -48,16 +46,47 @@ export default async function ReviewsPage({
   const session = await getAdminSession();
   const canManage = session?.role === "SUPERADMIN";
 
+  const status = sp.status as ReviewStatus | undefined;
+
   const res = await listReviews(query);
-  if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
+  if (!res.ok) {
+    return (
+      <div className="p-8 space-y-5">
+        <PageHeader
+          title="Reviews"
+          description="Moderate marketplace reviews and provider replies."
+        />
+        <Alert variant="danger" data-testid="reviews-error">
+          {res.status === 403
+            ? "Viewing reviews requires an admin role."
+            : `Failed to load reviews: ${res.message}`}
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-8">
-      <PageHeader title="Reviews" />
-      <Panel title="Reviews" accent="primary" bodyClassName="p-0" className="mt-4">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+    <div className="p-8 space-y-5">
+      <PageHeader
+        title="Reviews"
+        description="Moderate marketplace reviews and provider replies."
+      />
+      <Panel title="Reviews" accent="primary" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+          <StatusSegments
+            param="status"
+            options={STATUS_OPTIONS}
+            current={status}
+            basePath="/reviews"
+            searchParams={{
+              rating: sp.rating,
+              provider_id: sp.provider_id,
+              q: sp.q,
+            }}
+            testidPrefix="reviews-status"
+          />
           <ReviewsFilter
-            status={sp.status as ReviewStatus | undefined}
+            status={status}
             provider_id={sp.provider_id}
             rating={sp.rating}
             q={sp.q}

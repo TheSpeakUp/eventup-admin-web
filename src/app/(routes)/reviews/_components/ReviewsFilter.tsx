@@ -7,6 +7,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ReviewStatus } from "@/lib/reviews/types";
+import { SearchInput } from "@/app/_components/ui";
 
 export default function ReviewsFilter({
   status,
@@ -22,35 +23,12 @@ export default function ReviewsFilter({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  const handleStatusChange = (newStatus: ReviewStatus | "all") => {
-    const params = new URLSearchParams();
-    if (newStatus !== "all") params.set("status", newStatus);
-    if (provider_id) params.set("provider_id", provider_id);
-    if (rating) params.set("rating", rating);
-    if (q) params.set("q", q);
-    startTransition(() => {
-      router.push(`/reviews?${params.toString()}`);
-    });
-  };
-
   const handleRatingChange = (newRating: string) => {
     const params = new URLSearchParams();
     if (status) params.set("status", status);
     if (provider_id) params.set("provider_id", provider_id);
     if (newRating !== "all") params.set("rating", newRating);
     if (q) params.set("q", q);
-    startTransition(() => {
-      router.push(`/reviews?${params.toString()}`);
-    });
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQ = e.target.value;
-    const params = new URLSearchParams();
-    if (status) params.set("status", status);
-    if (provider_id) params.set("provider_id", provider_id);
-    if (rating) params.set("rating", rating);
-    if (newQ) params.set("q", newQ);
     startTransition(() => {
       router.push(`/reviews?${params.toString()}`);
     });
@@ -68,75 +46,43 @@ export default function ReviewsFilter({
     });
   };
 
-  const currentStatus = status ?? "all";
   const currentRating = rating ?? "all";
 
   return (
     <div
       data-testid="reviews-filter"
-      className="space-y-3 rounded border border-zinc-200 bg-surface-1 p-4"
+      className="flex flex-wrap items-center gap-2"
     >
-      <div className="flex flex-wrap gap-4">
-        <div>
-          <label className="block text-xs font-medium text-zinc-600">Status</label>
-          <select
-            value={currentStatus}
-            onChange={(e) => handleStatusChange(e.target.value as ReviewStatus | "all")}
-            disabled={pending}
-            data-testid="reviews-filter-status"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="published">Published</option>
-            <option value="hidden">Hidden</option>
-            <option value="removed">Removed</option>
-          </select>
-        </div>
+      <select
+        value={currentRating}
+        onChange={(e) => handleRatingChange(e.target.value)}
+        disabled={pending}
+        data-testid="reviews-filter-rating"
+        className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+      >
+        <option value="all">All ratings</option>
+        <option value="1">1 star</option>
+        <option value="2">2 stars</option>
+        <option value="3">3 stars</option>
+        <option value="4">4 stars</option>
+        <option value="5">5 stars</option>
+      </select>
 
-        <div>
-          <label className="block text-xs font-medium text-zinc-600">Rating</label>
-          <select
-            value={currentRating}
-            onChange={(e) => handleRatingChange(e.target.value)}
-            disabled={pending}
-            data-testid="reviews-filter-rating"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="1">1 star</option>
-            <option value="2">2 stars</option>
-            <option value="3">3 stars</option>
-            <option value="4">4 stars</option>
-            <option value="5">5 stars</option>
-          </select>
-        </div>
+      <input
+        type="text"
+        value={provider_id ?? ""}
+        onChange={handleProviderIdChange}
+        disabled={pending}
+        placeholder="Provider ID"
+        data-testid="reviews-filter-provider-id"
+        className="h-9 rounded-md border border-hairline bg-surface-2 px-2 text-sm text-ink focus:border-hairline-strong focus:outline-none"
+      />
 
-        <div>
-          <label className="block text-xs font-medium text-zinc-600">Provider ID</label>
-          <input
-            type="text"
-            value={provider_id ?? ""}
-            onChange={handleProviderIdChange}
-            disabled={pending}
-            placeholder="Filter by provider"
-            data-testid="reviews-filter-provider-id"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-zinc-600">Search</label>
-          <input
-            type="text"
-            value={q ?? ""}
-            onChange={handleSearchChange}
-            disabled={pending}
-            placeholder="Search review body"
-            data-testid="reviews-filter-search"
-            className="mt-1 rounded border border-zinc-200 px-2 py-1 text-sm"
-          />
-        </div>
-      </div>
+      <SearchInput
+        param="q"
+        testid="reviews-filter-search"
+        placeholder="Search review body…"
+      />
     </div>
   );
 }

@@ -33,8 +33,7 @@ test.describe("Promo codes CRUD + targeting", () => {
 
   test("status filter narrows the list to inactive codes", async ({ page }) => {
     await loginAsMockAdmin(page, "/promo-codes");
-    await page.getByTestId("promo-status-filter").selectOption("inactive");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByTestId("promo-status-inactive").click();
     await page.waitForURL("**/promo-codes?**status=inactive");
     // EXPIRED20 is the seeded inactive code; WELCOME10 (active) must be gone.
     await expect(
