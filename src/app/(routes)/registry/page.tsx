@@ -5,6 +5,7 @@
 // bottom — running it requires MODERATOR+ (any authenticated admin).
 import { listRegistrySnapshots } from "@/lib/registry/api";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 import RegistryFilters from "./_components/RegistryFilters";
 import RegistryPagination from "./_components/RegistryPagination";
 import { RegistrySnapshotsTable } from "./_components/RegistrySnapshotsTable";
@@ -73,17 +74,23 @@ export default async function RegistryPage({
   return (
     <div className="p-8 space-y-6">
       <PageHeader title="Registry snapshots" />
-      <RegistryFilters
-        attributeKey={attributeKey}
-        categoryId={categoryIdRaw}
-        entityType={entityType}
-      />
-      <RegistrySnapshotsTable rows={items} />
-      <RegistryPagination
-        nextLastId={next_last_id}
-        hasMore={has_more}
-        filters={filters}
-      />
+      <Panel title="Snapshots" accent="primary" bodyClassName="p-0">
+        <div className="flex flex-wrap items-end gap-3 px-4 py-3 border-b border-hairline">
+          <RegistryFilters
+            attributeKey={attributeKey}
+            categoryId={categoryIdRaw}
+            entityType={entityType}
+          />
+        </div>
+        <RegistrySnapshotsTable rows={items} />
+        <div className="px-4 py-3 border-t border-hairline">
+          <RegistryPagination
+            nextLastId={next_last_id}
+            hasMore={has_more}
+            filters={filters}
+          />
+        </div>
+      </Panel>
       <RevalidationPanel />
     </div>
   );

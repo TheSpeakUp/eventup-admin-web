@@ -19,7 +19,7 @@ export default function ProvidersTable({ rows }: { rows: ProviderListItem[] }) {
     );
   }
   return (
-    <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
+    <div className="overflow-hidden">
       <Table className="min-w-full" data-testid="providers-table">
         <Thead>
           <tr>

@@ -5,6 +5,7 @@ import type { PromoCodeFilter } from "@/lib/promo-codes/types";
 import PromoCodesTable from "./_components/PromoCodesTable";
 import PageHeader from "@/app/_components/ui/PageHeader";
 import { buttonClass } from "@/app/_components/ui/Button";
+import { Panel } from "@/app/_components/ui";
 
 export default async function PromoCodesPage({
   searchParams,
@@ -54,31 +55,30 @@ export default async function PromoCodesPage({
         }
       />
 
-      <form className="mt-4 flex gap-2" data-testid="promo-codes-search">
-        <input
-          name="code"
-          placeholder="Search by code"
-          defaultValue={sp.code ?? ""}
-          className="rounded border px-2 py-1"
-        />
-        <select
-          name="status"
-          defaultValue={sp.status ?? ""}
-          data-testid="promo-status-filter"
-          className="rounded border px-2 py-1"
-        >
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-        <button type="submit" className="rounded border px-3 py-1">
-          Apply
-        </button>
-      </form>
-
-      <div className="mt-4">
+      <Panel title="Promo codes" accent="primary" bodyClassName="p-0" className="mt-4">
+        <form className="flex gap-2 px-4 py-3 border-b border-hairline" data-testid="promo-codes-search">
+          <input
+            name="code"
+            placeholder="Search by code"
+            defaultValue={sp.code ?? ""}
+            className="rounded border px-2 py-1"
+          />
+          <select
+            name="status"
+            defaultValue={sp.status ?? ""}
+            data-testid="promo-status-filter"
+            className="rounded border px-2 py-1"
+          >
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button type="submit" className="rounded border px-3 py-1">
+            Apply
+          </button>
+        </form>
         <PromoCodesTable rows={rows} />
-      </div>
+      </Panel>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { getAdminSession } from "@/lib/auth/session";
 import QualityTabs from "./_components/QualityTabs";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 import ServiceMetricsTable from "./_components/ServiceMetricsTable";
 import ProviderMetricsTable from "./_components/ProviderMetricsTable";
 import FormulaConfigsTable from "./_components/FormulaConfigsTable";
@@ -52,7 +53,9 @@ async function TabContent({
     if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
     return (
       <div className="mt-4">
-        <ServiceMetricsTable rows={res.data.items} />
+        <Panel title="Service metrics" accent="primary" bodyClassName="p-0">
+          <ServiceMetricsTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -61,7 +64,9 @@ async function TabContent({
     if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
     return (
       <div className="mt-4">
-        <ProviderMetricsTable rows={res.data.items} />
+        <Panel title="Provider metrics" accent="primary" bodyClassName="p-0">
+          <ProviderMetricsTable rows={res.data.items} />
+        </Panel>
       </div>
     );
   }
@@ -70,7 +75,9 @@ async function TabContent({
     if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
     return (
       <div className="mt-4">
-        <FormulaConfigsTable rows={res.data.items} canManage={canManage} />
+        <Panel title="Formula configs" accent="primary" bodyClassName="p-0">
+          <FormulaConfigsTable rows={res.data.items} canManage={canManage} />
+        </Panel>
       </div>
     );
   }
@@ -78,9 +85,13 @@ async function TabContent({
   const res = await listAnomalies({ limit: 200, resolved: filters.resolved });
   if (!res.ok) return <ErrorPanel message={res.message} status={res.status} />;
   return (
-    <div className="mt-4 space-y-4">
-      <AnomaliesFilter resolved={filters.resolved} />
-      <AnomaliesTable rows={res.data.items} canManage={canManage} />
+    <div className="mt-4">
+      <Panel title="Anomalies" accent="primary" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+          <AnomaliesFilter resolved={filters.resolved} />
+        </div>
+        <AnomaliesTable rows={res.data.items} canManage={canManage} />
+      </Panel>
     </div>
   );
 }

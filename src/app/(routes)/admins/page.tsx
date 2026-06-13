@@ -1,5 +1,6 @@
 import { listAdmins, listInvitations } from "@/lib/admins/api";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 import AdminsTable from "./_components/AdminsTable";
 import InviteForm from "./_components/InviteForm";
 import InvitationsTable from "./_components/InvitationsTable";
@@ -33,31 +34,29 @@ export default async function AdminsPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <PageHeader
-        title="Admin team"
-        actions={
-          <span className="text-xs text-zinc-500" data-testid="admins-count">
-            {admins.length} admin{admins.length === 1 ? "" : "s"}
-          </span>
-        }
-      />
+      <PageHeader title="Admin team" />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-zinc-700">Invite a new admin</h2>
         <InviteForm />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">Admins</h2>
+      <Panel
+        title="Admins"
+        accent="primary"
+        bodyClassName="p-0"
+        action={
+          <span className="text-xs text-zinc-500" data-testid="admins-count">
+            {admins.length} admin{admins.length === 1 ? "" : "s"}
+          </span>
+        }
+      >
         <AdminsTable rows={admins} />
-      </section>
+      </Panel>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">
-          Pending invitations
-        </h2>
+      <Panel title="Pending invitations" accent="info" bodyClassName="p-0">
         <InvitationsTable rows={invitations} />
-      </section>
+      </Panel>
     </div>
   );
 }

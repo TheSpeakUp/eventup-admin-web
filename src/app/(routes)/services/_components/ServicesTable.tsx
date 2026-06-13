@@ -79,7 +79,7 @@ export default function ServicesTable({ rows }: { rows: ServiceListItem[] }) {
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
+      <div className="overflow-hidden">
         <Table className="min-w-full" data-testid="services-table">
           <Thead>
             <tr>

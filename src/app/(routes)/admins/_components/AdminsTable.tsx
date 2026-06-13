@@ -15,7 +15,7 @@ export default function AdminsTable({ rows }: { rows: AdminListItem[] }) {
     return <EmptyState data-testid="admins-empty">No admins yet.</EmptyState>;
   }
   return (
-    <div className="overflow-x-auto rounded-md border border-zinc-200">
+    <div className="overflow-x-auto">
       <Table data-testid="admins-table" className="min-w-full">
         <Thead>
           <tr>

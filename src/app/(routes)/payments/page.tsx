@@ -8,6 +8,7 @@
 import { listPayments } from "@/lib/payments/api";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 import { isPaymentStatus } from "@/lib/payments/types";
 import PaymentsFilters from "./_components/PaymentsFilters";
 import PaymentsPagination from "./_components/PaymentsPagination";
@@ -71,9 +72,12 @@ export default async function PaymentsPage({
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader
+      <PageHeader title="Payments" />
+      <Panel
         title="Payments"
-        actions={
+        accent="primary"
+        bodyClassName="p-0"
+        action={
           <div className="flex items-center gap-3">
             <ExportCsvButton surface="payments" params={{ status, currency, q }} />
             <span className="text-xs text-zinc-500" data-testid="payments-total">
@@ -81,16 +85,21 @@ export default async function PaymentsPage({
             </span>
           </div>
         }
-      />
-      <PaymentsFilters />
-      <PaymentsTable rows={items} />
-      <PaymentsPagination
-        total={total}
-        limit={LIMIT}
-        offset={offset}
-        basePath="/payments"
-        searchParams={preserved}
-      />
+      >
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
+          <PaymentsFilters />
+        </div>
+        <PaymentsTable rows={items} />
+        <div className="px-4 py-3 border-t border-hairline">
+          <PaymentsPagination
+            total={total}
+            limit={LIMIT}
+            offset={offset}
+            basePath="/payments"
+            searchParams={preserved}
+          />
+        </div>
+      </Panel>
     </div>
   );
 }

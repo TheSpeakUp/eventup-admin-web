@@ -4,6 +4,7 @@ import CountersCard from "./_components/CountersCard";
 import OffersFilters from "./_components/OffersFilters";
 import OffersTable from "./_components/OffersTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
+import { Panel } from "@/app/_components/ui";
 import Link from "next/link";
 
 const DEFAULT_QUEUE: QueueStatus[] = ["overdue_response", "warning"];
@@ -61,8 +62,12 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
         </Link>
       </header>
       <CountersCard counters={result.data.counters} />
-      <OffersFilters />
-      <OffersTable items={sorted} />
+      <Panel title="SLA queue" accent="primary" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-hairline">
+          <OffersFilters />
+        </div>
+        <OffersTable items={sorted} />
+      </Panel>
     </main>
   );
 }

@@ -4,6 +4,7 @@ import ProvidersFilters from "./_components/ProvidersFilters";
 import ProvidersTable from "./_components/ProvidersTable";
 import ExportCsvButton from "@/app/_components/ExportCsvButton";
 import PageHeader from "@/app/_components/ui/PageHeader";
+import { Panel } from "@/app/_components/ui";
 
 const LIMIT = 10;
 
@@ -51,27 +52,35 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="p-8 space-y-5">
-      <PageHeader
-        title="Providers moderation"
-        actions={
-          <>
+      <PageHeader title="Providers moderation" />
+      <Panel
+        title="All providers"
+        accent="primary"
+        bodyClassName="p-0"
+        action={
+          <div className="flex items-center gap-3">
             <ExportCsvButton surface="providers" params={{ search }} />
             <span className="text-xs text-zinc-500" data-testid="providers-count">
               {count} provider{count === 1 ? "" : "s"} on this page
             </span>
-          </>
+          </div>
         }
-      />
-      <ProvidersFilters />
-      <ProvidersTable rows={items} />
-      <Pagination
-        nextLastId={next_last_id}
-        hasMore={has_more}
-        count={count}
-        basePath="/providers"
-        searchParams={{ search }}
-        lastId={lastId}
-      />
+      >
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
+          <ProvidersFilters />
+        </div>
+        <ProvidersTable rows={items} />
+        <div className="px-4 py-3 border-t border-hairline">
+          <Pagination
+            nextLastId={next_last_id}
+            hasMore={has_more}
+            count={count}
+            basePath="/providers"
+            searchParams={{ search }}
+            lastId={lastId}
+          />
+        </div>
+      </Panel>
     </div>
   );
 }

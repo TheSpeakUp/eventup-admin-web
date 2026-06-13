@@ -6,6 +6,7 @@ import Alert from "@/app/_components/ui/Alert";
 import PageHeader from "@/app/_components/ui/PageHeader";
 import Button, { buttonClass } from "@/app/_components/ui/Button";
 import { Input, Select } from "@/app/_components/ui/Field";
+import { Panel } from "@/app/_components/ui";
 import { CategoriesTable } from "./_components/CategoriesTable";
 
 export default async function CategoriesPage({
@@ -50,27 +51,26 @@ export default async function CategoriesPage({
         }
       />
 
-      <form className="mt-5 flex gap-2" data-testid="categories-search">
-        <Input
-          name="search"
-          placeholder="Search name or slug"
-          defaultValue={sp.search ?? ""}
-          className="mt-0 max-w-xs"
-        />
-        <Select name="sort" defaultValue={sort} className="mt-0 w-auto">
-          <option value="sort_order_asc">Sort ↑</option>
-          <option value="sort_order_desc">Sort ↓</option>
-          <option value="name_asc">Name A–Z</option>
-          <option value="name_desc">Name Z–A</option>
-        </Select>
-        <Button type="submit" variant="secondary">
-          Apply
-        </Button>
-      </form>
-
-      <div className="mt-5">
+      <Panel title="Categories" accent="primary" bodyClassName="p-0" className="mt-5">
+        <form className="flex gap-2 px-4 py-3 border-b border-hairline" data-testid="categories-search">
+          <Input
+            name="search"
+            placeholder="Search name or slug"
+            defaultValue={sp.search ?? ""}
+            className="mt-0 max-w-xs"
+          />
+          <Select name="sort" defaultValue={sort} className="mt-0 w-auto">
+            <option value="sort_order_asc">Sort ↑</option>
+            <option value="sort_order_desc">Sort ↓</option>
+            <option value="name_asc">Name A–Z</option>
+            <option value="name_desc">Name Z–A</option>
+          </Select>
+          <Button type="submit" variant="secondary">
+            Apply
+          </Button>
+        </form>
         <CategoriesTable rows={rows} parentNames={parentNames} />
-      </div>
+      </Panel>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import SummaryCards from "./_components/SummaryCards";
 import TrendSparkline from "./_components/TrendSparkline";
 import ListingStatTable from "./_components/ListingStatTable";
 import ExportCsvButton from "./_components/ExportCsvButton";
+import { Panel } from "@/app/_components/ui";
 
 function ErrorPanel({ message, status }: { message: string; status: number }) {
   return (
@@ -96,11 +97,11 @@ export default async function TrafficPage({
         <SummaryCards summary={summary} />
       </div>
 
-      <section className="mt-6 rounded border border-zinc-200 bg-surface-1 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-700">
-            Views &amp; clicks trend
-          </h2>
+      <Panel
+        title="Views & clicks trend"
+        accent="primary"
+        className="mt-6"
+        action={
           <div className="flex items-center gap-3 text-xs text-zinc-500">
             <span className="flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm bg-blue-600" />
@@ -111,9 +112,10 @@ export default async function TrafficPage({
               Clicks
             </span>
           </div>
-        </div>
+        }
+      >
         <TrendSparkline series={summary.series} />
-      </section>
+      </Panel>
 
       <section className="mt-8">
         <div className="flex items-center justify-between">
@@ -143,33 +145,35 @@ export default async function TrafficPage({
           />
         </div>
 
-        <h3 className="mt-4 text-sm font-semibold text-zinc-700">
-          Top {type}s by views
-        </h3>
-        <div className="mt-2">
-          <ListingStatTable
-            rows={top.top}
-            type={type}
-            testid="traffic-top-table"
-            emptyLabel={`No ${type} traffic in this window.`}
-          />
-        </div>
+        <Panel title="Top listings" accent="info" className="mt-4">
+          <h3 className="text-sm font-semibold text-zinc-700">
+            Top {type}s by views
+          </h3>
+          <div className="mt-2">
+            <ListingStatTable
+              rows={top.top}
+              type={type}
+              testid="traffic-top-table"
+              emptyLabel={`No ${type} traffic in this window.`}
+            />
+          </div>
 
-        <h3 className="mt-6 text-sm font-semibold text-zinc-700">
-          Anti-top — high views, low CTR
-        </h3>
-        <p className="text-xs text-zinc-400">
-          Listings drawing attention but converting poorly — review copy,
-          pricing, or imagery.
-        </p>
-        <div className="mt-2">
-          <ListingStatTable
-            rows={top.anti_top}
-            type={type}
-            testid="traffic-antitop-table"
-            emptyLabel={`No under-performing ${type}s in this window.`}
-          />
-        </div>
+          <h3 className="mt-6 text-sm font-semibold text-zinc-700">
+            Anti-top — high views, low CTR
+          </h3>
+          <p className="text-xs text-zinc-400">
+            Listings drawing attention but converting poorly — review copy,
+            pricing, or imagery.
+          </p>
+          <div className="mt-2">
+            <ListingStatTable
+              rows={top.anti_top}
+              type={type}
+              testid="traffic-antitop-table"
+              emptyLabel={`No under-performing ${type}s in this window.`}
+            />
+          </div>
+        </Panel>
       </section>
     </div>
   );

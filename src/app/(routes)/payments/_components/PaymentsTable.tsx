@@ -22,7 +22,7 @@ export default function PaymentsTable({ rows }: { rows: PaymentListItem[] }) {
     );
   }
   return (
-    <div className="overflow-hidden rounded-md border border-zinc-200 bg-surface-1">
+    <div className="overflow-hidden">
       <Table className="min-w-full" data-testid="payments-table">
         <Thead>
           <tr>
