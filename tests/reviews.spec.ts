@@ -122,13 +122,17 @@ test.describe("Reviews moderation (Layer 4)", () => {
 
     await row.getByTestId("reply-moderate-3").click();
 
-    // After revalidatePath, the form should disappear (or be disabled) because
-    // the reply is now hidden.
-    // For now, we verify via going to the same URL (a simple refresh).
+    // moderateReplyAction calls revalidatePath("/reviews"), so the button flips
+    // in place. Wait for that flip BEFORE refreshing — a bare page.goto right
+    // after click races the in-flight server-action POST and can reload the old
+    // state on a slow runner (the source of the flaky "Hide reply" failure).
+    await expect(
+      row.getByTestId("reply-moderate-3"),
+    ).toContainText("Restore reply");
+
+    // Re-confirm the change survives a full reload.
     await page.goto("/reviews");
     const refreshedRow = page.getByTestId("reviews-row-3");
-    // The reply button should now say "Restore reply" instead of "Hide reply"
-    // (status changed to hidden).
     await expect(
       refreshedRow.getByTestId("reply-moderate-3"),
     ).toContainText("Restore reply");
@@ -140,18 +144,21 @@ test.describe("Reviews moderation (Layer 4)", () => {
     const row = page.getByTestId("reviews-row-9");
     await expect(row.getByTestId("reply-moderate-9-form")).toBeVisible();
 
-    // Hide the reply
+    // Hide the reply. revalidatePath flips the button in place — wait for that
+    // before refreshing, so page.goto can't race the in-flight POST.
     await row.getByTestId("reply-moderate-9").click();
+    await expect(row.getByTestId("reply-moderate-9")).toContainText("Restore reply");
 
-    // Refresh and confirm it's now in "Restore" mode
+    // Confirm it survives a reload, in "Restore" mode.
     await page.goto("/reviews");
     let currentRow = page.getByTestId("reviews-row-9");
     await expect(currentRow.getByTestId("reply-moderate-9")).toContainText("Restore reply");
 
-    // Restore it
+    // Restore it — again, wait for the in-place flip before refreshing.
     await currentRow.getByTestId("reply-moderate-9").click();
+    await expect(currentRow.getByTestId("reply-moderate-9")).toContainText("Hide reply");
 
-    // Refresh and confirm it's back to "Hide reply"
+    // Confirm it's back to "Hide reply" after a reload.
     await page.goto("/reviews");
     currentRow = page.getByTestId("reviews-row-9");
     await expect(currentRow.getByTestId("reply-moderate-9")).toContainText("Hide reply");
