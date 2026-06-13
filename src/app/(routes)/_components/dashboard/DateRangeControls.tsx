@@ -7,10 +7,12 @@ export default function DateRangeControls({
   from,
   to,
   granularity,
+  tab,
 }: {
   from: string;
   to: string;
   granularity: "day" | "week" | "month";
+  tab?: string;
 }) {
   return (
     <form
@@ -19,6 +21,7 @@ export default function DateRangeControls({
       action=""
       data-testid="dashboard-date-range-form"
     >
+      {tab ? <input type="hidden" name="tab" value={tab} /> : null}
       <label className="flex flex-col gap-1 text-xs text-ink-subtle">
         From
         <input type="date" name="from" defaultValue={from} className={FIELD} />

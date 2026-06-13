@@ -2,51 +2,56 @@ import { test, expect } from "@playwright/test";
 import { loginAsMockAdmin } from "./helpers/login";
 
 test.describe("operator dashboard (F11)", () => {
-  test("dashboard home renders KPI cards, charts, and sections", async ({
+  test("overview summarizes every zone; tabs open the detail views", async ({
     page,
   }) => {
-    // Mock admin (admin@example.com) is SUPERADMIN, so all sections render
+    // Mock admin (admin@example.com) is SUPERADMIN, so all zones are visible.
     await loginAsMockAdmin(page, "/");
 
-    // Verify dashboard page loads
+    // Overview is the default tab: a calm summary grid of per-zone panels.
     await expect(page.getByTestId("dashboard-page")).toBeVisible();
-
-    // Verify KPI cards section is present
     await expect(page.getByTestId("dashboard-kpi-section")).toBeVisible();
+    // Top-performers summary on the overview shows mocked provider data.
+    await expect(page.getByText("Acme").first()).toBeVisible();
 
-    // Verify revenue chart section renders (SUPERADMIN only)
+    // All four zone tabs are present for SUPERADMIN.
+    await expect(page.getByTestId("dashboard-tab-overview")).toBeVisible();
+    await expect(page.getByTestId("dashboard-tab-revenue")).toBeVisible();
+    await expect(page.getByTestId("dashboard-tab-growth")).toBeVisible();
+    await expect(page.getByTestId("dashboard-tab-operations")).toBeVisible();
+
+    // Revenue tab → revenue detail + chart.
+    await page.getByTestId("dashboard-tab-revenue").click();
     await expect(page.getByTestId("dashboard-revenue-section")).toBeVisible();
     await expect(page.getByTestId("revenue-chart")).toBeVisible();
 
-    // Verify content growth chart section renders (SUPERADMIN and MODERATOR)
+    // Growth tab → content-growth detail.
+    await page.getByTestId("dashboard-tab-growth").click();
     await expect(page.getByTestId("dashboard-growth-section")).toBeVisible();
 
-    // Verify funnel section renders (SUPERADMIN only)
+    // Operations tab → funnel + tops detail.
+    await page.getByTestId("dashboard-tab-operations").click();
     await expect(page.getByTestId("dashboard-funnel-section")).toBeVisible();
-
-    // Verify tops section renders (SUPERADMIN and MODERATOR)
     await expect(page.getByTestId("dashboard-tops-section")).toBeVisible();
-
-    // Verify mock data appears: provider name from mocked tops response
-    await expect(page.getByText("Acme").first()).toBeVisible();
   });
 
-  test("revenue and funnel sections hidden for MODERATOR role", async ({
+  test("MODERATOR sees only the growth zone (no payment zones)", async ({
     page,
   }) => {
-    // Log in as moderator (mod@example.com)
     await loginAsMockAdmin(page, "/", { email: "mod@example.com" });
 
-    // Verify dashboard page loads
     await expect(page.getByTestId("dashboard-page")).toBeVisible();
+    await expect(page.getByTestId("dashboard-kpi-section")).toBeVisible();
 
-    // MODERATOR can see growth (content-growth is MODERATOR+)
+    // MODERATOR can see the growth tab (content-growth is MODERATOR+).
+    await expect(page.getByTestId("dashboard-tab-growth")).toBeVisible();
+
+    // Payment zones (revenue / operations) are not offered to MODERATOR.
+    await expect(page.getByTestId("dashboard-tab-revenue")).toHaveCount(0);
+    await expect(page.getByTestId("dashboard-tab-operations")).toHaveCount(0);
+
+    // Growth tab opens its detail view.
+    await page.getByTestId("dashboard-tab-growth").click();
     await expect(page.getByTestId("dashboard-growth-section")).toBeVisible();
-    // MODERATOR must NOT see tops (revenue data — ADMIN+ only)
-    await expect(page.getByTestId("dashboard-tops-section")).not.toBeVisible();
-
-    // MODERATOR cannot see revenue and funnel (payment sections)
-    await expect(page.getByTestId("dashboard-revenue-section")).not.toBeVisible();
-    await expect(page.getByTestId("dashboard-funnel-section")).not.toBeVisible();
   });
 });
